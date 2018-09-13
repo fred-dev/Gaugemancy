@@ -37,3 +37,6 @@
 
 # Folders
 */obj/
+
+# Different adding.make for different platforms so
+addons.make
