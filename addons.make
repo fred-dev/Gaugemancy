@@ -1,9 +1,0 @@
-ofxAudioFile
-ofxGui
-ofxMSAInteractiveObject
-ofxMidi
-ofxOsc
-ofxPDSP
-ofxPoco
-ofxSIMDFloats
-ofxXmlSettings
