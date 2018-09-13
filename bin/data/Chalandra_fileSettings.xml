@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PATHS>
+	<NARRATION_FILE>NarrationShort.wav</NARRATION_FILE>
+	<FILE_1A>CHDevice1Preset1.wav</FILE_1A>
+	<FILE_2A>FlutterHarshSweepL.mp3</FILE_2A>
+	<FILE_3A>GlitchDropout2L.mp3</FILE_3A>
+	<FILE_4A>GlitchDropoutL.mp3</FILE_4A>
+	<FILE_5A>HarshImpactBuzzerL.mp3</FILE_5A>
+	<FILE_6A>HighFlutterSweepL.mp3</FILE_6A>
+	<FILE_1B>CHDevice1Preset2.wav</FILE_1B>
+	<FILE_2B>LowRadarL.mp3</FILE_2B>
+	<FILE_3B>ReversedSweepBuzL.mp3</FILE_3B>
+	<FILE_4B>ReverseImpactSweepL.mp3</FILE_4B>
+	<FILE_5B>ReverseRingSweepL.mp3</FILE_5B>
+	<FILE_6B>RisingSweepL.mp3</FILE_6B>
+</PATHS>
