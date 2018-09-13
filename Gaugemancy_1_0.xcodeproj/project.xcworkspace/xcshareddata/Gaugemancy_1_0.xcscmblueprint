@@ -1,0 +1,58 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "2DE9C8846D9375EAACFABA8963120E8E7719BAF5",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "328B2D9D97956D43F1C477558678A6865720047A" : 9223372036854775807,
+    "2DE9C8846D9375EAACFABA8963120E8E7719BAF5" : 9223372036854775807,
+    "90E2F969A762FB62C413A0C44D1F334E6EC3F531" : 9223372036854775807,
+    "56522B7FEFEAC766CAD5D481239D020213C85104" : 9223372036854775807,
+    "D0D4CE313047E9EBBE4B060F3FD7FDD8EDE4F484" : 9223372036854775807,
+    "A385189FADCB4EA03263C68194B874A01B0874D3" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "DC42CC4F-D4D2-4909-B1B5-382EAD4CD5BB",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "328B2D9D97956D43F1C477558678A6865720047A" : "openFrameworks\/addons\/ofxMSAInteractiveObject\/",
+    "2DE9C8846D9375EAACFABA8963120E8E7719BAF5" : "openFrameworks\/",
+    "90E2F969A762FB62C413A0C44D1F334E6EC3F531" : "openFrameworks\/addons\/ofxMidi\/",
+    "56522B7FEFEAC766CAD5D481239D020213C85104" : "openFrameworks\/addons\/ofxAudioFile\/",
+    "D0D4CE313047E9EBBE4B060F3FD7FDD8EDE4F484" : "openFrameworks\/addons\/ofxPDSP\/",
+    "A385189FADCB4EA03263C68194B874A01B0874D3" : "openFrameworks\/addons\/ofxSIMDFloats\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Gaugemancy_1_0",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "apps\/Ali moini\/Gaugemancy_1_0\/Gaugemancy_1_0.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/openframeworks\/openFrameworks.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "2DE9C8846D9375EAACFABA8963120E8E7719BAF5"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/memo\/ofxMSAInteractiveObject.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "328B2D9D97956D43F1C477558678A6865720047A"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/npisanti\/ofxAudioFile.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "56522B7FEFEAC766CAD5D481239D020213C85104"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/danomatika\/ofxMidi.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "90E2F969A762FB62C413A0C44D1F334E6EC3F531"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/npisanti\/ofxSIMDFloats.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "A385189FADCB4EA03263C68194B874A01B0874D3"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/npisanti\/ofxPDSP.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "D0D4CE313047E9EBBE4B060F3FD7FDD8EDE4F484"
+    }
+  ]
+}
