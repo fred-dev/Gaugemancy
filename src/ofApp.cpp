@@ -3045,8 +3045,9 @@ void ofApp::switchPresets()
 	if (ofGetElapsedTimeMillis() - presetSwitchTimer > 10000)
 	{
         redLed.setval_gpio("0");
+        ofSleepMillis(200);
 #endif // HAS_ADC
-
+        
 		switch (presetIndex) {
 		case 1:
                 presetIndex = 2;
@@ -3064,6 +3065,7 @@ void ofApp::switchPresets()
 		}
 		presetSwitchTimer = ofGetElapsedTimeMillis();
 #ifdef HAS_ADC
+        ofSleepMillis(200);
         redLed.setval_gpio("1");
 	}
 #endif // HAS_ADC
@@ -4463,7 +4465,10 @@ void ofApp::deviceOnlyUpdateRoutine()
 //normalise those vaules
 	normaliseADCValues();
 // this checks for the gestural input (lots of squeazing rapidly
-	checkForHits();
+    if(useHitGesture){
+        checkForHits();
+    }
+	
 
 }
 
