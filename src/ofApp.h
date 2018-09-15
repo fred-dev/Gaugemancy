@@ -68,7 +68,7 @@
 #define BTN_MSG_A_SAVE_NARRATION 18
 #define BTN_MSG_A_PAUSE_SIMULATION 19
 #define BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY 20
-
+#define BTN_MSG_A_EFFECTS_OR_GRANULAR 28
 //these are button mode messages, they are send via events to the gotMessage() event listener method, trigger mode changes when received
 #define BTN_MSG_M_OP_MODE_PLAY_NARRATION 21
 #define BTN_MSG_M_OP_MODE_SWITCH_PRESETS 22
@@ -433,6 +433,7 @@ class ofApp : public ofBaseApp{
 		std::vector<int> zeroValues;	
 
 		bool fireHitSwitch, isCountingHits, isCheckingHitPeaks, isCheckingHitTroughs, hadHitPeak[6], hadHitTrough[6];
+        bool useHitGesture;
 		void checkForHits();
 		void onHitRoutine();
 		int timeBetweenHits, timeSinceLastHitPeak, timeSinceLastHitTrough, oldValues[6], hitsCollected, hitPeakChecker, maxPeakDuration, hitTroughsCollected, hitTroughChecker, maxTroughDuration, completedFullHits, requiredHits;

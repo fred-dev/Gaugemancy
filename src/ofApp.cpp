@@ -1747,7 +1747,7 @@ void ofApp::createMultiGrainModeButtons()
 			multiGrainModeButtons[i].disableAllEvents();
 			break;
 		case 3:
-			multiGrainModeButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
+			multiGrainModeButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
 			multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
 			multiGrainModeButtons[i].disableAllEvents();
 			break;
@@ -1842,7 +1842,7 @@ void ofApp::createSingleGrainModeModeButtons()
 			SingleGrainModeButtons[i].disableAllEvents();
 			break;
 		case 3:
-			SingleGrainModeButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
+            SingleGrainModeButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
 			SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
 			SingleGrainModeButtons[i].disableAllEvents();
 			break;
@@ -2041,7 +2041,7 @@ void ofApp::createSimulationMultiModeButtons()
 			simulationMultiButtons[i].disableAllEvents();
 			break;
 		case 3:
-			simulationMultiButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
+			simulationMultiButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
 			simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
 			simulationMultiButtons[i].disableAllEvents();
 			break;
@@ -2142,7 +2142,7 @@ void ofApp::createSimulationSingleModeButtons()
 			simulationSingleButtons[i].disableAllEvents();
 			break;
 		case 3:
-			simulationSingleButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
+			simulationSingleButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
 			simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
 			simulationSingleButtons[i].disableAllEvents();
 			break;
@@ -2451,6 +2451,9 @@ void ofApp::setupParamsFromXML()
     cout << "AUDIO_DEVICE_ID = " + ofToString(audioDeviceId) << endl;
 
     
+// this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between letting of the push and the next push
+    useHitGesture = appSettingsXML.getValue("SETTINGS:HIT_TO_CHANGE_PRESETS", false);
+    cout << "HIT_TO_CHANGE_PRESETS = " + ofToString(useHitGesture) << endl;
 // this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between letting of the push and the next push
     maxTroughDuration = appSettingsXML.getValue("SETTINGS:MAX_TROUGH_DURATION", 250);
     cout << "MAX_TROUGH_DURATION = " + ofToString(maxTroughDuration) << endl;
@@ -2870,7 +2873,7 @@ void ofApp::transferEfffectParamtersToUnits(){
         if(effectsPatching[presetIndex-1][j].hasChorus){
             
             effChorussParams[j]._e_chorus_in_depth >> choruss[j]->in_depth();
-            effChorussParams[j]._e_chorus_in_depth >> choruss[j]->in_speed();
+            effChorussParams[j]._e_chorus_in_speed >> choruss[j]->in_speed();
             effChorussParams[j]._e_chorus_in_delay >> choruss[j]->in_delay();
             
         }
@@ -3679,17 +3682,10 @@ void ofApp::populateVectors()
         
         EFFCompressorUnit tempeffCompressorsParams;
         effCompressorsParams.push_back(tempeffCompressorsParams);
-        
-        
-        
-        
-	}
-effectsPatching.push_back(tempChannelEffects1);
-    effectsPatching.push_back(tempChannelEffects2);
     
-    cout<< "effectsPatching size = " + ofToString(effectsPatching.size()) << endl;
-    cout<< "effectsPatching[0] size = " + ofToString(effectsPatching[0].size())<< endl;
-    cout<< "effectsPatching[1] size = " + ofToString(effectsPatching[1].size())<< endl;
+	}
+    effectsPatching.push_back(tempChannelEffects1);
+    effectsPatching.push_back(tempChannelEffects2);
 }
 
 #ifdef HAS_ADC
@@ -4089,12 +4085,18 @@ void ofApp::keyPressed(int key){
 		{
 			ofSendMessage(ofToString(BTN_MSG_A_PAUSE_SIMULATION));
 		}
+            if(key == 'e'){
+                drawEffects=!drawEffects;
+            }
 		break;
 	case OP_MODE_SIMULATION_SINGLE:
 		if (key == ' ')
 		{
 			ofSendMessage(ofToString(BTN_MSG_A_PAUSE_SIMULATION));
 		}
+            if(key == 'e'){
+                drawEffects=!drawEffects;
+            }
 		break;
 	case OP_MODE_NARRATION_GLITCH:
 		if (key == 'g')
@@ -4308,8 +4310,10 @@ void ofApp::gotMessage(ofMessage msg){
     // crappy low budget events system, openframeworks has this built in, I can call ofSendMessage() from anywhere and it will be received with this callback. I use my button message and button action definitions as messages and they arrive here and appropriate action is taken.
 	switch (ofToInt(msg.message))
 	{
-
-
+    case BTN_MSG_A_EFFECTS_OR_GRANULAR:
+            drawEffects=!drawEffects;
+        break;
+            
 	case BTN_MSG_A_SKIP_NARRATION:
 		goToMode(grainOperationModeTranslate);
 		break;
@@ -4379,14 +4383,14 @@ void ofApp::gotMessage(ofMessage msg){
 		if (presetIndex == 1) {
 			for (int i = 0; i<numberOfSlots; i++) {
 				samplePanels[i].saveToFile(filePathPrefix + unitID + "_preset_1.xml");
-                effectsPanels[i].saveToFile(filePathPrefix + unitID + "_effectParameterSettings_preset_1");
+                effectsPanels[i].saveToFile(filePathPrefix + unitID + "_effectParameterSettings_preset_1.xml");
 
 			}
 		}
 		else if (presetIndex == 2) {
 			for (int i = 0; i<numberOfSlots; i++) {
 				samplePanels[i].saveToFile(filePathPrefix + unitID + "_preset_2.xml");
-                effectsPanels[i].saveToFile(filePathPrefix + unitID + "_effectParameterSettings_preset_2");
+                effectsPanels[i].saveToFile(filePathPrefix + unitID + "_effectParameterSettings_preset_2.xml");
 			}
 		}
 		break;
