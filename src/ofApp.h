@@ -6,6 +6,14 @@
 #include "ofxOsc.h"
 #include "AudioPlayer.h"
 
+#include "EFFBitCrushUnit.h"
+#include "EFFDecimatorUnit.h"
+#include "EFFDelayUnit.h"
+#include "EFFFilterUnit.h"
+#include "EFFChorusUnit.h"
+#include "EFFReverbUnit.h"
+#include "EFFCompressorUnit.h"
+
 
 // stupid code to set the HAS_ADC define only if not on windows or mac
 #ifndef TARGET_OSX
@@ -230,7 +238,7 @@ class ofApp : public ofBaseApp{
 
 		void getAccumulatedPressure();
 
-		void applyDynamicValuesToParameters(int &k, std::vector<ofParameter<int>> connectTo, int v, std::vector<ofParameter<float>> parameter, std::vector<ofParameter<float>> parameterMin, std::vector<ofParameter<float>> parameterMax);
+		void applyDynamicValuesToParameters(int &k, std::vector<ofParameter<int>> connectTo, int v, std::vector<ofParameter<float>> parameter, std::vector<ofParameter<float>> parameterMin, std::vector<ofParameter<float>> parameterMax, string paramName);
 
 		void switchPresets();
 		int presetSwitchTimer;
@@ -331,6 +339,8 @@ class ofApp : public ofBaseApp{
 
 		ofxPDSPEngine           engine;
         int engineBufferSize;
+        int numberOfBuffers;
+        int audioDeviceId;
 
 		void setupGraincloud(std::vector<string> paths, string presetPath);
 		void populateVectors();
@@ -468,8 +478,67 @@ class ofApp : public ofBaseApp{
     
     ofParameter<int> curveSelector;
 
+// effects
+    
+    std::vector<pdsp::Bitcruncher*> bitCrusherLs;
+    std::vector<pdsp::Bitcruncher*> bitCrusherRs;
+    
+    std::vector<pdsp::Compressor*> compressors;
+    
+    std::vector<pdsp::Decimator*> decimatorLs;
+    std::vector<pdsp::Decimator*> decimatorRs;
+    
+    std::vector<pdsp::Delay*> delayLs;
+    std::vector<pdsp::Delay*> delayRs;
+    std::vector<pdsp::Amp*>               delaySends;
+    
+    std::vector<pdsp::MultiLadder4*> multiLadderFilterLs;
+    std::vector<pdsp::MultiLadder4*> multiLadderFilterRs;
+    
+    std::vector<pdsp::DimensionChorus*> choruss;
+    
+    std::vector<pdsp::BasiVerb*> reverbs;
+    std::vector<pdsp::Amp*>               reverbSends;
+    
+    bool drawEffects;
+    struct ChannelEffects {
+        bool hasBitCrusher;
+        bool hasDecimator;
+        bool hasChorus;
+        bool hasFilter;
+        bool hasDelay;
+        bool hasReverb;
+    };
+    
+    std::vector<ofxPanel>				effectsPanels;
+    
+    std::vector<std::vector<ChannelEffects>> effectsPatching;
+    
+    void loadEffectPatchSettings();
+    
+    std::vector<std::vector<ofParameterGroup>> effectsParamtersForGui;
+    
+    std::vector<EFFBitCrushUnit> effBitCrushersParams;
+    std::vector<EFFDecimatorUnit> effDecimatorsParams;
+    std::vector<EFFDelayUnit> effDelaysParams;
+    std::vector<EFFFilterUnit> effFiltersParams;
+    std::vector<EFFChorusUnit> effChorussParams;
+    std::vector<EFFReverbUnit> effReverbsParams;
+    std::vector<EFFCompressorUnit> effCompressorsParams;
 
+    void applyDynamicValuesToBitCrusherParameters(int k, int v);
+    void applyDynamicValuesToDecimatorParameters(int k, int v);
+    void applyDynamicValuesToDelayParameters(int k, int v);
+    void applyDynamicValuesToFilterParameters(int k, int v);
+    void applyDynamicValuesToChorusParameters(int k, int v);
+    void applyDynamicValuesToReverbParameters(int k, int v);
 
+    void updateEffectParametersFromValues();
+    void transferEfffectParamtersToUnits();
+    void updateEffects();
+    
+    void updateEffectsSimulation();
+ 
 
 #ifndef HAS_ADC
 		//Visualiser stuff
@@ -500,20 +569,7 @@ class ofApp : public ofBaseApp{
         void curveTypeChanged(int &curve);
 #endif
 
-		struct ChannelEffects {
-			bool hasPhaser;
-			bool hasCompressor;
-			bool hasBitCruncher;
-			bool hasReverb;
-			bool hasDelay;
-			bool hasPhaseShifter;
-		};
 
-		std::vector<ChannelEffects> effectsPatching;
-		
-		void loadEffectPatchSettings();
-
-		std::vector<std::vector<ofParameterGroup>> effectsParamtersForGui;
 
 		int currentTarget;
 		void controlOn(int x, int y);

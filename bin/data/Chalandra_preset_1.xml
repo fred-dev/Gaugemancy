@@ -322,19 +322,19 @@
 		<in_length_1>24.1895</in_length_1>
 		<in_length_Min_1>20</in_length_Min_1>
 		<in_length_Max_1>50</in_length_Max_1>
-		<IL_Connect_to_1>1</IL_Connect_to_1>
+		<IL_Connect_to_1>0</IL_Connect_to_1>
 	</In_Length>
 	<density>
 		<in_density_1>1.42032</in_density_1>
 		<in_density_Min_1>0.839286</in_density_Min_1>
 		<in_density_Max_1>5</in_density_Max_1>
-		<ID_Connect_to_1>2</ID_Connect_to_1>
+		<ID_Connect_to_1>0</ID_Connect_to_1>
 	</density>
 	<Distance_Jitter>
 		<distance_jitter_1>16.3873</distance_jitter_1>
 		<distance_jitter_min_1>0</distance_jitter_min_1>
 		<distance_jitter_max_1>117.347</distance_jitter_max_1>
-		<DJ_Connect_to_1>3</DJ_Connect_to_1>
+		<DJ_Connect_to_1>0</DJ_Connect_to_1>
 	</Distance_Jitter>
 	<Pitch_Jitter>
 		<pitch_jitter_1>0</pitch_jitter_1>
@@ -352,19 +352,19 @@
 		<_spread_1>0.0591368</_spread_1>
 		<_spread_min_1>0</_spread_min_1>
 		<_spread_max_1>0.423469</_spread_max_1>
-		<S_Connect_to_1>1</S_Connect_to_1>
+		<S_Connect_to_1>0</S_Connect_to_1>
 	</Spread>
 	<Volume>
-		<Volume_1>0.795918</Volume_1>
+		<Volume_1>1</Volume_1>
 		<Volume_min_1>0</Volume_min_1>
 		<Volume_max_1>1</Volume_max_1>
-		<V_Connect_to_1>2</V_Connect_to_1>
+		<V_Connect_to_1>0</V_Connect_to_1>
 	</Volume>
 	<Direction>
 		<grain_forwards_1>-1</grain_forwards_1>
 	</Direction>
 	<Position>
-		<Play_Position_1>0.0195312</Play_Position_1>
+		<Play_Position_1>0.0234375</Play_Position_1>
 		<Play_Position_min_1>0</Play_Position_min_1>
 		<Play_Position_max_1>1</Play_Position_max_1>
 		<P_Connect_to_1>1</P_Connect_to_1>
@@ -408,7 +408,7 @@
 		<S_Connect_to_2>0</S_Connect_to_2>
 	</Spread>
 	<Volume>
-		<Volume_2>0.5</Volume_2>
+		<Volume_2>1</Volume_2>
 		<Volume_min_2>0</Volume_min_2>
 		<Volume_max_2>1</Volume_max_2>
 		<V_Connect_to_2>0</V_Connect_to_2>
@@ -417,7 +417,7 @@
 		<grain_forwards_2>0</grain_forwards_2>
 	</Direction>
 	<Position>
-		<Play_Position_2>0.0195312</Play_Position_2>
+		<Play_Position_2>0.0234375</Play_Position_2>
 		<Play_Position_min_2>0</Play_Position_min_2>
 		<Play_Position_max_2>1</Play_Position_max_2>
 		<P_Connect_to_2>2</P_Connect_to_2>
@@ -461,7 +461,7 @@
 		<S_Connect_to_3>0</S_Connect_to_3>
 	</Spread>
 	<Volume>
-		<Volume_3>0.5</Volume_3>
+		<Volume_3>1</Volume_3>
 		<Volume_min_3>0</Volume_min_3>
 		<Volume_max_3>1</Volume_max_3>
 		<V_Connect_to_3>0</V_Connect_to_3>
@@ -470,7 +470,7 @@
 		<grain_forwards_3>0</grain_forwards_3>
 	</Direction>
 	<Position>
-		<Play_Position_3>0.0195312</Play_Position_3>
+		<Play_Position_3>0.0234375</Play_Position_3>
 		<Play_Position_min_3>0</Play_Position_min_3>
 		<Play_Position_max_3>1</Play_Position_max_3>
 		<P_Connect_to_3>3</P_Connect_to_3>
@@ -514,7 +514,7 @@
 		<S_Connect_to_4>0</S_Connect_to_4>
 	</Spread>
 	<Volume>
-		<Volume_4>0.5</Volume_4>
+		<Volume_4>1</Volume_4>
 		<Volume_min_4>0</Volume_min_4>
 		<Volume_max_4>1</Volume_max_4>
 		<V_Connect_to_4>0</V_Connect_to_4>
@@ -523,7 +523,7 @@
 		<grain_forwards_4>0</grain_forwards_4>
 	</Direction>
 	<Position>
-		<Play_Position_4>0.0195312</Play_Position_4>
+		<Play_Position_4>0.0234375</Play_Position_4>
 		<Play_Position_min_4>0</Play_Position_min_4>
 		<Play_Position_max_4>1</Play_Position_max_4>
 		<P_Connect_to_4>4</P_Connect_to_4>
@@ -567,7 +567,7 @@
 		<S_Connect_to_5>0</S_Connect_to_5>
 	</Spread>
 	<Volume>
-		<Volume_5>0.5</Volume_5>
+		<Volume_5>1</Volume_5>
 		<Volume_min_5>0</Volume_min_5>
 		<Volume_max_5>1</Volume_max_5>
 		<V_Connect_to_5>0</V_Connect_to_5>
@@ -576,7 +576,7 @@
 		<grain_forwards_5>0</grain_forwards_5>
 	</Direction>
 	<Position>
-		<Play_Position_5>0.0195312</Play_Position_5>
+		<Play_Position_5>0.0234375</Play_Position_5>
 		<Play_Position_min_5>0</Play_Position_min_5>
 		<Play_Position_max_5>1</Play_Position_max_5>
 		<P_Connect_to_5>5</P_Connect_to_5>
@@ -584,7 +584,7 @@
 </Slot_5>
 <Slot_6>
 	<In_Length>
-		<in_length_6>500</in_length_6>
+		<in_length_6>2496.58</in_length_6>
 		<in_length_Min_6>100</in_length_Min_6>
 		<in_length_Max_6>3000</in_length_Max_6>
 		<IL_Connect_to_6>0</IL_Connect_to_6>
@@ -620,7 +620,7 @@
 		<S_Connect_to_6>0</S_Connect_to_6>
 	</Spread>
 	<Volume>
-		<Volume_6>0.5</Volume_6>
+		<Volume_6>1</Volume_6>
 		<Volume_min_6>0</Volume_min_6>
 		<Volume_max_6>1</Volume_max_6>
 		<V_Connect_to_6>0</V_Connect_to_6>
@@ -629,7 +629,7 @@
 		<grain_forwards_6>0</grain_forwards_6>
 	</Direction>
 	<Position>
-		<Play_Position_6>0.0195312</Play_Position_6>
+		<Play_Position_6>0.0234375</Play_Position_6>
 		<Play_Position_min_6>0</Play_Position_min_6>
 		<Play_Position_max_6>1</Play_Position_max_6>
 		<P_Connect_to_6>6</P_Connect_to_6>

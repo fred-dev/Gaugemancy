@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Main_Controls>
-	<Compression_Speed>143</Compression_Speed>
+	<Compression_Speed>12</Compression_Speed>
 	<Compression_Limit>1024</Compression_Limit>
 	<Simulated_input>0</Simulated_input>
 	<Compression_simulations>0</Compression_simulations>
@@ -8,8 +8,8 @@
 	<Include_sensor_2>1</Include_sensor_2>
 	<Include_sensor_3>1</Include_sensor_3>
 	<Include_sensor_4>1</Include_sensor_4>
-	<Include_sensor_5>0</Include_sensor_5>
-	<Include_sensor_6>0</Include_sensor_6>
+	<Include_sensor_5>1</Include_sensor_5>
+	<Include_sensor_6>1</Include_sensor_6>
 	<Run_Simulation>0</Run_Simulation>
 	<Cam_distance>1400</Cam_distance>
 	<Compression_simulation_1>0</Compression_simulation_1>

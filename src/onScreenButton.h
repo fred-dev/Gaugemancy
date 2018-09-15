@@ -16,7 +16,7 @@ public:
     ofTrueTypeFont labelFont;
     bool buttonActive;
     void setup(string label, int message) {
-        ofLogVerbose()<<"MyTestObject::setup() - hello!\n"<<endl;
+        ofLogVerbose()<<buttonName +  " button::setup() - hello!"<<endl;
         enableMouseEvents();
         enableKeyEvents();
         labelFont.load("verdana.ttf",15);
@@ -28,7 +28,7 @@ public:
     
     void exit() {
         
-        ofLogVerbose()<<"MyTestObject::exit() - goodbye!\n"<<endl;
+        ofLogVerbose()<< buttonName +  " button::exit() - goodbye!"<<endl;
     }
     
     
@@ -59,45 +59,25 @@ public:
     }
     
     virtual void onRollOver(int x, int y) {
-		ofLogVerbose() <<"MyTestObject::onRollOver x " + ofToString( x) + " y " + ofToString( y) + buttonName <<endl;
+		ofLogVerbose() <<buttonName +  " button::onRollOver x " + ofToString( x) + " y " + ofToString( y) + buttonName <<endl;
     }
     
     virtual void onRollOut() {
-        ofLogVerbose()<<"MyTestObject::onRollOut x " + ofToString( x) + " y " + ofToString( y)<<endl;
-    }
-    
-    virtual void onMouseMove(int x, int y){
-        ofLogVerbose()<<"MyTestObject::onMouseMove x " + ofToString( x) + " y " + ofToString( y)<<endl;
-    }
-    
-    virtual void onDragOver(int x, int y, int button) {
-        ofLogVerbose()<<"MyTestObject::onDragOver x " + ofToString( x) + " y " + ofToString( y)<<endl;
-    }
-    
-    virtual void onDragOutside(int x, int y, int button) {
-        ofLogVerbose()<<"MyTestObject::onDragOutside x " + ofToString( x) + " y " + ofToString( y)<<endl;
+        ofLogVerbose()<<buttonName +  " button::onRollOut x " + ofToString( x) + " y " + ofToString( y)<<endl;
     }
     
     virtual void onPress(int x, int y, int button) {
-        ofLogVerbose()<<"MyTestObject::onPress x " + ofToString( x) + " y " + ofToString( y)<<endl;
-        
+        ofLogVerbose()<<buttonName +  " button::onPress x " + ofToString( x) + " y " + ofToString( y)<<endl;
     }
     
     virtual void onRelease(int x, int y, int button) {
-        ofLogVerbose()<<"MyTestObject::onRelease x "+  ofToString( x) + " y " + ofToString( y)<<endl;
+        ofLogVerbose()<<buttonName +  " button::onRelease x "+  ofToString( x) + " y " + ofToString( y)<<endl;
 		ofSendMessage(ofToString(buttonMessage));
     }
     
     virtual void onReleaseOutside(int x, int y, int button) {
-        ofLogVerbose()<<"MyTestObject::onReleaseOutside x " + ofToString( x) + " y " + ofToString( y)<<endl;
+        ofLogVerbose()<<buttonName +  " button::onReleaseOutside x " + ofToString( x) + " y " + ofToString( y)<<endl;
     }
     
-    virtual void keyPressed(int key) {
-        ofLogVerbose()<<"MyTestObject::keyPressed key " + ofToString( key) <<endl;
-    }
-    
-    virtual void keyReleased(int key) {
-        ofLogVerbose()<<"MyTestObject::keyReleased key " + ofToString( key) <<endl;
-    }
     
 };

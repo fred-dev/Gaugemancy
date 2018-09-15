@@ -317,3 +317,50 @@
 		<P_Connect_to_6>0</P_Connect_to_6>
 	</Position>
 </Sensor_6>
+<Slot_1>
+	<In_Length>
+		<in_length_1>24.1895</in_length_1>
+		<in_length_Min_1>20</in_length_Min_1>
+		<in_length_Max_1>50</in_length_Max_1>
+		<IL_Connect_to_1>0</IL_Connect_to_1>
+	</In_Length>
+	<density>
+		<in_density_1>1.42032</in_density_1>
+		<in_density_Min_1>0.839286</in_density_Min_1>
+		<in_density_Max_1>5</in_density_Max_1>
+		<ID_Connect_to_1>0</ID_Connect_to_1>
+	</density>
+	<Distance_Jitter>
+		<distance_jitter_1>16.3873</distance_jitter_1>
+		<distance_jitter_min_1>0</distance_jitter_min_1>
+		<distance_jitter_max_1>117.347</distance_jitter_max_1>
+		<DJ_Connect_to_1>0</DJ_Connect_to_1>
+	</Distance_Jitter>
+	<Pitch_Jitter>
+		<pitch_jitter_1>0</pitch_jitter_1>
+		<pitch_jitter_min_1>0</pitch_jitter_min_1>
+		<pitch_jitter_max_1>10</pitch_jitter_max_1>
+		<PJ_Connect_to_1>0</PJ_Connect_to_1>
+	</Pitch_Jitter>
+	<Pitch>
+		<pitch_1>0</pitch_1>
+		<pitch_min_1>-20</pitch_min_1>
+		<pitch_max_1>20</pitch_max_1>
+		<Pitch_Connect_to_1>0</Pitch_Connect_to_1>
+	</Pitch>
+	<Spread>
+		<_spread_1>0.0591368</_spread_1>
+		<_spread_min_1>0</_spread_min_1>
+		<_spread_max_1>0.423469</_spread_max_1>
+		<S_Connect_to_1>0</S_Connect_to_1>
+	</Spread>
+	<Volume>
+		<Volume_1>1</Volume_1>
+		<Volume_min_1>0</Volume_min_1>
+		<Volume_max_1>1</Volume_max_1>
+		<V_Connect_to_1>0</V_Connect_to_1>
+	</Volume>
+	<Direction>
+		<grain_forwards_1>-1</grain_forwards_1>
+	</Direction>
+</Slot_1>

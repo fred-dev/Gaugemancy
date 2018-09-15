@@ -1,28 +1,30 @@
 {
-  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "2DE9C8846D9375EAACFABA8963120E8E7719BAF5",
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "76AECE3CBDC876D5AAF6CD6BB5596AA32194C800",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
 
   },
   "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
-    "328B2D9D97956D43F1C477558678A6865720047A" : 9223372036854775807,
-    "2DE9C8846D9375EAACFABA8963120E8E7719BAF5" : 9223372036854775807,
+    "76AECE3CBDC876D5AAF6CD6BB5596AA32194C800" : 9223372036854775807,
     "90E2F969A762FB62C413A0C44D1F334E6EC3F531" : 9223372036854775807,
-    "56522B7FEFEAC766CAD5D481239D020213C85104" : 9223372036854775807,
+    "A385189FADCB4EA03263C68194B874A01B0874D3" : 9223372036854775807,
+    "2DE9C8846D9375EAACFABA8963120E8E7719BAF5" : 9223372036854775807,
     "D0D4CE313047E9EBBE4B060F3FD7FDD8EDE4F484" : 9223372036854775807,
-    "A385189FADCB4EA03263C68194B874A01B0874D3" : 9223372036854775807
+    "328B2D9D97956D43F1C477558678A6865720047A" : 9223372036854775807,
+    "56522B7FEFEAC766CAD5D481239D020213C85104" : 9223372036854775807
   },
-  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "DC42CC4F-D4D2-4909-B1B5-382EAD4CD5BB",
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "C6E63754-CFE4-4C58-A8F5-4BA9FAAB3C3A",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
-    "328B2D9D97956D43F1C477558678A6865720047A" : "openFrameworks\/addons\/ofxMSAInteractiveObject\/",
-    "2DE9C8846D9375EAACFABA8963120E8E7719BAF5" : "openFrameworks\/",
-    "90E2F969A762FB62C413A0C44D1F334E6EC3F531" : "openFrameworks\/addons\/ofxMidi\/",
-    "56522B7FEFEAC766CAD5D481239D020213C85104" : "openFrameworks\/addons\/ofxAudioFile\/",
-    "D0D4CE313047E9EBBE4B060F3FD7FDD8EDE4F484" : "openFrameworks\/addons\/ofxPDSP\/",
-    "A385189FADCB4EA03263C68194B874A01B0874D3" : "openFrameworks\/addons\/ofxSIMDFloats\/"
+    "76AECE3CBDC876D5AAF6CD6BB5596AA32194C800" : "Gaugemancy\/",
+    "90E2F969A762FB62C413A0C44D1F334E6EC3F531" : "..\/..\/addons\/ofxMidi",
+    "A385189FADCB4EA03263C68194B874A01B0874D3" : "..\/..\/addons\/ofxSIMDFloats",
+    "2DE9C8846D9375EAACFABA8963120E8E7719BAF5" : "..\/..",
+    "D0D4CE313047E9EBBE4B060F3FD7FDD8EDE4F484" : "..\/..\/addons\/ofxPDSP",
+    "328B2D9D97956D43F1C477558678A6865720047A" : "..\/..\/addons\/ofxMSAInteractiveObject",
+    "56522B7FEFEAC766CAD5D481239D020213C85104" : "..\/..\/addons\/ofxAudioFile"
   },
-  "DVTSourceControlWorkspaceBlueprintNameKey" : "Gaugemancy_1_0",
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Gaugemancy",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,
-  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "apps\/Ali moini\/Gaugemancy_1_0\/Gaugemancy_1_0.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Gaugemancy.xcodeproj",
   "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
     {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/openframeworks\/openFrameworks.git",
@@ -38,6 +40,11 @@
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/npisanti\/ofxAudioFile.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "56522B7FEFEAC766CAD5D481239D020213C85104"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/fred-dev\/Gaugemancy.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "76AECE3CBDC876D5AAF6CD6BB5596AA32194C800"
     },
     {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/danomatika\/ofxMidi.git",
