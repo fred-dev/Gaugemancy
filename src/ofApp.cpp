@@ -24,6 +24,7 @@ void ofApp::setup(){
     
 // based on the XML settings populate the vectors with blanks
 	populateVectors();
+    populateEffectVectors();
     
 // read the audio file paths from the XML so we know what to load
 	setupFilePaths();
@@ -448,6 +449,9 @@ void ofApp::loadEffectPatchSettings()
         
         engine.start();
         
+       
+            clearEffectVectors();
+            populateEffectVectors();
         
     }
     
@@ -3440,6 +3444,7 @@ void ofApp::populateVectors()
 {
     std::vector<ChannelEffects> tempChannelEffects1;
     std::vector<ChannelEffects> tempChannelEffects2;
+
     //just filling stuff with blanks based on sizes read from the XML
 	for (int vC = 0; vC < numberOfSlots; vC++)
 	{
@@ -3616,9 +3621,56 @@ void ofApp::populateVectors()
 		ofParameterGroup	_grainDirection_group_temp;
 		_grainDirection_group.push_back(_grainDirection_group_temp);
         
+        
+        //------------bit crusher
+        EFFBitCrushUnit temp_effBitCrushersParams;
+        effBitCrushersParams.push_back(temp_effBitCrushersParams);
+        
+        
+        //------------decimator
+        EFFDecimatorUnit tempeffDecimatorsParams;
+        effDecimatorsParams.push_back(tempeffDecimatorsParams);
+        
+        
+        //------------delay
+        EFFDelayUnit tempeffDelaysParams;
+        effDelaysParams.push_back(tempeffDelaysParams);
+        
+        
+        //------------Filter
+        EFFFilterUnit tempeffFiltersParams;
+        effFiltersParams.push_back(tempeffFiltersParams);
+        
+        
+        //------------chorus
+        EFFChorusUnit tempeffChorus;
+        effChorussParams.push_back(tempeffChorus);
+        
+        
+        //------------reverb
+        EFFReverbUnit tempeffReverbsParams;
+        effReverbsParams.push_back(tempeffReverbsParams);
+        
+        
+        //------------compressor
+        EFFCompressorUnit tempeffCompressorsParams;
+        effCompressorsParams.push_back(tempeffCompressorsParams);
+        
         ofxPanel effectPanel;
         effectsPanels.push_back(effectPanel);
 
+       
+    
+	}
+    effectsPatching.push_back(tempChannelEffects1);
+    effectsPatching.push_back(tempChannelEffects2);
+    
+    populateEffectVectors();
+    
+
+}
+void ofApp::populateEffectVectors(){
+    for(int i =0; i<numberOfSlots; i++){
         //------------bitcrusher
         pdsp::Bitcruncher* tmp_BitcrusherL = new pdsp::Bitcruncher();
         bitCrusherLs.push_back(tmp_BitcrusherL);
@@ -3685,12 +3737,37 @@ void ofApp::populateVectors()
         
         EFFCompressorUnit tempeffCompressorsParams;
         effCompressorsParams.push_back(tempeffCompressorsParams);
-    
-	}
-    effectsPatching.push_back(tempChannelEffects1);
-    effectsPatching.push_back(tempChannelEffects2);
+    }
 }
+void ofApp::clearEffectVectors(){
+    //------------bitcrusher
+    bitCrusherLs.clear();
+    bitCrusherRs.clear();
+    
+    //------------decimator
+    decimatorLs.clear();
+    decimatorRs.clear();
 
+    //------------delay
+    delayLs.clear();
+    delayRs.clear();
+    delaySends.clear();
+    
+    //------------filter
+    multiLadderFilterLs.clear();
+    multiLadderFilterRs.clear();
+    
+    //------------chorus
+    choruss.clear();
+
+    //------------reverb
+    reverbs.clear();
+    reverbSends.clear();
+    
+    //------------compressor
+    compressors.clear();
+
+}
 #ifdef HAS_ADC
 void ofApp::calibrateOnStart() {
 // get the pressure in the balls when we start the unit, they can all be very different

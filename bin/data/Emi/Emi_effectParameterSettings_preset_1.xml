@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <Effects_Slot_1>
 	<Chorus_slot_1>
-		<Depth>0.959184</Depth>
+		<Depth>0.188776</Depth>
 		<Depth_Min>0</Depth_Min>
 		<Depth_Max>1</Depth_Max>
 		<Depth_connect_to>0</Depth_connect_to>
-		<Speed>108.231</Speed>
+		<Speed>15.3061</Speed>
 		<Speed_Min>107.143</Speed_Min>
 		<Speed_Max>200</Speed_Max>
-		<Speed_connect_to>1</Speed_connect_to>
+		<Speed_connect_to>0</Speed_connect_to>
 		<Delay>1</Delay>
 		<Delay_Min>0</Delay_Min>
 		<Delay_Max>200</Delay_Max>

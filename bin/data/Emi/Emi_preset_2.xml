@@ -90,7 +90,7 @@
 		<S_Connect_to_1>0</S_Connect_to_1>
 	</Spread>
 	<Volume>
-		<Volume_1>0.5</Volume_1>
+		<Volume_1>1</Volume_1>
 		<Volume_min_1>0</Volume_min_1>
 		<Volume_max_1>1</Volume_max_1>
 		<V_Connect_to_1>0</V_Connect_to_1>

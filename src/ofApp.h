@@ -345,6 +345,8 @@ class ofApp : public ofBaseApp{
 
 		void setupGraincloud(std::vector<string> paths, string presetPath);
 		void populateVectors();
+        void populateEffectVectors();
+        void clearEffectVectors();
 	
 #ifndef HAS_ADC
 		std::vector<ofxSampleBufferPlotter*>  waveformGraphics;
