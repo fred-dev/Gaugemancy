@@ -80,7 +80,7 @@ void ofApp::setup(){
 	engine.listDevices();
     engine.setChannels(0,2);
     
-	engine.setDeviceID(1); // REMEMBER TO SET THIS AT THE RIGHT INDEX!!!!
+	engine.setDeviceID(audioDeviceId); // REMEMBER TO SET THIS AT THE RIGHT INDEX!!!!
 	engine.setup(44100, engineBufferSize, numberOfBuffers);
 }
 
@@ -2375,11 +2375,14 @@ void ofApp::setupParamsFromXML()
 		cout << "Username settings loaded" << endl;
 	}
     
+    
 	unitID = usernameXML.getValue("NAMES:USERNAME", "NO_UNIT_ID");
 	cout << "UNIT_ID = " + ofToString(unitID) << endl;
+    filePathPrefix = filePathPrefix + unitID + "/";
+    cout<< "Root user data path is " + filePathPrefix <<endl;
 
 // based on the username load that app settings profile
-	if (!appSettingsXML.loadFile(filePathPrefix + unitID + "_appSettings.xml")) {
+	if (!appSettingsXML.loadFile(filePathPrefix  + unitID + "_appSettings.xml")) {
 		cout << "App settings not loaded" << endl;
 
 	}
@@ -2590,8 +2593,6 @@ void ofApp::setupParamsFromXML()
 		recyclingMessage.addStringArg(filePathPrefix);
 		sender.sendMessage(recyclingMessage, false);
 	}
-
-
 }
 
 void ofApp::setupFilePaths()
@@ -2600,13 +2601,13 @@ void ofApp::setupFilePaths()
 	if (fileSettingsXML.loadFile(filePathPrefix + unitID + "_fileSettings.xml")) {
 		cout << "File settings loaded" << endl;
 		for (int i = 0; i < numberOfSlots; i++) {
-			cout << "Getting paths from file settings " + ofToString(i)<< endl;
+			cout << "Getting audio file paths from " + unitID +  "_fileSettings: Slot " + ofToString(i + 1)<< endl;
 			filePathsSet1[i] = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "A", "Grain_" + ofToString(i + 1) + ".mp3");
 			fileNamesSet1[i] = fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "A", "Grain_" + ofToString(i + 1) + ".mp3");
-			cout << "File path " + ofToString(i + 1) + "A  = " + filePathsSet1[i] << endl;
+			cout << "Preset 1 File path " + ofToString(i + 1) + "A  = " + filePathsSet1[i] << endl;
 			filePathsSet2[i] = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "B", "Grain_" + ofToString(i + 1) + ".mp3");
 			fileNamesSet2[i] = fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "B", "Grain_" + ofToString(i + 1) + ".mp3");
-			cout << "File path " + ofToString(i + 1) + "B  = " + filePathsSet2[i] << endl;	
+			cout << "Preset 2 File path " + ofToString(i + 1) + "B  = " + filePathsSet2[i] << endl;
 
 			if (oscDebug) {
                 // if we are using OSC debug send the names

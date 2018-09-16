@@ -248,6 +248,7 @@ class ofApp : public ofBaseApp{
 
 		string dataRoot;
 		string filePathPrefix;
+        string filePathPrefixAudio;
 		string unitID;
 		int logLevel;
 

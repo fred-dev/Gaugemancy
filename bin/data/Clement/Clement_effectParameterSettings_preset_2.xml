@@ -63,7 +63,7 @@
 		<Ratio>10</Ratio>
 	</Compressor_slot_1>
 	<Decimator_slot_1>
-		<Rate>1</Rate>
+		<Rate>44100</Rate>
 		<Rate_Min>1</Rate_Min>
 		<Rate_Max>44100</Rate_Max>
 		<Rate_Connect_to>1</Rate_Connect_to>
