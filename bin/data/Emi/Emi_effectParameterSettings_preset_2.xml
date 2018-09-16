@@ -69,11 +69,11 @@
 		<Rate_Connect_to>1</Rate_Connect_to>
 	</Decimator_slot_1>
 	<Delay_slot_1>
-		<Send_>0.530612</Send_>
+		<Send_>0.306122</Send_>
 		<Send_Min>0</Send_Min>
 		<Send_Max>1</Send_Max>
 		<Send_Connect_To>0</Send_Connect_To>
-		<Time_>393.878</Time_>
+		<Time_>291.837</Time_>
 		<Time_Min>0</Time_Min>
 		<Time_Max>400</Time_Max>
 		<Time_Connect_To>0</Time_Connect_To>
@@ -81,7 +81,7 @@
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>
-		<feedback_>0.0255102</feedback_>
+		<feedback_>0.285714</feedback_>
 		<feedback_Min>0</feedback_Min>
 		<feedback_Max>1</feedback_Max>
 		<feedback_COnnect_To>0</feedback_COnnect_To>
