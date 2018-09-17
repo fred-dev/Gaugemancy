@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Sensor_1>
+<Slot_1>
 	<In_Length>
 		<in_length_1>177.806</in_length_1>
 		<in_length_Min_1>1169.39</in_length_Min_1>
@@ -51,17 +51,8 @@
 	<Direction>
 		<grain_forwards_1>1</grain_forwards_1>
 	</Direction>
-</Sensor_1>
-<Main_Controls>
-	<Compression_Speed>1</Compression_Speed>
-	<Compression_Limit>1024</Compression_Limit>
-	<Simulated_input>0</Simulated_input>
-	<Compression_simulations>0</Compression_simulations>
-	<Include_sensor_1>0</Include_sensor_1>
-	<Include_sensor_2>0</Include_sensor_2>
-	<Include_sensor_3>0</Include_sensor_3>
-	<Include_sensor_4>0</Include_sensor_4>
-	<Include_sensor_5>0</Include_sensor_5>
-	<Include_sensor_6>0</Include_sensor_6>
-	<Run_Simulation>0</Run_Simulation>
-</Main_Controls>
+	<Window_Type_slot_1>
+		<Window_type_1>0</Window_type_1>
+		<Window_1>Rectangular</Window_1>
+	</Window_Type_slot_1>
+</Slot_1>

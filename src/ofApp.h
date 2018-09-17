@@ -323,7 +323,12 @@ class ofApp : public ofBaseApp{
 		float     narrControlX;
 		int     narrControlY;
 
+    
+    
+    
 		ofxPanel narrPanel;
+        ofParameter<int>      narr_window_type_id;
+        ofParameter<string>    narr_window_type_name;
 		ofParameter<float> narr_in_length;
 		ofParameter<float> narr_in_position_jitter;
 		ofParameter<float> narr_in_density;
@@ -349,6 +354,8 @@ class ofApp : public ofBaseApp{
         void clearEffectVectors();
 	
 #ifndef HAS_ADC
+        void onNarrWindowTypeChanged(int & windowType);
+
 		std::vector<ofxSampleBufferPlotter*>  waveformGraphics;
 #endif
 		std::vector<int>					grainVoices;
@@ -376,6 +383,10 @@ class ofApp : public ofBaseApp{
 		std::vector<int>					controlY;
 
 		std::vector<ofxPanel>				samplePanels;
+    
+        std::vector<ofParameterGroup>		_windowTypeGroup_group;
+        std::vector<ofParameter<int>>       _window_type_id;
+    
 
 		std::vector<ofParameterGroup>		_in_length_group;
 		std::vector<ofParameter<float>>		_in_length;
@@ -465,6 +476,10 @@ class ofApp : public ofBaseApp{
 		void simulatedInputChanged(int & simulatedInput);
 		void singleCompSimChanged(const void * guiSender, int & value);
 		bool singleCompSimActive[6];
+    
+        std::vector<ofParameter<string>>    _window_type_name;
+        std::string windowTypeNames[10];
+        void onWindowTypeChanged(int & windowType);
 
 #endif
 

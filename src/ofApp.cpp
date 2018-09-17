@@ -455,7 +455,10 @@ void ofApp::loadEffectPatchSettings()
     
     for (int j = 0; j < numberOfSlots; j++)
     {
-        effectsPanels[j].clear();
+        
+             effectsPanels[j].clear();
+        
+       
         effectsPanels[j].setup("Effects Slot "+ ofToString(j+1),filePathPrefix + unitID + "_effectParameterSettings_preset_" + ofToString(presetIndex) + ".xml");
         
         if(effectsPatching[presetIndex-1][j].hasBitCrusher){
@@ -508,7 +511,6 @@ void ofApp::loadEffectPatchSettings()
         if(presetIndex == 2){
             effectsPanels[j].loadFromFile(filePathPrefix + unitID + "_effectParameterSettings_preset_2.xml");
         }
-        effectsPanels[j].setPosition(uiX[j], uiMaxY[j] + 10);
         
     }
     
@@ -524,8 +526,8 @@ void ofApp::loadEffectPatchSettings()
         
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e]>> choruss[e]->out_0() >> *multiLadderFilterLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e]>> choruss[e]->out_1() >> *multiLadderFilterRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e]>> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
+            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e]>> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
             
             cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e]>> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
             cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e]>> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
@@ -1131,6 +1133,18 @@ void ofApp::initParameters()
 	isCheckingHitTroughs = false;
 	narrationIsPlaying = false;
 	presetSwitchTimer = ofGetElapsedTimeMillis();
+    
+    
+    windowTypeNames[0]="Rectangular";
+    windowTypeNames[1]= "Triangular";
+    windowTypeNames[2]= "Hann";
+    windowTypeNames[3]= "Hamming";
+    windowTypeNames[4]= "Blackman";
+    windowTypeNames[5]= "BlackmanHarris";
+    windowTypeNames[6]= "SineWindow";
+    windowTypeNames[7]= "Welch";
+    windowTypeNames[8]= "Gaussian";
+    windowTypeNames[9]= "Tukey";
     
 #ifndef HAS_ADC
     curvesNames[0] = "Direct";
@@ -3115,7 +3129,14 @@ void ofApp::setupNarrationGrain()
 	narrCloud.setSample(&narrSampleData); // give to the pdsp::GrainCloud the pointer to the sample
 
 	narrPanel.setup("Narration", filePathPrefix + unitID + "_narr.xml", 100, 100); // Seting up this GUI module and adding the parameters to it
-
+    
+  
+    
+    narrPanel.add(narr_window_type_id.set("Window type", 0, 0, 9));
+#ifndef HAS_ADC
+    narr_window_type_id.addListener(this, &ofApp::onNarrWindowTypeChanged);
+    narrPanel.add(narr_window_type_name.set("Window type", "default"));
+#endif
 	narrPanel.add(narr_in_length.set("in length", 500, 10, 3000));
 	narrPanel.add(narr_in_density.set("in density", 0.9, 0.1, 1.0));
 	narrPanel.add(narr_in_distance_jitter.set("distance jitter", 0.0, 0.0, 1000.0));
@@ -3285,80 +3306,135 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 
 		sampleData[i]->setVerbose(true);
 		sampleData[i]->load(paths[i]);
-		cloud[i]->setWindowType(pdsp::SineWindow, 2048);
-		cloud[i]->setSample(sampleData[i]); // give to the pdsp::GrainCloud the pointer to the sample
+        cloud[i]->setSample(sampleData[i]); // give to the pdsp::GrainCloud the pointer to the sample
 
-		if (firstRun) {
-			samplePanels[i].setup("Slot " + ofToString(i + 1)); //we have a GUI panel for each granular
+        if (firstRun) {
+            samplePanels[i].setup("Slot " + ofToString(i + 1), filePathPrefix + presetPath); //we have a GUI panel for each granular
             //the parameters are split into groups to make it easier to see, each group has value, a min, a max, and connect to to connect it to the sensor
-			_in_length_group[i].add(_in_length[i].set("in length " + ofToString(i + 1), 500, 10, 3000));
-			_in_length_group[i].add(_in_lengthMin[i].set("in length Min " + ofToString(i + 1), 100, 10, 3000));
-			_in_length_group[i].add(_in_lengthMax[i].set("in length Max " + ofToString(i + 1), 3000, 10, 3000));
-			_in_length_group[i].add(in_length_connect[i].set("IL Connect to " + ofToString(i + 1), 0, 0, 6));
-			_in_length_group[i].setName("In Length");
-			samplePanels[i].add(_in_length_group[i]);
-
-			_in_density_group[i].add(_in_density[i].set("in density " + ofToString(i + 1), 0.9, 0.1, 1.0));
-			_in_density_group[i].add(_in_densityMin[i].set("in density Min " + ofToString(i + 1), 0.1, 0.1, 1.0));
-			_in_density_group[i].add(_in_densityMax[i].set("in density Max " + ofToString(i + 1), 5.0, 0.1, 1.0));
-			_in_density_group[i].add(in_density_connect[i].set("ID Connect to " + ofToString(i + 1), 0, 0, 6));
-			_in_density_group[i].setName("density");
-			samplePanels[i].add(_in_density_group[i]);
-
-			_in_distance_jitter_group[i].add(_in_distance_jitter[i].set("distance jitter " + ofToString(i + 1), 20.0, 0.0, 1000.0));
-			_in_distance_jitter_group[i].add(_in_distance_jitterMin[i].set("distance jitter min " + ofToString(i + 1), 0.0, 0.0, 1000.0));
-			_in_distance_jitter_group[i].add(_in_distance_jitterMax[i].set("distance jitter max " + ofToString(i + 1), 1000.0, 0.0, 1000.0));
-			_in_distance_jitter_group[i].add(in_distJit_connect[i].set("DJ Connect to " + ofToString(i + 1), 0, 0, 6));
-			_in_distance_jitter_group[i].setName("Distance Jitter");
-			samplePanels[i].add(_in_distance_jitter_group[i]);
-
-			_in_pitch_jitter_group[i].add(_in_pitch_jitter[i].set("pitch jitter " + ofToString(i + 1), 0.0, -200.0, 200.0));
-			_in_pitch_jitter_group[i].add(_in_pitch_jitterMin[i].set("pitch jitter min " + ofToString(i + 1), -200.0, -200.0, 200.0));
-			_in_pitch_jitter_group[i].add(_in_pitch_jitterMax[i].set("pitch jitter max " + ofToString(i + 1), 200.0, -200.0, 200.0));
-			_in_pitch_jitter_group[i].add(in_pitchJit_connect[i].set("PJ Connect to " + ofToString(i + 1), 0, 0, 6));
-			_in_pitch_jitter_group[i].setName("Pitch Jitter");
-			samplePanels[i].add(_in_pitch_jitter_group[i]);
-
-			_in_pitch_group[i].add(_in_pitch[i].set("pitch " + ofToString(i + 1), 0.0, -20.0, 20.0));
-			_in_pitch_group[i].add(_in_pitchMin[i].set("pitch min " + ofToString(i + 1), -20.0, -20.0, 20.0));
-			_in_pitch_group[i].add(_in_pitchMax[i].set("pitch max " + ofToString(i + 1), 20.0, -20.0, 20.0));
-			_in_pitch_group[i].add(in_pitch_connect[i].set("Pitch Connect to " + ofToString(i + 1), 0, 0, 6));
-			_in_pitch_group[i].setName("Pitch");
-			samplePanels[i].add(_in_pitch_group[i]);
-
-			_spread_group[i].add(_spread[i].set("_spread " + ofToString(i + 1), 0.0, 0.0, 1.0));
-			_spread_group[i].add(_spreadMin[i].set("_spread min " + ofToString(i + 1), 0.0, 0.0, 1.0));
-			_spread_group[i].add(_spreadMax[i].set("_spread max " + ofToString(i + 1), 1.0, 0.0, 1.0));
-			_spread_group[i].add(_spread_connect[i].set("S Connect to " + ofToString(i + 1), 0, 0, 6));
-			_spread_group[i].setName("Spread");
-			samplePanels[i].add(_spread_group[i]);
-
-			_volume_group[i].add(_volume[i].set("Volume " + ofToString(i + 1), 0.5, 0.0, 1.0));
-			_volume_group[i].add(_volumeMin[i].set("Volume min " + ofToString(i + 1), 0.0, 0.0, 1.0));
-			_volume_group[i].add(_volumeMax[i].set("Volume max " + ofToString(i + 1), 1.0, 0.0, 1.0));
-			_volume_group[i].add(_volume_connect[i].set("V Connect to " + ofToString(i + 1), 0, 0, 6));
-			_volume_group[i].setName("Volume");
-			samplePanels[i].add(_volume_group[i]);
-
-			_grainDirection_group[i].add(_grainDirection[i].set("grain forwards " + ofToString(i + 1), 0.0, -1.0, 1.0));
-			_grainDirection_group[i].setName("Direction");
-			samplePanels[i].add(_grainDirection_group[i]);
-
-			if (!useAccumulatedPressure)
-			{
+            _windowTypeGroup_group[i].add(_window_type_id[i].set("Window type " + ofToString(i + 1), 0, 0, 9));
+#ifndef HAS_ADC
+            _window_type_id[i].addListener(this, &ofApp::onWindowTypeChanged);
+            _windowTypeGroup_group[i].add(_window_type_name[i].set("Window "+ ofToString(i + 1), "default"));
+            _windowTypeGroup_group[i].setName("Window Type slot " + ofToString(i + 1));
+#endif
+            samplePanels[i].add(_windowTypeGroup_group[i]);
+            
+            _in_length_group[i].add(_in_length[i].set("in length " + ofToString(i + 1), 500, 10, 3000));
+            _in_length_group[i].add(_in_lengthMin[i].set("in length Min " + ofToString(i + 1), 100, 10, 3000));
+            _in_length_group[i].add(_in_lengthMax[i].set("in length Max " + ofToString(i + 1), 3000, 10, 3000));
+            _in_length_group[i].add(in_length_connect[i].set("IL Connect to " + ofToString(i + 1), 0, 0, 6));
+            _in_length_group[i].setName("In Length");
+            samplePanels[i].add(_in_length_group[i]);
+            
+            _in_density_group[i].add(_in_density[i].set("in density " + ofToString(i + 1), 0.9, 0.1, 1.0));
+            _in_density_group[i].add(_in_densityMin[i].set("in density Min " + ofToString(i + 1), 0.1, 0.1, 1.0));
+            _in_density_group[i].add(_in_densityMax[i].set("in density Max " + ofToString(i + 1), 5.0, 0.1, 1.0));
+            _in_density_group[i].add(in_density_connect[i].set("ID Connect to " + ofToString(i + 1), 0, 0, 6));
+            _in_density_group[i].setName("density");
+            samplePanels[i].add(_in_density_group[i]);
+            
+            _in_distance_jitter_group[i].add(_in_distance_jitter[i].set("distance jitter " + ofToString(i + 1), 20.0, 0.0, 1000.0));
+            _in_distance_jitter_group[i].add(_in_distance_jitterMin[i].set("distance jitter min " + ofToString(i + 1), 0.0, 0.0, 1000.0));
+            _in_distance_jitter_group[i].add(_in_distance_jitterMax[i].set("distance jitter max " + ofToString(i + 1), 1000.0, 0.0, 1000.0));
+            _in_distance_jitter_group[i].add(in_distJit_connect[i].set("DJ Connect to " + ofToString(i + 1), 0, 0, 6));
+            _in_distance_jitter_group[i].setName("Distance Jitter");
+            samplePanels[i].add(_in_distance_jitter_group[i]);
+            
+            _in_pitch_jitter_group[i].add(_in_pitch_jitter[i].set("pitch jitter " + ofToString(i + 1), 0.0, -200.0, 200.0));
+            _in_pitch_jitter_group[i].add(_in_pitch_jitterMin[i].set("pitch jitter min " + ofToString(i + 1), -200.0, -200.0, 200.0));
+            _in_pitch_jitter_group[i].add(_in_pitch_jitterMax[i].set("pitch jitter max " + ofToString(i + 1), 200.0, -200.0, 200.0));
+            _in_pitch_jitter_group[i].add(in_pitchJit_connect[i].set("PJ Connect to " + ofToString(i + 1), 0, 0, 6));
+            _in_pitch_jitter_group[i].setName("Pitch Jitter");
+            samplePanels[i].add(_in_pitch_jitter_group[i]);
+            
+            _in_pitch_group[i].add(_in_pitch[i].set("pitch " + ofToString(i + 1), 0.0, -20.0, 20.0));
+            _in_pitch_group[i].add(_in_pitchMin[i].set("pitch min " + ofToString(i + 1), -20.0, -20.0, 20.0));
+            _in_pitch_group[i].add(_in_pitchMax[i].set("pitch max " + ofToString(i + 1), 20.0, -20.0, 20.0));
+            _in_pitch_group[i].add(in_pitch_connect[i].set("Pitch Connect to " + ofToString(i + 1), 0, 0, 6));
+            _in_pitch_group[i].setName("Pitch");
+            samplePanels[i].add(_in_pitch_group[i]);
+            
+            _spread_group[i].add(_spread[i].set("_spread " + ofToString(i + 1), 0.0, 0.0, 1.0));
+            _spread_group[i].add(_spreadMin[i].set("_spread min " + ofToString(i + 1), 0.0, 0.0, 1.0));
+            _spread_group[i].add(_spreadMax[i].set("_spread max " + ofToString(i + 1), 1.0, 0.0, 1.0));
+            _spread_group[i].add(_spread_connect[i].set("S Connect to " + ofToString(i + 1), 0, 0, 6));
+            _spread_group[i].setName("Spread");
+            samplePanels[i].add(_spread_group[i]);
+            
+            _volume_group[i].add(_volume[i].set("Volume " + ofToString(i + 1), 0.5, 0.0, 1.0));
+            _volume_group[i].add(_volumeMin[i].set("Volume min " + ofToString(i + 1), 0.0, 0.0, 1.0));
+            _volume_group[i].add(_volumeMax[i].set("Volume max " + ofToString(i + 1), 1.0, 0.0, 1.0));
+            _volume_group[i].add(_volume_connect[i].set("V Connect to " + ofToString(i + 1), 0, 0, 6));
+            _volume_group[i].setName("Volume");
+            samplePanels[i].add(_volume_group[i]);
+            
+            _grainDirection_group[i].add(_grainDirection[i].set("grain forwards " + ofToString(i + 1), 0.0, -1.0, 1.0));
+            _grainDirection_group[i].setName("Direction");
+            samplePanels[i].add(_grainDirection_group[i]);
+            
+            if (!useAccumulatedPressure)
+            {
                 // in accumulated pressure mode (single granualr) the posX value is taken automatically from all sensors together so we only need this for the multi modes
-				_posX_group[i].add(_posX[i].set("Play Position " + ofToString(i + 1), 0.5, 0.0, 1.0));
-				_posX_group[i].add(_posXMin[i].set("Play Position min " + ofToString(i + 1), 0.0, 0.0, 1.0));
-				_posX_group[i].add(_posXMax[i].set("Play Position max " + ofToString(i + 1), 1.0, 0.0, 1.0));
-				_posX_group[i].add(_posX_connect[i].set("P Connect to " + ofToString(i + 1), 0, 0, 6));
-				_posX_group[i].setName("Position");
-				samplePanels[i].add(_posX_group[i]);
-			}
-		}
+                _posX_group[i].add(_posX[i].set("Play Position " + ofToString(i + 1), 0.5, 0.0, 1.0));
+                _posX_group[i].add(_posXMin[i].set("Play Position min " + ofToString(i + 1), 0.0, 0.0, 1.0));
+                _posX_group[i].add(_posXMax[i].set("Play Position max " + ofToString(i + 1), 1.0, 0.0, 1.0));
+                _posX_group[i].add(_posX_connect[i].set("P Connect to " + ofToString(i + 1), 0, 0, 6));
+                _posX_group[i].setName("Position");
+                samplePanels[i].add(_posX_group[i]);
+            }
+        }
         //load from the XML
-		samplePanels[i].loadFromFile(filePathPrefix + presetPath);
+        samplePanels[i].loadFromFile(filePathPrefix + presetPath);
         //set the XML path manually so the native save and recal settings buttons work properly with our settings
-		samplePanels[i].setFileName(filePathPrefix + presetPath);
+        samplePanels[i].setFileName(filePathPrefix + presetPath);
+
+        switch (_window_type_id[i]) {
+            case 0:
+                cloud[i]->setWindowType(pdsp::Rectangular, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Rectangular" << endl;
+                break;
+            case 1:
+                cloud[i]->setWindowType(pdsp::Triangular, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Triangular" << endl;
+                break;
+            case 2:
+                cloud[i]->setWindowType(pdsp::Hann, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Hann" << endl;
+                break;
+            case 3:
+                cloud[i]->setWindowType(pdsp::Hamming, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Hamming" << endl;
+                break;
+            case 4:
+                cloud[i]->setWindowType(pdsp::Blackman, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Blackman" << endl;
+                break;
+            case 5:
+                cloud[i]->setWindowType(pdsp::BlackmanHarris, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: BlackmanHarris" << endl;
+                break;
+            case 6:
+                cloud[i]->setWindowType(pdsp::SineWindow, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: SineWindow" << endl;
+                break;
+            case 7:
+                cloud[i]->setWindowType(pdsp::Welch, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Welch" << endl;
+                break;
+            case 8:
+                cloud[i]->setWindowType(pdsp::Gaussian, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Gaussian" << endl;
+                break;
+            case 9:
+                cloud[i]->setWindowType(pdsp::Tukey, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Tukey" << endl;
+                break;
+        }
+
+		
+        _window_type_name[i] = windowTypeNames[_window_type_id[i]];
+
+  
 
         // apply all base settings to the grainular objects
 			0.00f >> (*posX[i]) >> cloud[i]->in_position();
@@ -3395,6 +3471,8 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 			drawGrains[i] = false;
 			waveformGraphics[i]->setWaveform(*sampleData[i], 0, ofColor(0, 100, 100, 255), uiWidth[i], uiHeigth[i]);
 			samplePanels[i].setPosition(uiX[i], uiMaxY[i] + 10);
+            effectsPanels[i].setPosition(uiX[i], uiMaxY[i] + 10);
+
 
 #endif
 		
@@ -3441,7 +3519,105 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 #endif // HAS_ADC
 	
 }
+#ifndef HAS_ADC
+void ofApp::onNarrWindowTypeChanged(int & windowType){
+    switch (narr_window_type_id) {
+        case 0:
+            narrCloud.setWindowType(pdsp::Rectangular, 2048);
+            cout << "Narration using window type: Rectangular" << endl;
+            break;
+        case 1:
+            narrCloud.setWindowType(pdsp::Triangular, 2048);
+            cout << "Narration using window type: Triangular" << endl;
+            break;
+        case 2:
+            narrCloud.setWindowType(pdsp::Hann, 2048);
+            cout << "Narration using window type: Hann" << endl;
+            break;
+        case 3:
+            narrCloud.setWindowType(pdsp::Hamming, 2048);
+            cout << "Narration using window type: Hamming" << endl;
+            break;
+        case 4:
+            narrCloud.setWindowType(pdsp::Blackman, 2048);
+            cout << "Narration using window type: Blackman" << endl;
+            break;
+        case 5:
+            narrCloud.setWindowType(pdsp::BlackmanHarris, 2048);
+            cout << "Narration using window type: BlackmanHarris" << endl;
+            break;
+        case 6:
+            narrCloud.setWindowType(pdsp::SineWindow, 2048);
+            cout << "Narration using window type: SineWindow" << endl;
+            break;
+        case 7:
+            narrCloud.setWindowType(pdsp::Welch, 2048);
+            cout << "Narration using window type: Welch" << endl;
+            break;
+        case 8:
+            narrCloud.setWindowType(pdsp::Gaussian, 2048);
+            cout << "Narration using window type: Gaussian" << endl;
+            break;
+        case 9:
+            narrCloud.setWindowType(pdsp::Tukey, 2048);
+            cout << "Narration using window type: Tukey" << endl;
+            break;
+    }
 
+    narr_window_type_name = windowTypeNames[narr_window_type_id];
+
+}
+
+void ofApp::onWindowTypeChanged(int & windowType){
+    for (int i =0; i<numberOfSlots; i++) {
+        switch (_window_type_id[i]) {
+            case 0:
+                cloud[i]->setWindowType(pdsp::Rectangular, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Rectangular" << endl;
+                break;
+            case 1:
+                cloud[i]->setWindowType(pdsp::Triangular, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Triangular" << endl;
+                break;
+            case 2:
+                cloud[i]->setWindowType(pdsp::Hann, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Hann" << endl;
+                break;
+            case 3:
+                cloud[i]->setWindowType(pdsp::Hamming, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Hamming" << endl;
+                break;
+            case 4:
+                cloud[i]->setWindowType(pdsp::Blackman, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Blackman" << endl;
+                break;
+            case 5:
+                cloud[i]->setWindowType(pdsp::BlackmanHarris, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: BlackmanHarris" << endl;
+                break;
+            case 6:
+                cloud[i]->setWindowType(pdsp::SineWindow, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: SineWindow" << endl;
+                break;
+            case 7:
+                cloud[i]->setWindowType(pdsp::Welch, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Welch" << endl;
+                break;
+            case 8:
+                cloud[i]->setWindowType(pdsp::Gaussian, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Gaussian" << endl;
+                break;
+            case 9:
+                cloud[i]->setWindowType(pdsp::Tukey, 2048);
+                cout << "Slot " + ofToString(i +1) + " using window type: Tukey" << endl;
+                break;
+        }
+
+        _window_type_name[i] = windowTypeNames[_window_type_id[i]];
+    }
+}
+
+#endif
 void ofApp::populateVectors()
 {
     std::vector<ChannelEffects> tempChannelEffects1;
@@ -3496,6 +3672,14 @@ void ofApp::populateVectors()
 
 		ofxPanel				tmp_samplePanels;
 		samplePanels.push_back(tmp_samplePanels);
+        
+        ofParameter<int>		tmp__window_type_id;
+        _window_type_id.push_back(tmp__window_type_id);
+        
+#ifndef HAS_ADC
+        ofParameter<string>        _temp_window_type_name;
+        _window_type_name.push_back(_temp_window_type_name);
+#endif
 		ofParameter<float>		tmp__in_length;
 		_in_length.push_back(tmp__in_length);
 		ofParameter<float>		tmp__in_lengthMin;
@@ -3594,7 +3778,9 @@ void ofApp::populateVectors()
         
         tempChannelEffects2.push_back(thisEffectSet2);
         
-  
+        
+        ofParameterGroup	_windowTypeGroup_group_temp;
+        _windowTypeGroup_group.push_back(_windowTypeGroup_group_temp);
 
 		ofParameterGroup	_in_length_group_temp;
 		_in_length_group.push_back(_in_length_group_temp);

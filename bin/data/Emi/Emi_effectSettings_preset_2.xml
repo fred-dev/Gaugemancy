@@ -3,10 +3,10 @@
    <SLOT_1>
       <BIT_CRUSH>0</BIT_CRUSH>
       <DECIMATOR>1</DECIMATOR>
-      <CHORUS>0</CHORUS>
+      <CHORUS>1</CHORUS>
       <FILTER>1</FILTER>
       <DELAY>1</DELAY>
-      <REVERB>0</REVERB>
+      <REVERB></REVERB>
    </SLOT_1>
    <SLOT_2>
       <BIT_CRUSH>1</BIT_CRUSH>
@@ -49,3 +49,4 @@
       <REVERB>0</REVERB>
    </SLOT_6>
 </SLOTS>
+

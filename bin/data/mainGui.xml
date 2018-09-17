@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <Main_Controls>
-	<Compression_Speed>40</Compression_Speed>
+	<Compression_Speed>22</Compression_Speed>
 	<Compression_Limit>1024</Compression_Limit>
 	<Simulated_input>0</Simulated_input>
 	<Compression_simulation_1>0</Compression_simulation_1>

@@ -56,7 +56,7 @@
 	</Reverb_slot_1>
 	<Compressor_slot_1>
 		<Threshold>0</Threshold>
-		<GR_meter>0</GR_meter>
+		<GR_meter>nan</GR_meter>
 		<Attack__MS_>10</Attack__MS_>
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
