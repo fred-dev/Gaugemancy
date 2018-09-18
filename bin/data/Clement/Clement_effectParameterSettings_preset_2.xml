@@ -15,24 +15,24 @@
 		<Delay_connect_to>0</Delay_connect_to>
 	</Chorus_slot_1>
 	<Filter_slot_1>
-		<Freq>19285</Freq>
-		<Freq_Min>1</Freq_Min>
+		<Freq>16556</Freq>
+		<Freq_Min>10816</Freq_Min>
 		<Freq_Max>20000</Freq_Max>
-		<Freq_connect_to>0</Freq_connect_to>
-		<Reso>0.0765306</Reso>
+		<Freq_connect_to>6</Freq_connect_to>
+		<Reso>0.331633</Reso>
 		<Reso_Min>0</Reso_Min>
 		<Reso_Max>1</Reso_Max>
 		<Reso_connect_to>0</Reso_connect_to>
 	</Filter_slot_1>
 	<Reverb_slot_1>
-		<Send_>0</Send_>
-		<Send_Min>0</Send_Min>
-		<Send_Max>1</Send_Max>
-		<Send_Connect_To>0</Send_Connect_To>
-		<Time_>0</Time_>
-		<Time_Min>0</Time_Min>
-		<Time_Max>20</Time_Max>
-		<Time_Connect_To>0</Time_Connect_To>
+		<Send_>0.719388</Send_>
+		<Send_Min>0.464286</Send_Min>
+		<Send_Max>0.872449</Send_Max>
+		<Send_Connect_To>5</Send_Connect_To>
+		<Time_>12.2832</Time_>
+		<Time_Min>7.2449</Time_Min>
+		<Time_Max>15.3061</Time_Max>
+		<Time_Connect_To>3</Time_Connect_To>
 		<Damping_>0</Damping_>
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
@@ -63,29 +63,35 @@
 		<Ratio>10</Ratio>
 	</Compressor_slot_1>
 	<Decimator_slot_1>
-		<Rate>44100</Rate>
-		<Rate_Min>1</Rate_Min>
-		<Rate_Max>44100</Rate_Max>
-		<Rate_Connect_to>1</Rate_Connect_to>
+		<Rate>34537</Rate>
+		<Rate_Min>44100</Rate_Min>
+		<Rate_Max>38250</Rate_Max>
+		<Rate_Connect_to>5</Rate_Connect_to>
 	</Decimator_slot_1>
 	<Delay_slot_1>
-		<Send_>0.530612</Send_>
+		<Send_>0.295918</Send_>
 		<Send_Min>0</Send_Min>
 		<Send_Max>1</Send_Max>
 		<Send_Connect_To>0</Send_Connect_To>
-		<Time_>393.878</Time_>
-		<Time_Min>0</Time_Min>
-		<Time_Max>400</Time_Max>
+		<Time_>214.286</Time_>
+		<Time_Min>128.571</Time_Min>
+		<Time_Max>173.469</Time_Max>
 		<Time_Connect_To>0</Time_Connect_To>
 		<Damping_>0</Damping_>
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>
-		<feedback_>0.0255102</feedback_>
+		<feedback_>0.0561224</feedback_>
 		<feedback_Min>0</feedback_Min>
 		<feedback_Max>1</feedback_Max>
 		<feedback_COnnect_To>0</feedback_COnnect_To>
 	</Delay_slot_1>
+	<Bitcrusher_slot_1>
+		<Bits>16</Bits>
+		<Bits_Min>1</Bits_Min>
+		<Bits_Max>16</Bits_Max>
+		<Bits_Connect_To>0</Bits_Connect_To>
+	</Bitcrusher_slot_1>
 </Effects_Slot_1>
 <Effects_Slot_2>
 	<Bitcrusher_slot_1>

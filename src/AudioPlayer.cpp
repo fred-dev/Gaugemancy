@@ -9,24 +9,18 @@ int AudioPlayer::number = 0;
 void AudioPlayer::patch (){
    
     addModuleOutput("0", fader0 );
-    addModuleOutput("1", fader1 );
     
                  pitchControl >> sampler0.in_pitch();
-                 pitchControl >> sampler1.in_pitch();
     
     sampleTrig >> sampler0 >> amp0;
     envGate    >> env      >> amp0.in_mod();
-    sampleTrig >> sampler1 >> amp1;
-                  env      >> amp1.in_mod();
+
      
                 sampler0 >> amp0 >> fader0;
-                sampler1 >> amp1 >> fader1;
-                
+    
     faderControl >> dBtoLin  >> fader0.in_mod();
-                    dBtoLin  >> fader1.in_mod();
     
     sampler0.addSample( &sample, 0 );
-    sampler1.addSample( &sample, 1 );
 
     smoothControl >> env.in_attack();
     smoothControl >> env.in_release();
@@ -139,12 +133,8 @@ void AudioPlayer::loadButtonCall( bool & value ) {
         }
 
         // switch to mono if the sample has just one channel
-        if( sample.channels == 1 ){
-            sampler1.setSample( &sample, 0, 0 );
-        }else{
-            sampler1.setSample( &sample, 0, 1 );
-        }
-        
+            sampler0.setSample( &sample, 0, 0 );
+       
         loadButton = false;
         
         faderControl.setv(fvalue);

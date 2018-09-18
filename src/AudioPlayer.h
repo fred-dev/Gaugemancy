@@ -36,13 +36,10 @@ private:
     void loadSample( string path );
     
     pdsp::Sampler       sampler0;
-    pdsp::Sampler       sampler1;
     pdsp::ADSR          env;
     pdsp::Amp           amp0;
-    pdsp::Amp           amp1;
     
     pdsp::Amp           fader0;
-    pdsp::Amp           fader1;
     pdsp::DBtoLin       dBtoLin;
     pdsp::Parameter     faderControl;    
 

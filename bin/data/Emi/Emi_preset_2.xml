@@ -1,40 +1,40 @@
 <?xml version="1.0"?>
 <Slot_1>
 	<In_Length>
-		<in_length_1>177.806</in_length_1>
-		<in_length_Min_1>100</in_length_Min_1>
-		<in_length_Max_1>3000</in_length_Max_1>
-		<IL_Connect_to_1>0</IL_Connect_to_1>
+		<in_length_1>421.888</in_length_1>
+		<in_length_Min_1>803.265</in_length_Min_1>
+		<in_length_Max_1>193.061</in_length_Max_1>
+		<IL_Connect_to_1>1</IL_Connect_to_1>
 	</In_Length>
 	<density>
-		<in_density_1>0.9</in_density_1>
-		<in_density_Min_1>0.1</in_density_Min_1>
-		<in_density_Max_1>5</in_density_Max_1>
-		<ID_Connect_to_1>0</ID_Connect_to_1>
+		<in_density_1>0.239477</in_density_1>
+		<in_density_Min_1>0.403061</in_density_Min_1>
+		<in_density_Max_1>0.141327</in_density_Max_1>
+		<ID_Connect_to_1>2</ID_Connect_to_1>
 	</density>
 	<Distance_Jitter>
-		<distance_jitter_1>20</distance_jitter_1>
-		<distance_jitter_min_1>0</distance_jitter_min_1>
-		<distance_jitter_max_1>1000</distance_jitter_max_1>
-		<DJ_Connect_to_1>0</DJ_Connect_to_1>
+		<distance_jitter_1>117.985</distance_jitter_1>
+		<distance_jitter_min_1>51.0204</distance_jitter_min_1>
+		<distance_jitter_max_1>158.163</distance_jitter_max_1>
+		<DJ_Connect_to_1>3</DJ_Connect_to_1>
 	</Distance_Jitter>
 	<Pitch_Jitter>
-		<pitch_jitter_1>0</pitch_jitter_1>
-		<pitch_jitter_min_1>-200</pitch_jitter_min_1>
-		<pitch_jitter_max_1>200</pitch_jitter_max_1>
-		<PJ_Connect_to_1>0</PJ_Connect_to_1>
+		<pitch_jitter_1>4.375</pitch_jitter_1>
+		<pitch_jitter_min_1>0</pitch_jitter_min_1>
+		<pitch_jitter_max_1>7</pitch_jitter_max_1>
+		<PJ_Connect_to_1>4</PJ_Connect_to_1>
 	</Pitch_Jitter>
 	<Pitch>
-		<pitch_1>0</pitch_1>
-		<pitch_min_1>-20</pitch_min_1>
-		<pitch_max_1>20</pitch_max_1>
-		<Pitch_Connect_to_1>0</Pitch_Connect_to_1>
+		<pitch_1>-4.375</pitch_1>
+		<pitch_min_1>0</pitch_min_1>
+		<pitch_max_1>-7</pitch_max_1>
+		<Pitch_Connect_to_1>6</Pitch_Connect_to_1>
 	</Pitch>
 	<Spread>
-		<_spread_1>0</_spread_1>
+		<_spread_1>0.0733419</_spread_1>
 		<_spread_min_1>0</_spread_min_1>
-		<_spread_max_1>1</_spread_max_1>
-		<S_Connect_to_1>0</S_Connect_to_1>
+		<_spread_max_1>0.117347</_spread_max_1>
+		<S_Connect_to_1>5</S_Connect_to_1>
 	</Spread>
 	<Volume>
 		<Volume_1>1</Volume_1>
@@ -45,12 +45,9 @@
 	<Direction>
 		<grain_forwards_1>0</grain_forwards_1>
 	</Direction>
-	<Window_Type>
-		<Window_type_1>6</Window_type_1>
-		<Windowing_>Tukey</Windowing_>
-	</Window_Type>
 	<Window_Type_slot_1>
-		<Window_type_1>4</Window_type_1>
-		<Window_1>Blackman</Window_1>
+		<Window_type_1>0</Window_type_1>
+		<Window_1>Rectangular</Window_1>
+		<Windowing_1>Rectangular</Windowing_1>
 	</Window_Type_slot_1>
 </Slot_1>

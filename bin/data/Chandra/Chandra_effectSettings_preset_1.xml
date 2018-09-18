@@ -2,50 +2,10 @@
 <SLOTS>
    <SLOT_1>
       <BIT_CRUSH>1</BIT_CRUSH>
-      <DECIMATOR>0</DECIMATOR>
-      <CHORUS>1</CHORUS>
-      <FILTER>0</FILTER>
-      <DELAY>0</DELAY>
+      <DECIMATOR>1</DECIMATOR>
+      <CHORUS>0</CHORUS>
+      <FILTER>1</FILTER>
+      <DELAY>1</DELAY>
       <REVERB>1</REVERB>
    </SLOT_1>
-   <SLOT_2>
-      <BIT_CRUSH>1</BIT_CRUSH>
-      <DECIMATOR>0</DECIMATOR>
-      <CHORUS>0</CHORUS>
-      <FILTER>0</FILTER>
-      <DELAY>1</DELAY>
-      <REVERB>0</REVERB>
-   </SLOT_2>
-   <SLOT_3>
-      <BIT_CRUSH>1</BIT_CRUSH>
-      <DECIMATOR>0</DECIMATOR>
-      <CHORUS>0</CHORUS>
-      <FILTER>1</FILTER>
-      <DELAY>0</DELAY>
-      <REVERB>0</REVERB>
-   </SLOT_3>
-   <SLOT_4>
-      <BIT_CRUSH>1</BIT_CRUSH>
-      <DECIMATOR>0</DECIMATOR>
-      <CHORUS>1</CHORUS>
-      <FILTER>0</FILTER>
-      <DELAY>0</DELAY>
-      <REVERB>1</REVERB>
-   </SLOT_4>
-   <SLOT_5>
-      <BIT_CRUSH>1</BIT_CRUSH>
-      <DECIMATOR>0</DECIMATOR>
-      <CHORUS>0</CHORUS>
-      <FILTER>0</FILTER>
-      <DELAY>1</DELAY>
-      <REVERB>0</REVERB>
-   </SLOT_5>
-   <SLOT_6>
-      <BIT_CRUSH>1</BIT_CRUSH>
-      <DECIMATOR>0</DECIMATOR>
-      <CHORUS>0</CHORUS>
-      <FILTER>1</FILTER>
-      <DELAY>1</DELAY>
-      <REVERB>0</REVERB>
-   </SLOT_6>
 </SLOTS>

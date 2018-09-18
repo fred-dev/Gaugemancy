@@ -29,8 +29,9 @@ void ofApp::setup(){
 // read the audio file paths from the XML so we know what to load
 	setupFilePaths();
     
-// create the granualr objects we need and setup thier parameters from the ofParameter class
-	setupGraincloud(filePathsSet1, unitID + "_preset_1.xml");
+    // create the granualr objects we need and setup thier parameters from the ofParameter class
+    setupGraincloud(filePathsSet1, unitID + "_preset_1.xml");
+    
 #ifndef HAS_ADC
 // setup graphic envirnment variables and FBOs - latop only
 	setupGraphicEnv();
@@ -76,7 +77,7 @@ void ofApp::setup(){
 	{
 		setupNarration();
 	}
-
+   
 	//-----------------init and start audio subsystem-------------
 	engine.listDevices();
     engine.setChannels(0,2);
@@ -413,8 +414,9 @@ void ofApp::loadEffectPatchSettings()
             reverbs[i]->disconnectAll();
             reverbSends[i]->disconnectAll();
         }
-        
-        clearEffectVectors();
+        if(!firstRun){
+            clearEffectVectors();
+        }
         populateEffectVectors();
     }
     
@@ -519,573 +521,573 @@ void ofApp::loadEffectPatchSettings()
     {
         if (!effectsPatching[presetIndex-1][e].hasBitCrusher &&  !effectsPatching[presetIndex-1][e].hasDecimator &&  !effectsPatching[presetIndex-1][e].hasChorus &&  !effectsPatching[presetIndex-1][e].hasFilter &&  !effectsPatching[presetIndex-1][e].hasDelay && ! effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> compressors[e]->ch(0) >>engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> compressors[e]->ch(1) >>engine.audio_out(1);
             cout << "Patching chain with no effects" << endl;
         }
         
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e]>> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e]>> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e]>> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e]>> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e]>> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e]>> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f)  >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f)  >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f)  >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f)  >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f)  >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f)  >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f)  >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f)  >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *multiLadderFilterLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *multiLadderFilterRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_1() >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_1() >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >>  *bitCrusherLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >>  *bitCrusherRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >>  *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >>  *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->out_0()>> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->out_1()>> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0)>> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1)>> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> choruss[e]->out_0() >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> choruss[e]->out_1() >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> choruss[e]->out_0() >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> choruss[e]->out_1() >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *reverbSends[e] >> reverbs[e]->out_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *reverbSends[e] >> reverbs[e]->out_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >>  compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >>  compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *multiLadderFilterLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *multiLadderFilterRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> choruss[e]->out_0() >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> choruss[e]->out_1() >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *decimatorLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *decimatorRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher)
         {
-            cloud[e]->out_L() >> (*ampControl[e])[0] * dB(12.0f) >> *bitCrusherLs[e] >> compressors[e]->in_0() >> engine.audio_out(0);
-            cloud[e]->out_R() >> (*ampControl[e])[1] * dB(12.0f) >> *bitCrusherRs[e] >> compressors[e]->in_1() >> engine.audio_out(1);
+            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
     }
@@ -1135,6 +1137,8 @@ void ofApp::initParameters()
 	presetSwitchTimer = ofGetElapsedTimeMillis();
     
     
+
+#ifndef HAS_ADC
     windowTypeNames[0]="Rectangular";
     windowTypeNames[1]= "Triangular";
     windowTypeNames[2]= "Hann";
@@ -1146,7 +1150,6 @@ void ofApp::initParameters()
     windowTypeNames[8]= "Gaussian";
     windowTypeNames[9]= "Tukey";
     
-#ifndef HAS_ADC
     curvesNames[0] = "Direct";
     curvesNames[1] = "Power of two";
     curvesNames[2] = "Quartic";
@@ -1315,7 +1318,16 @@ void ofApp::updatePlayNarrMode()
 		narrationIsPlaying = false;
 		std::cout << "Narration is over setting up granulars" << endl;
 		narrAmpControl.setv(0.0f);
-		goToMode(grainOperationModeTranslate);
+#ifndef HAS_ADC
+goToMode(grainOperationModeTranslate);
+#endif
+#ifdef HAS_ADC
+        narration.disconnectAll();
+        engine.audio_out(0).disconnectAll();
+        engine.audio_out(1).disconnectAll();
+        goToMode(grainOperationModeTranslate);
+
+#endif
 	}
     
 #ifdef HAS_ADC
@@ -2253,7 +2265,7 @@ void ofApp::exitNarrationGlitchMode()
 #endif
 	0.0 >> narrCloud.in_position();
 	narrAmpControl.setv(0.0);
-
+    hasGlitchSource = false;
 		
 }
 
@@ -3105,8 +3117,8 @@ void ofApp::setupNarration() {
 			cout << "Loaded narration audio file from " + narrationFilePath << endl;
 			shouldTriggerNarrationPlay = true;
 
-			narration.out("0") >> engine.audio_out(0);
-			narration.out("0") >> engine.audio_out(1);
+			narration >> engine.audio_out(0);
+			narration >> engine.audio_out(1);
 		}
 		else {
 			cout << "Error loading narration audio file" << endl;
@@ -3120,22 +3132,11 @@ void ofApp::setupNarrationGrain()
 {
 // called from setupNarration, it sets up the granular and its settings form XML for the narration (if it has it)
 	cout << "setup narration grain" << endl;
-	narrGrainVoices = narrCloud.getVoicesNum();
-	// sampleData is an instance of pdsp::SampleBuffer
-	narrSampleData.setVerbose(true);
-	narrSampleData.load(narrationFilePath);
-	narrCloud.setWindowType(pdsp::Triangular); // select the shape of the grain envelope
-											   // available windows: Rectangular, Triangular, Hann, Hamming, Blackman, BlackmanHarris, SineWindow, Tukey, Welch
-	narrCloud.setSample(&narrSampleData); // give to the pdsp::GrainCloud the pointer to the sample
-
 	narrPanel.setup("Narration", filePathPrefix + unitID + "_narr.xml", 100, 100); // Seting up this GUI module and adding the parameters to it
-    
-  
-    
     narrPanel.add(narr_window_type_id.set("Window type", 0, 0, 9));
 #ifndef HAS_ADC
     narr_window_type_id.addListener(this, &ofApp::onNarrWindowTypeChanged);
-    narrPanel.add(narr_window_type_name.set("Window type", "default"));
+    narrPanel.add(narr_window_type_name.set("Window name", "default"));
 #endif
 	narrPanel.add(narr_in_length.set("in length", 500, 10, 3000));
 	narrPanel.add(narr_in_density.set("in density", 0.9, 0.1, 1.0));
@@ -3147,6 +3148,55 @@ void ofApp::setupNarrationGrain()
 
 // load settings from the XML
 	narrPanel.loadFromFile(filePathPrefix + unitID + "_narr.xml");
+    
+    
+    narrGrainVoices = narrCloud.getVoicesNum();
+    // sampleData is an instance of pdsp::SampleBuffer
+    narrSampleData.setVerbose(true);
+    narrSampleData.load(narrationFilePath);
+    switch (narr_window_type_id) {
+    case 0:
+        narrCloud.setWindowType(pdsp::Rectangular);
+        cout << "Narration using window type: Rectangular" << endl;
+        break;
+    case 1:
+        narrCloud.setWindowType(pdsp::Triangular);
+        cout << "Narration using window type: Triangular" << endl;
+        break;
+    case 2:
+        narrCloud.setWindowType(pdsp::Hann);
+        cout << "Narration using window type: Hann" << endl;
+        break;
+    case 3:
+        narrCloud.setWindowType(pdsp::Hamming);
+        cout << "Narration using window type: Hamming" << endl;
+        break;
+    case 4:
+        narrCloud.setWindowType(pdsp::Blackman);
+        cout << "Narration using window type: Blackman" << endl;
+        break;
+    case 5:
+        narrCloud.setWindowType(pdsp::BlackmanHarris);
+        cout << "Narration using window type: BlackmanHarris" << endl;
+        break;
+    case 6:
+        narrCloud.setWindowType(pdsp::SineWindow);
+        cout << "Narration using window type: SineWindow" << endl;
+        break;
+    case 7:
+        narrCloud.setWindowType(pdsp::Welch);
+        cout << "Narration using window type: Welch" << endl;
+        break;
+    case 8:
+        narrCloud.setWindowType(pdsp::Gaussian);
+        cout << "Narration using window type: Gaussian" << endl;
+        break;
+    case 9:
+        narrCloud.setWindowType(pdsp::Tukey);
+        cout << "Narration using window type: Tukey" << endl;
+        break;
+    }
+    narrCloud.setSample(&narrSampleData); // give to the pdsp::GrainCloud the pointer to the sample
 
 // prepare narration granular with the settings from the parameters
 	0.00f >> narrPosX >> narrCloud.in_position();
@@ -3175,8 +3225,8 @@ void ofApp::setupNarrationGrain()
 	narrAmpControl.enableSmoothing(50.0f);
 	narrAmpControl.setv(0.0f);
 
-	narrCloud.out_L() >> narrAmpControl[0] * dB(12.0f) >> engine.audio_out(0);
-	narrCloud.out_R() >> narrAmpControl[1] * dB(12.0f) >> engine.audio_out(1);
+	narrCloud.ch(0) >> narrAmpControl[0]  >> engine.audio_out(0);
+	narrCloud.ch(1) >> narrAmpControl[1]  >> engine.audio_out(1);
 }
 
 #ifndef HAS_ADC
@@ -3289,7 +3339,7 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 // this is the loader for files and parameters for the main granular system, single and multi
 #ifdef HAS_ADC
 	ofSleepMillis(200);
-    redLed.setval_gpio("1");
+    //redLed.setval_gpio("1");
 
 #endif // HAS_ADC
     loadEffectPatchSettings();
@@ -3314,7 +3364,7 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
             _windowTypeGroup_group[i].add(_window_type_id[i].set("Window type " + ofToString(i + 1), 0, 0, 9));
 #ifndef HAS_ADC
             _window_type_id[i].addListener(this, &ofApp::onWindowTypeChanged);
-            _windowTypeGroup_group[i].add(_window_type_name[i].set("Window "+ ofToString(i + 1), "default"));
+            _windowTypeGroup_group[i].add(_window_type_name[i].set("Windowing "+ ofToString(i + 1), "default"));
             _windowTypeGroup_group[i].setName("Window Type slot " + ofToString(i + 1));
 #endif
             samplePanels[i].add(_windowTypeGroup_group[i]);
@@ -3390,51 +3440,51 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 
         switch (_window_type_id[i]) {
             case 0:
-                cloud[i]->setWindowType(pdsp::Rectangular, 2048);
+                cloud[i]->setWindowType(pdsp::Rectangular);
                 cout << "Slot " + ofToString(i +1) + " using window type: Rectangular" << endl;
                 break;
             case 1:
-                cloud[i]->setWindowType(pdsp::Triangular, 2048);
+                cloud[i]->setWindowType(pdsp::Triangular);
                 cout << "Slot " + ofToString(i +1) + " using window type: Triangular" << endl;
                 break;
             case 2:
-                cloud[i]->setWindowType(pdsp::Hann, 2048);
+                cloud[i]->setWindowType(pdsp::Hann);
                 cout << "Slot " + ofToString(i +1) + " using window type: Hann" << endl;
                 break;
             case 3:
-                cloud[i]->setWindowType(pdsp::Hamming, 2048);
+                cloud[i]->setWindowType(pdsp::Hamming);
                 cout << "Slot " + ofToString(i +1) + " using window type: Hamming" << endl;
                 break;
             case 4:
-                cloud[i]->setWindowType(pdsp::Blackman, 2048);
+                cloud[i]->setWindowType(pdsp::Blackman);
                 cout << "Slot " + ofToString(i +1) + " using window type: Blackman" << endl;
                 break;
             case 5:
-                cloud[i]->setWindowType(pdsp::BlackmanHarris, 2048);
+                cloud[i]->setWindowType(pdsp::BlackmanHarris);
                 cout << "Slot " + ofToString(i +1) + " using window type: BlackmanHarris" << endl;
                 break;
             case 6:
-                cloud[i]->setWindowType(pdsp::SineWindow, 2048);
+                cloud[i]->setWindowType(pdsp::SineWindow);
                 cout << "Slot " + ofToString(i +1) + " using window type: SineWindow" << endl;
                 break;
             case 7:
-                cloud[i]->setWindowType(pdsp::Welch, 2048);
+                cloud[i]->setWindowType(pdsp::Welch);
                 cout << "Slot " + ofToString(i +1) + " using window type: Welch" << endl;
                 break;
             case 8:
-                cloud[i]->setWindowType(pdsp::Gaussian, 2048);
+                cloud[i]->setWindowType(pdsp::Gaussian);
                 cout << "Slot " + ofToString(i +1) + " using window type: Gaussian" << endl;
                 break;
             case 9:
-                cloud[i]->setWindowType(pdsp::Tukey, 2048);
+                cloud[i]->setWindowType(pdsp::Tukey);
                 cout << "Slot " + ofToString(i +1) + " using window type: Tukey" << endl;
                 break;
         }
 
-		
+#ifndef HAS_ADC
         _window_type_name[i] = windowTypeNames[_window_type_id[i]];
+#endif
 
-  
 
         // apply all base settings to the grainular objects
 			0.00f >> (*posX[i]) >> cloud[i]->in_position();
@@ -3452,8 +3502,8 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 				//ampControl[i]->enableSmoothing(50.0f);
 				ampControl[i]->setv(0.0f);
 
-//				cloud[i]->out_L() >> (*ampControl[i])[0] * dB(12.0f) >> engine.audio_out(0);
-//				cloud[i]->out_R() >> (*ampControl[i])[1] * dB(12.0f) >> engine.audio_out(1);
+//				cloud[i]->ch(0) >> (*ampControl[i])[0]  >> engine.audio_out(0);
+//				cloud[i]->ch(1) >> (*ampControl[i])[1]  >> engine.audio_out(1);
 #ifndef HAS_ADC
             // create the sizes and positions of the waveform displays and interaction areas of the granulars
 				//ui values-------------------------------
@@ -3515,7 +3565,7 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 #else
     // waiting a bit on the raspberry pi as it was flipping out otherwsie
 	ofSleepMillis(200);
-    redLed.setval_gpio("1");
+    redLed.setval_gpio(ofToString(presetIndex-1));
 #endif // HAS_ADC
 	
 }
@@ -3523,92 +3573,92 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 void ofApp::onNarrWindowTypeChanged(int & windowType){
     switch (narr_window_type_id) {
         case 0:
-            narrCloud.setWindowType(pdsp::Rectangular, 2048);
+            narrCloud.setWindowType(pdsp::Rectangular);
             cout << "Narration using window type: Rectangular" << endl;
             break;
         case 1:
-            narrCloud.setWindowType(pdsp::Triangular, 2048);
+            narrCloud.setWindowType(pdsp::Triangular);
             cout << "Narration using window type: Triangular" << endl;
             break;
         case 2:
-            narrCloud.setWindowType(pdsp::Hann, 2048);
+            narrCloud.setWindowType(pdsp::Hann);
             cout << "Narration using window type: Hann" << endl;
             break;
         case 3:
-            narrCloud.setWindowType(pdsp::Hamming, 2048);
+            narrCloud.setWindowType(pdsp::Hamming);
             cout << "Narration using window type: Hamming" << endl;
             break;
         case 4:
-            narrCloud.setWindowType(pdsp::Blackman, 2048);
+            narrCloud.setWindowType(pdsp::Blackman);
             cout << "Narration using window type: Blackman" << endl;
             break;
         case 5:
-            narrCloud.setWindowType(pdsp::BlackmanHarris, 2048);
+            narrCloud.setWindowType(pdsp::BlackmanHarris);
             cout << "Narration using window type: BlackmanHarris" << endl;
             break;
         case 6:
-            narrCloud.setWindowType(pdsp::SineWindow, 2048);
+            narrCloud.setWindowType(pdsp::SineWindow);
             cout << "Narration using window type: SineWindow" << endl;
             break;
         case 7:
-            narrCloud.setWindowType(pdsp::Welch, 2048);
+            narrCloud.setWindowType(pdsp::Welch);
             cout << "Narration using window type: Welch" << endl;
             break;
         case 8:
-            narrCloud.setWindowType(pdsp::Gaussian, 2048);
+            narrCloud.setWindowType(pdsp::Gaussian);
             cout << "Narration using window type: Gaussian" << endl;
             break;
         case 9:
-            narrCloud.setWindowType(pdsp::Tukey, 2048);
+            narrCloud.setWindowType(pdsp::Tukey);
             cout << "Narration using window type: Tukey" << endl;
             break;
     }
-
+#ifndef HAS_ADC
     narr_window_type_name = windowTypeNames[narr_window_type_id];
-
+#endif
 }
 
 void ofApp::onWindowTypeChanged(int & windowType){
     for (int i =0; i<numberOfSlots; i++) {
         switch (_window_type_id[i]) {
             case 0:
-                cloud[i]->setWindowType(pdsp::Rectangular, 2048);
+                cloud[i]->setWindowType(pdsp::Rectangular);
                 cout << "Slot " + ofToString(i +1) + " using window type: Rectangular" << endl;
                 break;
             case 1:
-                cloud[i]->setWindowType(pdsp::Triangular, 2048);
+                cloud[i]->setWindowType(pdsp::Triangular);
                 cout << "Slot " + ofToString(i +1) + " using window type: Triangular" << endl;
                 break;
             case 2:
-                cloud[i]->setWindowType(pdsp::Hann, 2048);
+                cloud[i]->setWindowType(pdsp::Hann);
                 cout << "Slot " + ofToString(i +1) + " using window type: Hann" << endl;
                 break;
             case 3:
-                cloud[i]->setWindowType(pdsp::Hamming, 2048);
+                cloud[i]->setWindowType(pdsp::Hamming);
                 cout << "Slot " + ofToString(i +1) + " using window type: Hamming" << endl;
                 break;
             case 4:
-                cloud[i]->setWindowType(pdsp::Blackman, 2048);
+                cloud[i]->setWindowType(pdsp::Blackman);
                 cout << "Slot " + ofToString(i +1) + " using window type: Blackman" << endl;
                 break;
             case 5:
-                cloud[i]->setWindowType(pdsp::BlackmanHarris, 2048);
+                cloud[i]->setWindowType(pdsp::BlackmanHarris);
                 cout << "Slot " + ofToString(i +1) + " using window type: BlackmanHarris" << endl;
                 break;
             case 6:
-                cloud[i]->setWindowType(pdsp::SineWindow, 2048);
+                cloud[i]->setWindowType(pdsp::SineWindow);
                 cout << "Slot " + ofToString(i +1) + " using window type: SineWindow" << endl;
                 break;
             case 7:
-                cloud[i]->setWindowType(pdsp::Welch, 2048);
+                cloud[i]->setWindowType(pdsp::Welch);
                 cout << "Slot " + ofToString(i +1) + " using window type: Welch" << endl;
                 break;
             case 8:
-                cloud[i]->setWindowType(pdsp::Gaussian, 2048);
+                cloud[i]->setWindowType(pdsp::Gaussian);
                 cout << "Slot " + ofToString(i +1) + " using window type: Gaussian" << endl;
                 break;
             case 9:
-                cloud[i]->setWindowType(pdsp::Tukey, 2048);
+                cloud[i]->setWindowType(pdsp::Tukey);
                 cout << "Slot " + ofToString(i +1) + " using window type: Tukey" << endl;
                 break;
         }
@@ -3903,6 +3953,7 @@ void ofApp::populateEffectVectors(){
         
         //------------chorus
         pdsp::DimensionChorus* tmp_chorus = new pdsp::DimensionChorus();
+       
         choruss.push_back(tmp_chorus);
         
         EFFChorusUnit tempeffChorus;
