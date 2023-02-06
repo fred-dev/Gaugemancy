@@ -27,7 +27,7 @@
 		<Reso_Connect_To>0</Reso_Connect_To>
 	</Filter_slot_1>
 	<Reverb_slot_1>
-		<Send_>0.497688</Send_>
+		<Send_>0.0816327</Send_>
 		<Send_Min>0.497688</Send_Min>
 		<Send_Max>0.793607</Send_Max>
 		<Send_Connect_To>1</Send_Connect_To>
@@ -57,12 +57,13 @@
 		<Mod_amount_Connect_To>0</Mod_amount_Connect_To>
 	</Reverb_slot_1>
 	<Compressor_slot_1>
-		<Threshold>-24.2347</Threshold>
+		<Threshold>-18.1122</Threshold>
 		<GR_meter>0</GR_meter>
 		<Attack__MS_>10</Attack__MS_>
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>1</In_gain>
 	</Compressor_slot_1>
 	<Bitcrusher_slot_1>
 		<Bits>16</Bits>
@@ -103,12 +104,13 @@
 		<Bits_Connect_To>0</Bits_Connect_To>
 	</Bitcrusher_slot_1>
 	<Compressor_slot_2>
-		<Threshold>-29.5918</Threshold>
+		<Threshold>-15.8163</Threshold>
 		<GR_meter>0</GR_meter>
 		<Attack__MS_>10</Attack__MS_>
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>1</In_gain>
 	</Compressor_slot_2>
 	<Bitcrusher_slot_2>
 		<Bits>16</Bits>
@@ -129,7 +131,7 @@
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>
-		<feedback_>0.576531</feedback_>
+		<feedback_>0.178571</feedback_>
 		<feedback_Min>0</feedback_Min>
 		<feedback_Max>1</feedback_Max>
 		<feedback_COnnect_To>0</feedback_COnnect_To>
@@ -210,6 +212,7 @@
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>1</In_gain>
 	</Compressor_slot_3>
 	<Bitcrusher_slot_3>
 		<Bits>16</Bits>
@@ -248,11 +251,11 @@
 		<Delay_connect_to>0</Delay_connect_to>
 	</Chorus_slot_3>
 	<Delay_slot_3>
-		<Send_>0</Send_>
+		<Send_>0.69898</Send_>
 		<Send_Min>0</Send_Min>
 		<Send_Max>1</Send_Max>
 		<Send_Connect_To>0</Send_Connect_To>
-		<Time_>0</Time_>
+		<Time_>185.714</Time_>
 		<Time_Min>0</Time_Min>
 		<Time_Max>400</Time_Max>
 		<Time_Connect_To>0</Time_Connect_To>
@@ -260,13 +263,13 @@
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>
-		<feedback_>0</feedback_>
+		<feedback_>0.255102</feedback_>
 		<feedback_Min>0</feedback_Min>
 		<feedback_Max>1</feedback_Max>
 		<feedback_COnnect_To>0</feedback_COnnect_To>
 	</Delay_slot_3>
 	<Reverb_slot_3>
-		<Send_>0</Send_>
+		<Send_>0.25</Send_>
 		<Send_Min>0</Send_Min>
 		<Send_Max>1</Send_Max>
 		<Send_Connect_To>0</Send_Connect_To>
@@ -304,12 +307,13 @@
 		<Bits_Connect_To>0</Bits_Connect_To>
 	</Bitcrusher_slot_3>
 	<Compressor_slot_4>
-		<Threshold>-44.3878</Threshold>
+		<Threshold>-9.43878</Threshold>
 		<GR_meter>0</GR_meter>
 		<Attack__MS_>10</Attack__MS_>
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>1</In_gain>
 	</Compressor_slot_4>
 	<Bitcrusher_slot_4>
 		<Bits>16</Bits>
@@ -412,6 +416,7 @@
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>2.34694</In_gain>
 	</Compressor_slot_5>
 	<Bitcrusher_slot_5>
 		<Bits>16</Bits>
@@ -469,7 +474,7 @@
 		<Reso_connect_to>0</Reso_connect_to>
 	</Filter_slot_5>
 	<Reverb_slot_5>
-		<Send_>0</Send_>
+		<Send_>0.158163</Send_>
 		<Send_Min>0</Send_Min>
 		<Send_Max>1</Send_Max>
 		<Send_Connect_To>0</Send_Connect_To>
@@ -507,12 +512,13 @@
 		<Bits_Connect_To>0</Bits_Connect_To>
 	</Bitcrusher_slot_5>
 	<Compressor_slot_6>
-		<Threshold>-8.67347</Threshold>
+		<Threshold>-12.2449</Threshold>
 		<GR_meter>0</GR_meter>
 		<Attack__MS_>10</Attack__MS_>
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>1</In_gain>
 	</Compressor_slot_6>
 	<Bitcrusher_slot_6>
 		<Bits>16</Bits>
@@ -543,7 +549,7 @@
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>
-		<feedback_>0</feedback_>
+		<feedback_>0.0867347</feedback_>
 		<feedback_Min>0</feedback_Min>
 		<feedback_Max>1</feedback_Max>
 		<feedback_COnnect_To>0</feedback_COnnect_To>
@@ -572,15 +578,15 @@
 		<Delay_Connect_To>0</Delay_Connect_To>
 	</Chorus_slot_6>
 	<Reverb_slot_6>
-		<Send_>0</Send_>
+		<Send_>0.617347</Send_>
 		<Send_Min>0</Send_Min>
 		<Send_Max>1</Send_Max>
 		<Send_Connect_To>0</Send_Connect_To>
-		<Time_>0</Time_>
+		<Time_>6.22449</Time_>
 		<Time_Min>0</Time_Min>
 		<Time_Max>20</Time_Max>
-		<Time_Connect_To>0</Time_Connect_To>
-		<Damping_>0</Damping_>
+		<Time_Connect_To>1</Time_Connect_To>
+		<Damping_>0.107143</Damping_>
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>

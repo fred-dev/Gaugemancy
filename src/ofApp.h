@@ -16,12 +16,12 @@
 
 
 // stupid code to set the HAS_ADC define only if not on windows or mac
-#ifndef TARGET_OSX
-#ifndef TARGET_WIN32
-#define HAS_ADC
-#else
-#endif
-#endif
+//#ifndef TARGET_OSX
+//#ifndef TARGET_WIN32
+//#define HAS_ADC
+//#else
+//#endif
+//#endif
 
 // we only need this for windows and mac
 #ifndef HAS_ADC
@@ -40,7 +40,7 @@
 
 #define NUMBER_OF_SENSORS 6
 #define NUMBER_OF_EFFECTS 6
-#define NUMBER_OF_PRESETS 2
+#define NUMBER_OF_PRESETS 4
 
 // these are the different modes or scenes, these defines are used to make things easier to read, they are used to set the operationMode variable
 
@@ -238,8 +238,11 @@ class ofApp : public ofBaseApp{
 		void updateParametersFromValuesMulti();
 
 		void getAccumulatedPressure();
+        void UpdatePlayheadWithTimer();
+        float timeAdvanceInterval[NUMBER_OF_PRESETS], positionFromTime;
+        bool timeUpdateFromKey;
 
-		void applyDynamicValuesToParameters(int k, std::vector<ofParameter<int>> connectTo, int v, std::vector<ofParameter<float>> parameter, std::vector<ofParameter<float>> parameterMin, std::vector<ofParameter<float>> parameterMax, string paramName);
+		void applyDynamicValuesToParameters(int &k, std::vector<ofParameter<int>> connectTo, int v, std::vector<ofParameter<float>> parameter, std::vector<ofParameter<float>> parameterMin, std::vector<ofParameter<float>> parameterMax, string paramName);
 
 		void switchPresets();
 		int presetSwitchTimer;
@@ -267,9 +270,14 @@ class ofApp : public ofBaseApp{
 		ofxXmlSettings usernameXML;
 		ofxXmlSettings effectsPatchXML;
 
-		
         std::vector<string> filePathsSet[NUMBER_OF_PRESETS];
         std::vector<string> fileNamesSet[NUMBER_OF_PRESETS];
+//    
+//		std::vector<string> filePathsSet1;
+//		std::vector<string> fileNamesSet1;
+//
+//		std::vector<string> filePathsSet2;
+//		std::vector<string> fileNamesSet2;
 
 		//OP_MODE_WAIT_FOR_NARRATION
 		void setupNarration();
@@ -306,6 +314,11 @@ class ofApp : public ofBaseApp{
 		pdsp::ADSR              narrAmpEnv;
 		pdsp::Amp               narrVoiceAmpL;
 		pdsp::Amp               vnarrViceAmpR;
+    
+        pdsp::Amp narrOutControlL;
+        pdsp::Amp narrOutControlR;
+        EFFCompressorUnit narrCompressorControls;
+        pdsp::Compressor narrOutCompressor;
 
 
 		void controlOnNarr(int x, int y);
@@ -358,15 +371,16 @@ class ofApp : public ofBaseApp{
 		std::vector<ofxSampleBufferPlotter*>  waveformGraphics;
 #endif
 		std::vector<int>					grainVoices;
-		std::vector<shared_ptr<pdsp::SampleBuffer>>		sampleData;
-		std::vector<shared_ptr<pdsp::GrainCloud>>		cloud;
-		std::vector<shared_ptr<pdsp::ParameterAmp>> ampControl;
+		std::vector<pdsp::SampleBuffer*>		sampleData;
+		std::vector<pdsp::GrainCloud*>		cloud;
+		std::vector<pdsp::ParameterAmp*> ampControl;
+        std::vector<pdsp::Amp*> outputAmpL;
+        std::vector<pdsp::Amp*> outputAmpR;
 
-
-		std::vector<shared_ptr<pdsp::PatchNode>> posX;
+		std::vector<pdsp::PatchNode*> posX;
 
 		//std::vector<pdsp::PatchNode>		posX;
-		std::vector<shared_ptr<pdsp::PatchNode>> jitY;
+		std::vector<pdsp::PatchNode*> jitY;
 
 		//std::vector<pdsp::PatchNode>		jitY;
 
@@ -381,7 +395,7 @@ class ofApp : public ofBaseApp{
 		std::vector<int>					controlX;
 		std::vector<int>					controlY;
 
-        std::vector<shared_ptr<ofxPanel>>			samplePanels;
+    std::vector<shared_ptr<ofxPanel>>				samplePanels;
     
         std::vector<ofParameterGroup>		_windowTypeGroup_group;
         std::vector<ofParameter<int>>       _window_type_id;
@@ -528,9 +542,9 @@ class ofApp : public ofBaseApp{
         bool hasReverb;
     };
     
-    std::vector<shared_ptr<ofxPanel>>			effectsPanels;
+    std::vector<shared_ptr<ofxPanel>>				effectsPanels;
     
-        std::vector<std::vector<ChannelEffects>> effectsPatching;
+    std::vector<std::vector<ChannelEffects>> effectsPatching;
     
     void loadEffectPatchSettings();
     

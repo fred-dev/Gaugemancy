@@ -5,7 +5,7 @@
 		<Windowing_1>Rectangular</Windowing_1>
 	</Window_Type_slot_1>
 	<In_Length>
-		<in_length_1>726.99</in_length_1>
+		<in_length_1>1642.3</in_length_1>
 		<in_length_Min_1>604.949</in_length_Min_1>
 		<in_length_Max_1>193.061</in_length_Max_1>
 		<IL_Connect_to_1>0</IL_Connect_to_1>
@@ -17,14 +17,14 @@
 		<ID_Connect_to_1>0</ID_Connect_to_1>
 	</density>
 	<Distance_Jitter>
-		<distance_jitter_1>127.551</distance_jitter_1>
+		<distance_jitter_1>377.551</distance_jitter_1>
 		<distance_jitter_min_1>51.0204</distance_jitter_min_1>
 		<distance_jitter_max_1>158.163</distance_jitter_max_1>
 		<DJ_Connect_to_1>0</DJ_Connect_to_1>
 	</Distance_Jitter>
 	<Pitch_Jitter>
 		<pitch_jitter_1>4.08163</pitch_jitter_1>
-		<pitch_jitter_min_1>0</pitch_jitter_min_1>
+		<pitch_jitter_min_1>-6.12245</pitch_jitter_min_1>
 		<pitch_jitter_max_1>7</pitch_jitter_max_1>
 		<PJ_Connect_to_1>0</PJ_Connect_to_1>
 	</Pitch_Jitter>
@@ -35,7 +35,7 @@
 		<Pitch_Connect_to_1>0</Pitch_Connect_to_1>
 	</Pitch>
 	<Spread>
-		<_spread_1>0.0357143</_spread_1>
+		<_spread_1>0.137755</_spread_1>
 		<_spread_min_1>0</_spread_min_1>
 		<_spread_max_1>0.117347</_spread_max_1>
 		<S_Connect_to_1>0</S_Connect_to_1>
@@ -50,7 +50,7 @@
 		<grain_forwards_1>0.0408163</grain_forwards_1>
 	</Direction>
 	<Position>
-		<Play_Position_1>0.0234375</Play_Position_1>
+		<Play_Position_1>0.0351562</Play_Position_1>
 		<Play_Position_min_1>0</Play_Position_min_1>
 		<Play_Position_max_1>1</Play_Position_max_1>
 		<P_Connect_to_1>1</P_Connect_to_1>
@@ -80,7 +80,7 @@
 		<DJ_Connect_to_2>0</DJ_Connect_to_2>
 	</Distance_Jitter>
 	<Pitch_Jitter>
-		<pitch_jitter_2>6.12245</pitch_jitter_2>
+		<pitch_jitter_2>38.7755</pitch_jitter_2>
 		<pitch_jitter_min_2>-200</pitch_jitter_min_2>
 		<pitch_jitter_max_2>200</pitch_jitter_max_2>
 		<PJ_Connect_to_2>0</PJ_Connect_to_2>
@@ -115,11 +115,11 @@
 </Slot_2>
 <Slot_3>
 	<Window_Type_slot_3>
-		<Window_type_3>3</Window_type_3>
-		<Windowing_3>Hamming</Windowing_3>
+		<Window_type_3>1</Window_type_3>
+		<Windowing_3>Triangular</Windowing_3>
 	</Window_Type_slot_3>
 	<In_Length>
-		<in_length_3>818.52</in_length_3>
+		<in_length_3>437.143</in_length_3>
 		<in_length_Min_3>100</in_length_Min_3>
 		<in_length_Max_3>3000</in_length_Max_3>
 		<IL_Connect_to_3>0</IL_Connect_to_3>
@@ -131,7 +131,7 @@
 		<ID_Connect_to_3>0</ID_Connect_to_3>
 	</density>
 	<Distance_Jitter>
-		<distance_jitter_3>96.9388</distance_jitter_3>
+		<distance_jitter_3>301.02</distance_jitter_3>
 		<distance_jitter_min_3>0</distance_jitter_min_3>
 		<distance_jitter_max_3>1000</distance_jitter_max_3>
 		<DJ_Connect_to_3>0</DJ_Connect_to_3>
@@ -164,9 +164,9 @@
 		<grain_forwards_3>0</grain_forwards_3>
 	</Direction>
 	<Position>
-		<Play_Position_3>0.0234375</Play_Position_3>
+		<Play_Position_3>0.028699</Play_Position_3>
 		<Play_Position_min_3>0</Play_Position_min_3>
-		<Play_Position_max_3>1</Play_Position_max_3>
+		<Play_Position_max_3>0.816327</Play_Position_max_3>
 		<P_Connect_to_3>3</P_Connect_to_3>
 	</Position>
 </Slot_3>
@@ -176,7 +176,7 @@
 		<Windowing_4>SineWindow</Windowing_4>
 	</Window_Type_slot_4>
 	<In_Length>
-		<in_length_4>1703.32</in_length_4>
+		<in_length_4>650.714</in_length_4>
 		<in_length_Min_4>100</in_length_Min_4>
 		<in_length_Max_4>3000</in_length_Max_4>
 		<IL_Connect_to_4>0</IL_Connect_to_4>
@@ -194,10 +194,10 @@
 		<DJ_Connect_to_4>0</DJ_Connect_to_4>
 	</Distance_Jitter>
 	<Pitch_Jitter>
-		<pitch_jitter_4>0</pitch_jitter_4>
-		<pitch_jitter_min_4>-200</pitch_jitter_min_4>
-		<pitch_jitter_max_4>200</pitch_jitter_max_4>
-		<PJ_Connect_to_4>0</PJ_Connect_to_4>
+		<pitch_jitter_4>0.645727</pitch_jitter_4>
+		<pitch_jitter_min_4>0</pitch_jitter_min_4>
+		<pitch_jitter_max_4>18.3673</pitch_jitter_max_4>
+		<PJ_Connect_to_4>4</PJ_Connect_to_4>
 	</Pitch_Jitter>
 	<Pitch>
 		<pitch_4>0</pitch_4>
@@ -221,7 +221,7 @@
 		<grain_forwards_4>0</grain_forwards_4>
 	</Direction>
 	<Position>
-		<Play_Position_4>0.0234375</Play_Position_4>
+		<Play_Position_4>0.0351562</Play_Position_4>
 		<Play_Position_min_4>0</Play_Position_min_4>
 		<Play_Position_max_4>1</Play_Position_max_4>
 		<P_Connect_to_4>4</P_Connect_to_4>
@@ -275,10 +275,10 @@
 		<V_Connect_to_5>5</V_Connect_to_5>
 	</Volume>
 	<Direction>
-		<grain_forwards_5>-0.295918</grain_forwards_5>
+		<grain_forwards_5>-1</grain_forwards_5>
 	</Direction>
 	<Position>
-		<Play_Position_5>0.0234375</Play_Position_5>
+		<Play_Position_5>0.0351562</Play_Position_5>
 		<Play_Position_min_5>0</Play_Position_min_5>
 		<Play_Position_max_5>1</Play_Position_max_5>
 		<P_Connect_to_5>5</P_Connect_to_5>
@@ -286,8 +286,8 @@
 </Slot_5>
 <Slot_6>
 	<Window_Type_slot_6>
-		<Window_type_6>6</Window_type_6>
-		<Windowing_6>SineWindow</Windowing_6>
+		<Window_type_6>2</Window_type_6>
+		<Windowing_6>Hann</Windowing_6>
 	</Window_Type_slot_6>
 	<In_Length>
 		<in_length_6>772.755</in_length_6>
@@ -308,19 +308,19 @@
 		<DJ_Connect_to_6>0</DJ_Connect_to_6>
 	</Distance_Jitter>
 	<Pitch_Jitter>
-		<pitch_jitter_6>0</pitch_jitter_6>
-		<pitch_jitter_min_6>-200</pitch_jitter_min_6>
-		<pitch_jitter_max_6>200</pitch_jitter_max_6>
-		<PJ_Connect_to_6>0</PJ_Connect_to_6>
+		<pitch_jitter_6>2.04082</pitch_jitter_6>
+		<pitch_jitter_min_6>-2.04082</pitch_jitter_min_6>
+		<pitch_jitter_max_6>8.16327</pitch_jitter_max_6>
+		<PJ_Connect_to_6>6</PJ_Connect_to_6>
 	</Pitch_Jitter>
 	<Pitch>
 		<pitch_6>0</pitch_6>
-		<pitch_min_6>-20</pitch_min_6>
-		<pitch_max_6>20</pitch_max_6>
-		<Pitch_Connect_to_6>0</Pitch_Connect_to_6>
+		<pitch_min_6>-2.2449</pitch_min_6>
+		<pitch_max_6>1.83673</pitch_max_6>
+		<Pitch_Connect_to_6>6</Pitch_Connect_to_6>
 	</Pitch>
 	<Spread>
-		<_spread_6>0.107143</_spread_6>
+		<_spread_6>0.158163</_spread_6>
 		<_spread_min_6>0</_spread_min_6>
 		<_spread_max_6>1</_spread_max_6>
 		<S_Connect_to_6>0</S_Connect_to_6>

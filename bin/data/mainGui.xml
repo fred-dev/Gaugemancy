@@ -4,17 +4,17 @@
 	<Compression_Limit>1024</Compression_Limit>
 	<Simulated_input>0</Simulated_input>
 	<Compression_simulation_1>0</Compression_simulation_1>
-	<Include_sensor_1>0</Include_sensor_1>
+	<Include_sensor_1>1</Include_sensor_1>
 	<Compression_simulation_2>0</Compression_simulation_2>
-	<Include_sensor_2>0</Include_sensor_2>
+	<Include_sensor_2>1</Include_sensor_2>
 	<Compression_simulation_3>0</Compression_simulation_3>
 	<Include_sensor_3>1</Include_sensor_3>
 	<Compression_simulation_4>0</Compression_simulation_4>
-	<Include_sensor_4>0</Include_sensor_4>
+	<Include_sensor_4>1</Include_sensor_4>
 	<Compression_simulation_5>0</Compression_simulation_5>
-	<Include_sensor_5>0</Include_sensor_5>
+	<Include_sensor_5>1</Include_sensor_5>
 	<Compression_simulation_6>0</Compression_simulation_6>
-	<Include_sensor_6>0</Include_sensor_6>
+	<Include_sensor_6>1</Include_sensor_6>
 	<Run_Simulation>0</Run_Simulation>
 	<Curve_type>0</Curve_type>
 	<Cam_distance>1400</Cam_distance>

@@ -61,6 +61,7 @@
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>1.9898</In_gain>
 	</Compressor_slot_1>
 	<Bitcrusher_slot_1>
 		<Bits>16</Bits>
@@ -75,7 +76,7 @@
 		<Rate_Connect_to>0</Rate_Connect_to>
 	</Decimator_slot_1>
 	<Delay_slot_1>
-		<Send_>0.00100288</Send_>
+		<Send_>0.158163</Send_>
 		<Send_Min>0</Send_Min>
 		<Send_Max>0.171158</Send_Max>
 		<Send_Connect_To>3</Send_Connect_To>
@@ -101,12 +102,13 @@
 		<Bits_Connect_To>0</Bits_Connect_To>
 	</Bitcrusher_slot_1>
 	<Compressor_slot_2>
-		<Threshold>-5.61224</Threshold>
+		<Threshold>-20.6633</Threshold>
 		<GR_meter>0</GR_meter>
 		<Attack__MS_>10</Attack__MS_>
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>0.663265</In_gain>
 	</Compressor_slot_2>
 	<Bitcrusher_slot_2>
 		<Bits>16</Bits>
@@ -207,6 +209,7 @@
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>4.38775</In_gain>
 	</Compressor_slot_3>
 	<Bitcrusher_slot_3>
 		<Bits>16</Bits>
@@ -245,11 +248,11 @@
 		<Delay_connect_to>0</Delay_connect_to>
 	</Chorus_slot_3>
 	<Delay_slot_3>
-		<Send_>0</Send_>
+		<Send_>0.72449</Send_>
 		<Send_Min>0</Send_Min>
 		<Send_Max>1</Send_Max>
 		<Send_Connect_To>0</Send_Connect_To>
-		<Time_>0</Time_>
+		<Time_>326.531</Time_>
 		<Time_Min>0</Time_Min>
 		<Time_Max>400</Time_Max>
 		<Time_Connect_To>0</Time_Connect_To>
@@ -257,10 +260,10 @@
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>
-		<feedback_>0</feedback_>
+		<feedback_>0.163265</feedback_>
 		<feedback_Min>0</feedback_Min>
 		<feedback_Max>1</feedback_Max>
-		<feedback_COnnect_To>0</feedback_COnnect_To>
+		<feedback_COnnect_To>3</feedback_COnnect_To>
 	</Delay_slot_3>
 	<Reverb_slot_3>
 		<Send_>0.602041</Send_>
@@ -302,11 +305,12 @@
 	</Bitcrusher_slot_3>
 	<Compressor_slot_4>
 		<Threshold>-8.92857</Threshold>
-		<GR_meter>0</GR_meter>
+		<GR_meter>-8.03571</GR_meter>
 		<Attack__MS_>10</Attack__MS_>
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>2.95918</In_gain>
 	</Compressor_slot_4>
 	<Bitcrusher_slot_4>
 		<Bits>16</Bits>
@@ -402,11 +406,12 @@
 	</Bitcrusher_slot_4>
 	<Compressor_slot_5>
 		<Threshold>-12.7551</Threshold>
-		<GR_meter>0</GR_meter>
+		<GR_meter>-11.4796</GR_meter>
 		<Attack__MS_>10</Attack__MS_>
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>1.78571</In_gain>
 	</Compressor_slot_5>
 	<Bitcrusher_slot_5>
 		<Bits>16</Bits>
@@ -501,12 +506,13 @@
 		<Bits_Connect_To>0</Bits_Connect_To>
 	</Bitcrusher_slot_5>
 	<Compressor_slot_6>
-		<Threshold>-14.5408</Threshold>
-		<GR_meter>0</GR_meter>
+		<Threshold>-11.2245</Threshold>
+		<GR_meter>-10.102</GR_meter>
 		<Attack__MS_>10</Attack__MS_>
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>2.70408</In_gain>
 	</Compressor_slot_6>
 	<Bitcrusher_slot_6>
 		<Bits>16</Bits>

@@ -54,7 +54,7 @@ public:
         ParamGroup.add(_e_delay_in_feedback.set("feedback ", 0.0, 0, 1));
         ParamGroup.add(_e_delay_in_feedbackMin.set("feedback Min", 0.0, 0, 1));
         ParamGroup.add(_e_delay_in_feedbackMax.set("feedback Max", 1.0, 0, 1));
-        ParamGroup.add(_e_delay_in_feedbackConnectTo.set("feedback Connect To", 0, 0, 6));
+        ParamGroup.add(_e_delay_in_feedbackConnectTo.set("feedback COnnect To", 0, 0, 6));
         
     }
     

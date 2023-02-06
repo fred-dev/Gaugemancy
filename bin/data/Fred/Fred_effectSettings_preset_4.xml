@@ -1,14 +1,14 @@
 <?xml version="0.0" encoding="UTF-8"?>
 <SLOTS>
    
-   <SLOT_0>
+   <SLOT_1>
       <BIT_CRUSH>0</BIT_CRUSH>
       <DECIMATOR>0</DECIMATOR>
       <CHORUS>0</CHORUS>
       <FILTER>0</FILTER>
       <DELAY>0</DELAY>
       <REVERB>0</REVERB>
-   </SLOT_0>
+   </SLOT_1>
    <SLOT_2>
       <BIT_CRUSH>0</BIT_CRUSH>
       <DECIMATOR>0</DECIMATOR>
