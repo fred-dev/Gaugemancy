@@ -2,12 +2,15 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    ofLogToFile("myLogFile.txt", false);
 
-	//setup function for the whole system, run once on startup
+	//setup function for the whole system, run once on startupofLogVerbose
 
 //set the root path for all settings and audio (different for the PI - USB stick mounted via FSTAB, or the laptop version - relative to the exe
 #ifdef HAS_ADC
-	filePathPrefix = "/media/Data/";
+    filePathPrefix = ofToDataPath("");
+
+	//filePathPrefix = "/media/Data/";
 #else
 	filePathPrefix = ofToDataPath("");
 #endif
@@ -18,7 +21,7 @@ void ofApp::setup(){
 #endif
 // init parameters we need
 	initParameters();
-    
+    cout << "We are here" << endl;
 // read settings from XML, user, all user settings and
 	setupParamsFromXML();
     
@@ -30,8 +33,8 @@ void ofApp::setup(){
 	setupFilePaths();
     
     // create the granualr objects we need and setup thier parameters from the ofParameter class
-    setupGraincloud(filePathsSet1, unitID + "_preset_1.xml");
-    
+    setupGraincloud(filePathsSet[presetIndex-1], unitID + "_preset_" + ofToString(presetIndex) + ".xml");
+
 #ifndef HAS_ADC
 // setup graphic envirnment variables and FBOs - latop only
 	setupGraphicEnv();
@@ -178,7 +181,7 @@ float ofApp::exponentialEaseIn (float value){
 
 //processes sensor and simulation input to an quartic curve
 float ofApp::quarticEaseIn(float value){
-    return 1.0*(value/=1.0) * value * value * value;
+    return 1.0*(value/1.0) * value * value * value;
 }
 
 //processes sensor and simulation input to an inverted exponential curve
@@ -231,7 +234,7 @@ void ofApp::setupVisualiser() {
 	barsEmpty[5].rotateDeg(-90, 1, 0, 0);
 	barsFull[5].setPosition(0, 0, barLength / 2);
 	barsFull[5].rotateDeg(-90, 1, 0, 0);
-	ofLogVerbose() << "Display setup" << endl;
+	ofLogVerbose("setupVisualiser") << "Display setup" << endl;
 }
 
 void ofApp::setupGraphicEnv()
@@ -457,63 +460,69 @@ void ofApp::loadEffectPatchSettings()
     
     for (int j = 0; j < numberOfSlots; j++)
     {
-        
-             effectsPanels[j].clear();
+        ///we need to check if these need clearing first?
+             //effectsPanels[j]->clear();
         
        
-        effectsPanels[j].setup("Effects Slot "+ ofToString(j+1),filePathPrefix + unitID + "_effectParameterSettings_preset_" + ofToString(presetIndex) + ".xml");
+        effectsPanels[j]->setup("Effects Slot "+ ofToString(j+1),filePathPrefix + unitID + "_effectParameterSettings_preset_" + ofToString(presetIndex) + ".xml");
         
         if(effectsPatching[presetIndex-1][j].hasBitCrusher){
             effBitCrushersParams[j].setup();
             cout<< "adding bit crusher to slot " + ofToString(j+1) << endl;
             effBitCrushersParams[j].setParameterGroupName("Bitcrusher slot " + ofToString(j+1));
-            effectsPanels[j].add(effBitCrushersParams[j].getParamGroup());
+            effectsPanels[j]->add(effBitCrushersParams[j].getParamGroup());
         }
         
         if(effectsPatching[presetIndex-1][j].hasDecimator){
             effDecimatorsParams[j].setup();
             cout<< "adding decimator to slot " + ofToString(j+1) << endl;
             effDecimatorsParams[j].setParameterGroupName("Decimator slot " + ofToString(j+1));
-            effectsPanels[j].add(effDecimatorsParams[j].getParamGroup());
+            effectsPanels[j]->add(effDecimatorsParams[j].getParamGroup());
         }
         if(effectsPatching[presetIndex-1][j].hasChorus){
             effChorussParams[j].setup();
             cout<< "adding chorus to slot " + ofToString(j) << endl;
             effChorussParams[j].setParameterGroupName("Chorus slot " + ofToString(j+1));
-            effectsPanels[j].add(effChorussParams[j].getParamGroup());
+            effectsPanels[j]->add(effChorussParams[j].getParamGroup());
         }
         if(effectsPatching[presetIndex-1][j].hasFilter){
             effFiltersParams[j].setup();
             cout<< "adding filter to slot " + ofToString(j) << endl;
             effFiltersParams[j].setParameterGroupName("Filter slot " + ofToString(j+1));
-            effectsPanels[j].add(effFiltersParams[j].getParamGroup());
+            effectsPanels[j]->add(effFiltersParams[j].getParamGroup());
         }
         if(effectsPatching[presetIndex-1][j].hasDelay){
             effDelaysParams[j].setup();
             cout<< "adding delay to slot " + ofToString(j) << endl;
             effDelaysParams[j].setParameterGroupName("Delay slot " + ofToString(j+1));
-            effectsPanels[j].add(effDelaysParams[j].getParamGroup());
+            effectsPanels[j]->add(effDelaysParams[j].getParamGroup());
         }
         if(effectsPatching[presetIndex-1][j].hasReverb){
             effReverbsParams[j].setup();
             cout<< "adding reverb to slot " + ofToString(j) << endl;
             effReverbsParams[j].setParameterGroupName("Reverb slot " + ofToString(j+1));
-            effectsPanels[j].add(effReverbsParams[j].getParamGroup());
+            effectsPanels[j]->add(effReverbsParams[j].getParamGroup());
         }
         
         effCompressorsParams[j].setup();
         cout<< "adding compressor to slot " + ofToString(j) << endl;
         effCompressorsParams[j].setParameterGroupName("Compressor slot " + ofToString(j+1));
-        effectsPanels[j].add(effCompressorsParams[j].getParamGroup());
+        effectsPanels[j]->add(effCompressorsParams[j].getParamGroup());
         
         if(presetIndex == 1){
-            effectsPanels[j].loadFromFile(filePathPrefix + unitID + "_effectParameterSettings_preset_1.xml");
+            effectsPanels[j]->loadFromFile(filePathPrefix + unitID + "_effectParameterSettings_preset_1.xml");
         }
         
         if(presetIndex == 2){
-            effectsPanels[j].loadFromFile(filePathPrefix + unitID + "_effectParameterSettings_preset_2.xml");
+            effectsPanels[j]->loadFromFile(filePathPrefix + unitID + "_effectParameterSettings_preset_2.xml");
+        }
+        if(presetIndex == 3){
+            effectsPanels[j]->loadFromFile(filePathPrefix + unitID + "_effectParameterSettings_preset_3.xml");
         }
         
+        if(presetIndex == 4){
+            effectsPanels[j]->loadFromFile(filePathPrefix + unitID + "_effectParameterSettings_preset_4.xml");
+        }
     }
     
     // this is a stupid bit of code, the effects I can use need to be patched into each other in a single chain in one line, there is no way to insert them, so I need to take care of every possible combination of effects and patch the whole chain together at once.
@@ -1113,7 +1122,7 @@ void ofApp::exit() {
 	relayOut.setval_gpio("1");
 	ofSleepMillis(400);
 	relayOut.setval_gpio("0");
-	ofLogVerbose() << "relay setup" << endl;
+	ofLogVerbose("exit") << "relay setup" << endl;
 
 	if (doShutdown) {
 		string cmd = "sudo shutdown -h now";           // create the command
@@ -1323,8 +1332,6 @@ goToMode(grainOperationModeTranslate);
 #endif
 #ifdef HAS_ADC
         narration.disconnectAll();
-        engine.audio_out(0).disconnectAll();
-        engine.audio_out(1).disconnectAll();
         goToMode(grainOperationModeTranslate);
 
 #endif
@@ -1519,12 +1526,14 @@ void ofApp::updateMultiGrainMode() {
 #ifdef HAS_ADC
 	deviceOnlyUpdateRoutine();
 #endif // HAS_ADC
+    
+#ifndef HAS_ADC
 // just need to check if it is the first time, to know what we have to setup if we change presets
 	if (firstRun)
 	{
 		firstRun = false;
 	}
-
+#endif
 // as long as we are not pressing the mouse lets see what the parameters should be
 	if (!ofGetMousePressed())
 	{
@@ -1653,57 +1662,104 @@ void ofApp::drawMessages()
 	}
 	ofPopStyle();
 }
-
 void ofApp::drawGrainClouds()
 {
-	//this draws each granular module, with a waveform and display of the individual grains
-	ofPushView();
-	ofSetLineWidth(1.0f);
-	for (int j = 0; j < numberOfSlots; ++j) {
-		ofPushStyle();
-		ofSetColor(ofColor(0, 255, 255));
-		ofNoFill();
-		ofSetRectMode(OF_RECTMODE_CORNER);
-		ofDrawRectangle(uiX[j], uiY[j], uiWidth[j], uiHeigth[j]);
+    //this draws each granular module, with a waveform and display of the individual grains
+    ofPushView();
+    ofSetLineWidth(1.0f);
+    for (int j = 0; j < numberOfSlots; ++j) {
+        ofPushStyle();
+        ofSetColor(ofColor(0, 255, 255));
+        ofNoFill();
+        ofSetRectMode(OF_RECTMODE_CORNER);
+        ofDrawRectangle(uiX[j], uiY[j], uiWidth[j], uiHeigth[j]);
 
-		waveformGraphics[j]->draw(uiX[j], uiY[j]);
-		if (presetIndex==1)
-		{
-			ofDrawBitmapString(fileNamesSet1[j], uiX[j] + 5, uiY[j] + 15);
+        waveformGraphics[j]->draw(uiX[j], uiY[j]);
+    
+            ofDrawBitmapString(fileNamesSet[presetIndex-1][j], uiX[j] + 5, uiY[j] + 15);
 
-		}
-		if (presetIndex == 2)
-		{
-			ofDrawBitmapString(fileNamesSet2[j], uiX[j] + 5, uiY[j] + 15);
-		}
-		if (drawGrains[j]) {
-			//draw position crossdraw grains 
-			ofDrawLine(controlX[j], uiY[j], controlX[j], uiMaxY[j]);
-			ofDrawLine(uiX[j], controlY[j], uiMaxX[j], controlY[j]);
-			//draw grains
-			ofSetRectMode(OF_RECTMODE_CENTER);
-			int grainsY = uiY[j] + uiHeigth[j] / 2;
-			for (int k = 0; k < grainVoices[j]; ++k) {
-				float xpos = uiX[j] + (uiWidth[j] * cloud[j]->meter_position(k));
-				float dimensionX = cloud[j]->meter_env(k) * 10;
-				float dimensionY = cloud[j]->meter_env(k) * 50;
-				ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
-			}
-		}
-		ofSetColor(255);
-		ofDrawBitmapString("Slot " + ofToString(j + 1), uiX[j] + 5, uiHeigth[j] + uiY[j] - 10);
-		ofPopStyle();
+        
+    
+        if (drawGrains[j]) {
+            //draw position crossdraw grains
+            
+            ofDrawLine(controlX[j], uiY[j], controlX[j], uiMaxY[j]);
+            ofDrawLine(uiX[j], controlY[j], uiMaxX[j], controlY[j]);
+            //draw grains
+            ofSetRectMode(OF_RECTMODE_CENTER);
+            int grainsY = uiY[j] + uiHeigth[j] / 2;
+            for (int k = 0; k < grainVoices[j]; ++k) {
+                float xpos = uiX[j] + (uiWidth[j] * cloud[j]->meter_position(k));
+                float dimensionX = cloud[j]->meter_env(k) * 10;
+                float dimensionY = cloud[j]->meter_env(k) * 50;
+                ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
+            }
+        }
+        ofSetColor(255);
+        ofDrawBitmapString("Slot " + ofToString(j + 1), uiX[j] + 5, uiHeigth[j] + uiY[j] - 10);
+        ofPopStyle();
         if(drawEffects){
-            effectsPanels[j].draw();
+            effectsPanels[j]->draw();
 
         }
         if(!drawEffects){
-            samplePanels[j].draw();
+            samplePanels[j]->draw();
 
         }
-	}
-	ofPopView();
+    }
+    ofPopView();
 }
+
+//void ofApp::drawGrainClouds()
+//{
+//	//this draws each granular module, with a waveform and display of the individual grains
+//	ofPushView();
+//	ofSetLineWidth(1.0f);
+//	for (int j = 0; j < numberOfSlots; ++j) {
+//		ofPushStyle();
+//		ofSetColor(ofColor(0, 255, 255));
+//		ofNoFill();
+//		ofSetRectMode(OF_RECTMODE_CORNER);
+//		ofDrawRectangle(uiX[j], uiY[j], uiWidth[j], uiHeigth[j]);
+//
+//		waveformGraphics[j]->draw(uiX[j], uiY[j]);
+//		if (presetIndex==1)
+//		{
+//			ofDrawBitmapString(fileNamesSet1[j], uiX[j] + 5, uiY[j] + 15);
+//
+//		}
+//		if (presetIndex == 2)
+//		{
+//			ofDrawBitmapString(fileNamesSet2[j], uiX[j] + 5, uiY[j] + 15);
+//		}
+//		if (drawGrains[j]) {
+//			//draw position crossdraw grains
+//			ofDrawLine(controlX[j], uiY[j], controlX[j], uiMaxY[j]);
+//			ofDrawLine(uiX[j], controlY[j], uiMaxX[j], controlY[j]);
+//			//draw grains
+//			ofSetRectMode(OF_RECTMODE_CENTER);
+//			int grainsY = uiY[j] + uiHeigth[j] / 2;
+//			for (int k = 0; k < grainVoices[j]; ++k) {
+//				float xpos = uiX[j] + (uiWidth[j] * cloud[j]->meter_position(k));
+//				float dimensionX = cloud[j]->meter_env(k) * 10;
+//				float dimensionY = cloud[j]->meter_env(k) * 50;
+//				ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
+//			}
+//		}
+//		ofSetColor(255);
+//		ofDrawBitmapString("Slot " + ofToString(j + 1), uiX[j] + 5, uiHeigth[j] + uiY[j] - 10);
+//		ofPopStyle();
+//        if(drawEffects){
+//            effectsPanels[j]->draw();
+//
+//        }
+//        if(!drawEffects){
+//            samplePanels[j]->draw();
+//
+//        }
+//	}
+//	ofPopView();
+//}
 
 void ofApp::drawSimulationBars()
 {
@@ -1812,12 +1868,12 @@ void ofApp::updateSingleGrainMode()
 #ifdef HAS_ADC
 	deviceOnlyUpdateRoutine();
 #endif // HAS_ADC
-
+#ifndef HAS_ADC
 	if (firstRun)
 	{
 		firstRun = false;
 	}
-
+#endif
 	if (!ofGetMousePressed())
 	{
 		updateParametersFromValuesSingle();
@@ -2630,32 +2686,36 @@ void ofApp::setupParamsFromXML()
 
 void ofApp::setupFilePaths()
 {
-// reads the file paths of the audio files we need for te preset
-	if (fileSettingsXML.loadFile(filePathPrefix + unitID + "_fileSettings.xml")) {
-		cout << "File settings loaded" << endl;
-		for (int i = 0; i < numberOfSlots; i++) {
-			cout << "Getting audio file paths from " + unitID +  "_fileSettings: Slot " + ofToString(i + 1)<< endl;
-			filePathsSet1[i] = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "A", "Grain_" + ofToString(i + 1) + ".mp3");
-			fileNamesSet1[i] = fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "A", "Grain_" + ofToString(i + 1) + ".mp3");
-			cout << "Preset 1 File path " + ofToString(i + 1) + "A  = " + filePathsSet1[i] << endl;
-			filePathsSet2[i] = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "B", "Grain_" + ofToString(i + 1) + ".mp3");
-			fileNamesSet2[i] = fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "B", "Grain_" + ofToString(i + 1) + ".mp3");
-			cout << "Preset 2 File path " + ofToString(i + 1) + "B  = " + filePathsSet2[i] << endl;
+    // reads the file paths of the audio files we need for te preset
+        if (fileSettingsXML.loadFile(filePathPrefix + unitID + "_fileSettings.xml")) {
+            ofLogVerbose() << "File settings loaded" << endl;
+            ofSleepMillis(50);
+            for (int i = 0; i < numberOfSlots; i++) {
+                ofLogVerbose() << "Getting audio file paths from " + unitID +  "_fileSettings: Slot " + ofToString(i + 1)<< endl;
+                
+                for (int j=0; j < NUMBER_OF_PRESETS; j++) {
+                    filePathsSet[j][i] = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "_" + ofToString(j+1), "Grain_" + ofToString(i + 1) + ".mp3");
+                    ofLogVerbose() << "Preset " +ofToString(j)+ " File path slot " + ofToString(i + 1) + " = " + filePathsSet[j][i] << endl;
+                    fileNamesSet[j][i] = fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "_" + ofToString(j+1), "Grain_" + ofToString(i + 1) + ".mp3");
+                    ofLogVerbose() << "Preset " +ofToString(j)+ " File name slot " + ofToString(i + 1) + " = " + fileNamesSet[j][i] << endl;
+                    
+                    if (oscDebug) {
+                        // if we are using OSC debug send the names
+                        recyclingMessage.clear();
+                        recyclingMessage.setAddress("/" + ofToString(unitID) + "/filePaths");
+                        recyclingMessage.addStringArg(filePathsSet[j][i]);
+                    }
+                }
+            }
+            if (oscDebug) {
+                 sender.sendMessage(recyclingMessage, false);
+            }
+            narrationFilePath = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:NARRATION_FILE", "Mono_20hz_-20db_netV.wav");
 
-			if (oscDebug) {
-                // if we are using OSC debug send the names
-				recyclingMessage.clear();
-				recyclingMessage.setAddress("/" + ofToString(unitID) + "/filePaths");
-				recyclingMessage.addStringArg(filePathsSet1[i]);
-				recyclingMessage.addStringArg(filePathsSet2[i]);
-				sender.sendMessage(recyclingMessage, false);
-			}
-		}
-	}
-	else
-		cout << "File settings not loaded" << endl;
+        }
+        else
+            ofLogVerbose() << "File settings not loaded" << endl;
 
-	narrationFilePath = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:NARRATION_FILE", "Mono_20hz_-20db_netV.wav");
 }
 
 #ifdef HAS_ADC
@@ -2677,16 +2737,16 @@ void ofApp::setupADC()
 		sender.sendMessage(recyclingMessage, false);
 	}
 
-	ofLogVerbose() << "adc setup" << endl;
+	ofLogVerbose("setupADC") << "adc setup" << endl;
 
 }
 
 void ofApp::setupButton()
 {
     //setup the soft button for interaction - raspberry pi only
-	button.setup("19", "in", "high");
-	button.export_gpio();
-	button.setdir_gpio("in");
+        button.setup("19", "in", "high");
+        button.export_gpio();
+        button.setdir_gpio("in");
 
 	if (oscDebug) {
 		recyclingMessage.clear();
@@ -2712,7 +2772,7 @@ void ofApp::initLedBlue()
 		recyclingMessage.addIntArg(1);
 		sender.sendMessage(recyclingMessage, false);
 	}
-	ofLogVerbose() << "Blue LED setup" << endl;
+	ofLogVerbose("initLedBlue") << "Blue LED setup" << endl;
 }
 
 void ofApp::initLedRed()
@@ -2733,7 +2793,7 @@ void ofApp::initLedRed()
 		sender.sendMessage(recyclingMessage, false);
 	}
 
-	ofLogVerbose() << "Red LED setup" << endl;
+	ofLogVerbose("initLedRed") << "Red LED setup" << endl;
 }
 
 void ofApp::setupSpeakerControl()
@@ -2751,7 +2811,7 @@ void ofApp::setupSpeakerControl()
 		recyclingMessage.addIntArg(1);
 		sender.sendMessage(recyclingMessage, false);
 	}
-	ofLogVerbose() << "relay setup" << endl;
+	ofLogVerbose("setupSpeakerControl") << "relay setup" << endl;
 }
 
 void ofApp::syncSpeaker()
@@ -2842,7 +2902,7 @@ void ofApp::getAccumulatedPressure()
     //then apply the curved data to the granular and set the volume as it should be (could be mapped to a sensor)
 			accumulatedPressureNormalised >> cloud[0]->in_position();
 			ampControl[0]->setv(_volume[0]);
-			ofLogVerbose() << "Accumulated pressure is " + ofToString(accumulatedPressureNormalised) << endl;
+			ofLogVerbose("getAccumulatedPressure") << "Accumulated pressure is " + ofToString(accumulatedPressureNormalised) << endl;
 
 		}
     // of it does not pass the threshold then reset the volume and playhead position
@@ -2853,7 +2913,7 @@ void ofApp::getAccumulatedPressure()
 	
 }
 
-void ofApp::applyDynamicValuesToParameters(int &k, std::vector<ofParameter<int>> connectTo, int v, std::vector<ofParameter<float>> parameter, std::vector<ofParameter<float>> parameterMin, std::vector<ofParameter<float>> parameterMax, string paramName)
+void ofApp::applyDynamicValuesToParameters(int k, std::vector<ofParameter<int>> connectTo, int v, std::vector<ofParameter<float>> parameter, std::vector<ofParameter<float>> parameterMin, std::vector<ofParameter<float>> parameterMax, string paramName)
 {
     // if a parameter is mapped to a sensor then apply the data and map it between the min and max
 	if (connectTo[k] == v + 1) {
@@ -2869,7 +2929,7 @@ void ofApp::applyDynamicValuesToParameters(int &k, std::vector<ofParameter<int>>
 			ampControl[k]->setv(_volume[k]);
 		}
 
-		ofLogVerbose() << paramName + " on slot " + ofToString(k) + " = " + ofToString(parameter[k]) + " mapped between " + ofToString(parameterMin[k]) + " and " + ofToString(parameterMax[k]) + " on sensor " + ofToString(v+1)<< endl;
+		ofLogVerbose("applyDynamicValuesToParameters") << paramName + " on slot " + ofToString(k) + " = " + ofToString(parameter[k]) + " mapped between " + ofToString(parameterMin[k]) + " and " + ofToString(parameterMax[k]) + " on sensor " + ofToString(v+1)<< endl;
 	}
 }
 
@@ -2970,7 +3030,7 @@ void ofApp::applyDynamicValuesToDecimatorParameters(int k, int v){
     if (effectsPatching[presetIndex-1][k].hasDecimator) {
         if (effDecimatorsParams[k]._e_decomator_in_rateConnectTo == v + 1) {
             effDecimatorsParams[k]._e_decomator_in_rate = ofMap(normalisedA2DValues[v], 0.0, 1.0, effDecimatorsParams[k]._e_decomator_in_rateMin, effDecimatorsParams[k]._e_decomator_in_rateMax);
-            ofLogVerbose() << "Decimator control on slot " + ofToString(k) + " = " + ofToString(effDecimatorsParams[k]._e_decomator_in_rate) + " mapped between " + ofToString(effDecimatorsParams[k]._e_decomator_in_rateMin) + " and " + ofToString(effDecimatorsParams[k]._e_decomator_in_rateMax)+ " on sensor " + ofToString(v+1) << endl;
+            ofLogVerbose("applyDynamicValuesToDecimatorParameters") << "Decimator control on slot " + ofToString(k) + " = " + ofToString(effDecimatorsParams[k]._e_decomator_in_rate) + " mapped between " + ofToString(effDecimatorsParams[k]._e_decomator_in_rateMin) + " and " + ofToString(effDecimatorsParams[k]._e_decomator_in_rateMax)+ " on sensor " + ofToString(v+1) << endl;
         }
     }
 }
@@ -2978,22 +3038,22 @@ void ofApp::applyDynamicValuesToDelayParameters(int k, int v){
     if (effectsPatching[presetIndex-1][k].hasDelay) {
         if (effDelaysParams[k]._e_delay_in_sendConnectTo == v + 1) {
             effDelaysParams[k]._e_delay_in_send = ofMap(normalisedA2DValues[v], 0.0, 1.0, effDelaysParams[k]._e_delay_in_sendMin, effDelaysParams[k]._e_delay_in_sendMax);
-            ofLogVerbose() << "Delay send on slot " + ofToString(k) + " = " + ofToString(effDelaysParams[k]._e_delay_in_send) + " mapped between " + ofToString(effDelaysParams[k]._e_delay_in_sendMin) + " and " + ofToString(effDelaysParams[k]._e_delay_in_sendMax) + " on sensor " + ofToString(v+1) << endl;
+            ofLogVerbose("applyDynamicValuesToDelayParameters") << "Delay send on slot " + ofToString(k) + " = " + ofToString(effDelaysParams[k]._e_delay_in_send) + " mapped between " + ofToString(effDelaysParams[k]._e_delay_in_sendMin) + " and " + ofToString(effDelaysParams[k]._e_delay_in_sendMax) + " on sensor " + ofToString(v+1) << endl;
         }
         
         if (effDelaysParams[k]._e_delay_in_timeConnectTo == v + 1) {
             effDelaysParams[k]._e_delay_in_time = ofMap(normalisedA2DValues[v], 0.0, 1.0, effDelaysParams[k]._e_delay_in_timeMin, effDelaysParams[k]._e_delay_in_timeMax);
-            ofLogVerbose() << "Delay time on slot " + ofToString(k) + " = " + ofToString(effDelaysParams[k]._e_delay_in_time) + " mapped between " + ofToString(effDelaysParams[k]._e_delay_in_timeMin) + " and " + ofToString(effDelaysParams[k]._e_delay_in_timeMax)+ " on sensor " + ofToString(v+1) << endl;
+            ofLogVerbose("applyDynamicValuesToDelayParameters") << "Delay time on slot " + ofToString(k) + " = " + ofToString(effDelaysParams[k]._e_delay_in_time) + " mapped between " + ofToString(effDelaysParams[k]._e_delay_in_timeMin) + " and " + ofToString(effDelaysParams[k]._e_delay_in_timeMax)+ " on sensor " + ofToString(v+1) << endl;
         }
         
         if (effDelaysParams[k]._e_delay_in_feedbackConnectTo == v + 1) {
             effDelaysParams[k]._e_delay_in_feedback = ofMap(normalisedA2DValues[v], 0.0, 1.0, effDelaysParams[k]._e_delay_in_feedbackMin, effDelaysParams[k]._e_delay_in_feedbackMax);
-            ofLogVerbose() << "Delay Feedback on slot " + ofToString(k) + " = " + ofToString(effDelaysParams[k]._e_delay_in_feedback) + " mapped between " + ofToString(effDelaysParams[k]._e_delay_in_feedbackMin) + " and " + ofToString(effDelaysParams[k]._e_delay_in_feedbackMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToDelayParameters") << "Delay Feedback on slot " + ofToString(k) + " = " + ofToString(effDelaysParams[k]._e_delay_in_feedback) + " mapped between " + ofToString(effDelaysParams[k]._e_delay_in_feedbackMin) + " and " + ofToString(effDelaysParams[k]._e_delay_in_feedbackMax) + " on sensor " + ofToString(v+1)<< endl;
         }
         
         if (effDelaysParams[k]._e_delay_in_dampingConnectTo == v + 1) {
             effDelaysParams[k]._e_delay_in_damping = ofMap(normalisedA2DValues[v], 0.0, 1.0, effDelaysParams[k]._e_delay_in_dampingMin, effDelaysParams[k]._e_delay_in_dampingMax);
-            ofLogVerbose() << "Delay damping on slot " + ofToString(k) + " = " + ofToString(effDelaysParams[k]._e_delay_in_damping) + " mapped between " + ofToString(effDelaysParams[k]._e_delay_in_dampingMin) + " and " + ofToString(effDelaysParams[k]._e_delay_in_dampingMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToDelayParameters") << "Delay damping on slot " + ofToString(k) + " = " + ofToString(effDelaysParams[k]._e_delay_in_damping) + " mapped between " + ofToString(effDelaysParams[k]._e_delay_in_dampingMin) + " and " + ofToString(effDelaysParams[k]._e_delay_in_dampingMax) + " on sensor " + ofToString(v+1)<< endl;
         }
     }
 }
@@ -3001,12 +3061,12 @@ void ofApp::applyDynamicValuesToFilterParameters(int k, int v){
     if (effectsPatching[presetIndex-1][k].hasFilter) {
         if (effFiltersParams[k]._e_MLAD_in_freqConnectTo == v + 1) {
             effFiltersParams[k]._e_MLAD_in_freq = ofMap(normalisedA2DValues[v], 0.0, 1.0, effFiltersParams[k]._e_MLAD_in_freqMin, effFiltersParams[k]._e_MLAD_in_freqMax);
-            ofLogVerbose() << "Filter freq on slot " + ofToString(k) + " = " + ofToString(effFiltersParams[k]._e_MLAD_in_freq) + " mapped between " + ofToString(effFiltersParams[k]._e_MLAD_in_freqMin) + " and " + ofToString(effFiltersParams[k]._e_MLAD_in_freqMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToFilterParameters") << "Filter freq on slot " + ofToString(k) + " = " + ofToString(effFiltersParams[k]._e_MLAD_in_freq) + " mapped between " + ofToString(effFiltersParams[k]._e_MLAD_in_freqMin) + " and " + ofToString(effFiltersParams[k]._e_MLAD_in_freqMax) + " on sensor " + ofToString(v+1)<< endl;
         }
         
         if (effFiltersParams[k]._e_MLAD_in_resoConnectTo == v + 1) {
             effFiltersParams[k]._e_MLAD_in_reso = ofMap(normalisedA2DValues[v], 0.0, 1.0, effFiltersParams[k]._e_MLAD_in_resoMin, effFiltersParams[k]._e_MLAD_in_resoMax);
-            ofLogVerbose() << "Filter reso on slot " + ofToString(k) + " = " + ofToString(effFiltersParams[k]._e_MLAD_in_reso) + " mapped between " + ofToString(effFiltersParams[k]._e_MLAD_in_resoMin) + " and " + ofToString(effFiltersParams[k]._e_MLAD_in_resoMax)+ " on sensor " + ofToString(v+1) << endl;
+            ofLogVerbose("applyDynamicValuesToFilterParameters") << "Filter reso on slot " + ofToString(k) + " = " + ofToString(effFiltersParams[k]._e_MLAD_in_reso) + " mapped between " + ofToString(effFiltersParams[k]._e_MLAD_in_resoMin) + " and " + ofToString(effFiltersParams[k]._e_MLAD_in_resoMax)+ " on sensor " + ofToString(v+1) << endl;
         }
     }
 }
@@ -3014,15 +3074,15 @@ void ofApp::applyDynamicValuesToChorusParameters(int k, int v){
     if (effectsPatching[presetIndex-1][k].hasChorus) {
         if (effChorussParams[k]._e_chorus_in_depthConnectTo == v + 1) {
             effChorussParams[k]._e_chorus_in_depth = ofMap(normalisedA2DValues[v], 0.0, 1.0, effChorussParams[k]._e_chorus_in_depthMin, effChorussParams[k]._e_chorus_in_depthMax);
-            ofLogVerbose() << "Chorus depth on slot " + ofToString(k) + " = " + ofToString(effChorussParams[k]._e_chorus_in_depth) + " mapped between " + ofToString(effChorussParams[k]._e_chorus_in_depthMin) + " and " + ofToString(effChorussParams[k]._e_chorus_in_depthMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToChorusParameters") << "Chorus depth on slot " + ofToString(k) + " = " + ofToString(effChorussParams[k]._e_chorus_in_depth) + " mapped between " + ofToString(effChorussParams[k]._e_chorus_in_depthMin) + " and " + ofToString(effChorussParams[k]._e_chorus_in_depthMax) + " on sensor " + ofToString(v+1)<< endl;
         }
         if (effChorussParams[k]._e_chorus_in_speedConnectTo == v + 1) {
             effChorussParams[k]._e_chorus_in_speed = ofMap(normalisedA2DValues[v], 0.0, 1.0, effChorussParams[k]._e_chorus_in_speedMin, effChorussParams[k]._e_chorus_in_speedMax);
-            ofLogVerbose() << "Chorus Speed on slot " + ofToString(k) + " = " + ofToString(effChorussParams[k]._e_chorus_in_speed) + " mapped between " + ofToString(effChorussParams[k]._e_chorus_in_speedMin) + " and " + ofToString(effChorussParams[k]._e_chorus_in_speedMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToChorusParameters") << "Chorus Speed on slot " + ofToString(k) + " = " + ofToString(effChorussParams[k]._e_chorus_in_speed) + " mapped between " + ofToString(effChorussParams[k]._e_chorus_in_speedMin) + " and " + ofToString(effChorussParams[k]._e_chorus_in_speedMax) + " on sensor " + ofToString(v+1)<< endl;
         }
         if (effChorussParams[k]._e_chorus_in_delayConnectTo == v + 1) {
             effChorussParams[k]._e_chorus_in_delay = ofMap(normalisedA2DValues[v], 0.0, 1.0, effChorussParams[k]._e_chorus_in_delayMin, effChorussParams[k]._e_chorus_in_delayMax);
-            ofLogVerbose() << "Chorus delay on slot " + ofToString(k) + " = " + ofToString(effChorussParams[k]._e_chorus_in_delay) + " mapped between " + ofToString(effChorussParams[k]._e_chorus_in_delayMin) + " and " + ofToString(effChorussParams[k]._e_chorus_in_delayMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToChorusParameters") << "Chorus delay on slot " + ofToString(k) + " = " + ofToString(effChorussParams[k]._e_chorus_in_delay) + " mapped between " + ofToString(effChorussParams[k]._e_chorus_in_delayMin) + " and " + ofToString(effChorussParams[k]._e_chorus_in_delayMax) + " on sensor " + ofToString(v+1)<< endl;
         }
     }
 }
@@ -3030,31 +3090,31 @@ void ofApp::applyDynamicValuesToReverbParameters(int k, int v){
     if (effectsPatching[presetIndex-1][k].hasReverb) {
         if (effReverbsParams[k]._e_reverb_in_mixConnectTo == v + 1) {
             effReverbsParams[k]._e_reverb_in_mix = ofMap(normalisedA2DValues[v], 0.0, 1.0, effReverbsParams[k]._e_reverb_in_mixMin, effReverbsParams[k]._e_reverb_in_mixMax);
-            ofLogVerbose() << "Reverb mix on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_mix) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_mixMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_mixMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToReverbParameters") << "Reverb mix on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_mix) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_mixMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_mixMax) + " on sensor " + ofToString(v+1)<< endl;
         }
         if (effReverbsParams[k]._e_reverb_in_timeConnectTo == v + 1) {
             effReverbsParams[k]._e_reverb_in_time = ofMap(normalisedA2DValues[v], 0.0, 1.0, effReverbsParams[k]._e_reverb_in_timeMin, effReverbsParams[k]._e_reverb_in_timeMax);
-            ofLogVerbose() << "Reverb time on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_time) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_timeMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_timeMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToReverbParameters") << "Reverb time on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_time) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_timeMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_timeMax) + " on sensor " + ofToString(v+1)<< endl;
         }
         if (effReverbsParams[k]._e_reverb_in_dampingConnectTo == v + 1) {
             effReverbsParams[k]._e_reverb_in_damping = ofMap(normalisedA2DValues[v], 0.0, 1.0, effReverbsParams[k]._e_reverb_in_dampingMin, effReverbsParams[k]._e_reverb_in_dampingMax);
-            ofLogVerbose() << "Reverb damping on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_damping) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_dampingMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_dampingMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToReverbParameters") << "Reverb damping on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_damping) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_dampingMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_dampingMax) + " on sensor " + ofToString(v+1)<< endl;
         }
         if (effReverbsParams[k]._e_reverb_in_densityConnectTo == v + 1) {
             effReverbsParams[k]._e_reverb_in_density = ofMap(normalisedA2DValues[v], 0.0, 1.0, effReverbsParams[k]._e_reverb_in_densityMin, effReverbsParams[k]._e_reverb_in_densityMax);
-            ofLogVerbose() << "Reverb density on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_density) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_densityMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_densityMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToReverbParameters") << "Reverb density on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_density) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_densityMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_densityMax) + " on sensor " + ofToString(v+1)<< endl;
         }
         if (effReverbsParams[k]._e_reverb_in_hiCutConnectTo == v + 1) {
             effReverbsParams[k]._e_reverb_in_hiCut = ofMap(normalisedA2DValues[v], 0.0, 1.0, effReverbsParams[k]._e_reverb_in_hiCutMin, effReverbsParams[k]._e_reverb_in_hiCutMax);
-            ofLogVerbose() << "Reverb high cut on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_hiCut) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_hiCutMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_hiCutMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToReverbParameters") << "Reverb high cut on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_hiCut) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_hiCutMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_hiCutMax) + " on sensor " + ofToString(v+1)<< endl;
         }
         if (effReverbsParams[k]._e_reverb_in_modFreqConnectTo == v + 1) {
             effReverbsParams[k]._e_reverb_in_modFreq = ofMap(normalisedA2DValues[v], 0.0, 1.0, effReverbsParams[k]._e_reverb_in_modFreqMin, effReverbsParams[k]._e_reverb_in_modFreqMax);
-            ofLogVerbose() << "Reverb Mod freq on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_modFreq) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_modFreqMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_modFreqMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToReverbParameters") << "Reverb Mod freq on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_modFreq) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_modFreqMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_modFreqMax) + " on sensor " + ofToString(v+1)<< endl;
         }
         if (effReverbsParams[k]._e_reverb_in_modAmountConnectTo == v + 1) {
             effReverbsParams[k]._e_reverb_in_modAmount = ofMap(normalisedA2DValues[v], 0.0, 1.0, effReverbsParams[k]._e_reverb_in_modAmountMin, effReverbsParams[k]._e_reverb_in_modAmountMax);
-            ofLogVerbose() << "Reverb mod amount on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_modAmount) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_modAmountMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_modAmountMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToReverbParameters") << "Reverb mod amount on slot " + ofToString(k) + " = " + ofToString(effReverbsParams[k]._e_reverb_in_modAmount) + " mapped between " + ofToString(effReverbsParams[k]._e_reverb_in_modAmountMin) + " and " + ofToString(effReverbsParams[k]._e_reverb_in_modAmountMax) + " on sensor " + ofToString(v+1)<< endl;
         }
     }
 }
@@ -3064,7 +3124,7 @@ void ofApp::applyDynamicValuesToBitCrusherParameters(int k, int v)
     if (effectsPatching[presetIndex-1][k].hasBitCrusher) {
         if (effBitCrushersParams[k]._e_bitcrush_in_bitsConnectTo == v + 1) {
             effBitCrushersParams[k]._e_bitcrush_in_bits = ofMap(normalisedA2DValues[v], 0.0, 1.0, effBitCrushersParams[k]._e_bitcrush_in_bitsMin, effBitCrushersParams[k]._e_bitcrush_in_bitsMax);
-            ofLogVerbose() << "Bitcrusher on slot " + ofToString(k) + " = " + ofToString(effBitCrushersParams[k]._e_bitcrush_in_bits) + " mapped between " + ofToString(effBitCrushersParams[k]._e_bitcrush_in_bitsMin) + " and " + ofToString(effBitCrushersParams[k]._e_bitcrush_in_bitsMax) + " on sensor " + ofToString(v+1)<< endl;
+            ofLogVerbose("applyDynamicValuesToReverbParameters") << "Bitcrusher on slot " + ofToString(k) + " = " + ofToString(effBitCrushersParams[k]._e_bitcrush_in_bits) + " mapped between " + ofToString(effBitCrushersParams[k]._e_bitcrush_in_bitsMin) + " and " + ofToString(effBitCrushersParams[k]._e_bitcrush_in_bitsMax) + " on sensor " + ofToString(v+1)<< endl;
         }
     }
     
@@ -3074,32 +3134,28 @@ void ofApp::applyDynamicValuesToBitCrusherParameters(int k, int v)
 
 void ofApp::switchPresets()
 {
+    
 // I had a problem switching too fast on raspberry pi so I make a time to check it cannot happen within 10 seconds of the last switchPresets(), the raspberry pi changes the LED colour in this process
 #ifdef HAS_ADC
-	if (ofGetElapsedTimeMillis() - presetSwitchTimer > 10000)
-	{
+    if (ofGetElapsedTimeMillis() - presetSwitchTimer > 10000)
+    {
 
-#endif // HAS_ADC
         
-		switch (presetIndex) {
-		case 1:
-                presetIndex = 2;
-			setupGraincloud(filePathsSet2, unitID + "_preset_2.xml");
-			
-			cout << "Preset index 2 loaded" << endl;
-			break;
-		case 2:
-                presetIndex = 1;
-
-			setupGraincloud(filePathsSet1, unitID + "_preset_1.xml");
-			cout << "Preset index 1 loaded" << endl;
-		default:
-			break;
-		}
-		presetSwitchTimer = ofGetElapsedTimeMillis();
+#endif // HAS_ADC
+        presetIndex++;
+        if (presetIndex>NUMBER_OF_PRESETS) {
+            presetIndex=1;
+        }
+        for(int i = 0; i < numberOfSlots; i++){
+            drawGrains[i]=false;
+            
+        }
+        
+        setupGraincloud(filePathsSet[presetIndex-1], unitID + "_preset_" + ofToString(presetIndex) + ".xml");
+        presetSwitchTimer = ofGetElapsedTimeMillis();
 #ifdef HAS_ADC
 
-	}
+    }
 #endif // HAS_ADC
 }
 
@@ -3356,10 +3412,12 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 
 		sampleData[i]->setVerbose(true);
 		sampleData[i]->load(paths[i]);
-        cloud[i]->setSample(sampleData[i]); // give to the pdsp::GrainCloud the pointer to the sample
+       
+        cloud[i]->setSample(sampleData[i].get());
+        //*cloud[i].setSample(sampleData[i]); // give to the pdsp::GrainCloud the pointer to the sample
 
         if (firstRun) {
-            samplePanels[i].setup("Slot " + ofToString(i + 1), filePathPrefix + presetPath); //we have a GUI panel for each granular
+            samplePanels[i]->setup("Slot " + ofToString(i + 1), filePathPrefix + presetPath); //we have a GUI panel for each granular
             //the parameters are split into groups to make it easier to see, each group has value, a min, a max, and connect to to connect it to the sensor
             _windowTypeGroup_group[i].add(_window_type_id[i].set("Window type " + ofToString(i + 1), 0, 0, 9));
 #ifndef HAS_ADC
@@ -3367,60 +3425,60 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
             _windowTypeGroup_group[i].add(_window_type_name[i].set("Windowing "+ ofToString(i + 1), "default"));
             _windowTypeGroup_group[i].setName("Window Type slot " + ofToString(i + 1));
 #endif
-            samplePanels[i].add(_windowTypeGroup_group[i]);
+            samplePanels[i]->add(_windowTypeGroup_group[i]);
             
             _in_length_group[i].add(_in_length[i].set("in length " + ofToString(i + 1), 500, 10, 3000));
             _in_length_group[i].add(_in_lengthMin[i].set("in length Min " + ofToString(i + 1), 100, 10, 3000));
             _in_length_group[i].add(_in_lengthMax[i].set("in length Max " + ofToString(i + 1), 3000, 10, 3000));
             _in_length_group[i].add(in_length_connect[i].set("IL Connect to " + ofToString(i + 1), 0, 0, 6));
             _in_length_group[i].setName("In Length");
-            samplePanels[i].add(_in_length_group[i]);
+            samplePanels[i]->add(_in_length_group[i]);
             
             _in_density_group[i].add(_in_density[i].set("in density " + ofToString(i + 1), 0.9, 0.1, 1.0));
             _in_density_group[i].add(_in_densityMin[i].set("in density Min " + ofToString(i + 1), 0.1, 0.1, 1.0));
             _in_density_group[i].add(_in_densityMax[i].set("in density Max " + ofToString(i + 1), 5.0, 0.1, 1.0));
             _in_density_group[i].add(in_density_connect[i].set("ID Connect to " + ofToString(i + 1), 0, 0, 6));
             _in_density_group[i].setName("density");
-            samplePanels[i].add(_in_density_group[i]);
+            samplePanels[i]->add(_in_density_group[i]);
             
             _in_distance_jitter_group[i].add(_in_distance_jitter[i].set("distance jitter " + ofToString(i + 1), 20.0, 0.0, 1000.0));
             _in_distance_jitter_group[i].add(_in_distance_jitterMin[i].set("distance jitter min " + ofToString(i + 1), 0.0, 0.0, 1000.0));
             _in_distance_jitter_group[i].add(_in_distance_jitterMax[i].set("distance jitter max " + ofToString(i + 1), 1000.0, 0.0, 1000.0));
             _in_distance_jitter_group[i].add(in_distJit_connect[i].set("DJ Connect to " + ofToString(i + 1), 0, 0, 6));
             _in_distance_jitter_group[i].setName("Distance Jitter");
-            samplePanels[i].add(_in_distance_jitter_group[i]);
+            samplePanels[i]->add(_in_distance_jitter_group[i]);
             
             _in_pitch_jitter_group[i].add(_in_pitch_jitter[i].set("pitch jitter " + ofToString(i + 1), 0.0, -200.0, 200.0));
             _in_pitch_jitter_group[i].add(_in_pitch_jitterMin[i].set("pitch jitter min " + ofToString(i + 1), -200.0, -200.0, 200.0));
             _in_pitch_jitter_group[i].add(_in_pitch_jitterMax[i].set("pitch jitter max " + ofToString(i + 1), 200.0, -200.0, 200.0));
             _in_pitch_jitter_group[i].add(in_pitchJit_connect[i].set("PJ Connect to " + ofToString(i + 1), 0, 0, 6));
             _in_pitch_jitter_group[i].setName("Pitch Jitter");
-            samplePanels[i].add(_in_pitch_jitter_group[i]);
+            samplePanels[i]->add(_in_pitch_jitter_group[i]);
             
             _in_pitch_group[i].add(_in_pitch[i].set("pitch " + ofToString(i + 1), 0.0, -20.0, 20.0));
             _in_pitch_group[i].add(_in_pitchMin[i].set("pitch min " + ofToString(i + 1), -20.0, -20.0, 20.0));
             _in_pitch_group[i].add(_in_pitchMax[i].set("pitch max " + ofToString(i + 1), 20.0, -20.0, 20.0));
             _in_pitch_group[i].add(in_pitch_connect[i].set("Pitch Connect to " + ofToString(i + 1), 0, 0, 6));
             _in_pitch_group[i].setName("Pitch");
-            samplePanels[i].add(_in_pitch_group[i]);
+            samplePanels[i]->add(_in_pitch_group[i]);
             
             _spread_group[i].add(_spread[i].set("_spread " + ofToString(i + 1), 0.0, 0.0, 1.0));
             _spread_group[i].add(_spreadMin[i].set("_spread min " + ofToString(i + 1), 0.0, 0.0, 1.0));
             _spread_group[i].add(_spreadMax[i].set("_spread max " + ofToString(i + 1), 1.0, 0.0, 1.0));
             _spread_group[i].add(_spread_connect[i].set("S Connect to " + ofToString(i + 1), 0, 0, 6));
             _spread_group[i].setName("Spread");
-            samplePanels[i].add(_spread_group[i]);
+            samplePanels[i]->add(_spread_group[i]);
             
             _volume_group[i].add(_volume[i].set("Volume " + ofToString(i + 1), 0.5, 0.0, 1.0));
             _volume_group[i].add(_volumeMin[i].set("Volume min " + ofToString(i + 1), 0.0, 0.0, 1.0));
             _volume_group[i].add(_volumeMax[i].set("Volume max " + ofToString(i + 1), 1.0, 0.0, 1.0));
             _volume_group[i].add(_volume_connect[i].set("V Connect to " + ofToString(i + 1), 0, 0, 6));
             _volume_group[i].setName("Volume");
-            samplePanels[i].add(_volume_group[i]);
+            samplePanels[i]->add(_volume_group[i]);
             
             _grainDirection_group[i].add(_grainDirection[i].set("grain forwards " + ofToString(i + 1), 0.0, -1.0, 1.0));
             _grainDirection_group[i].setName("Direction");
-            samplePanels[i].add(_grainDirection_group[i]);
+            samplePanels[i]->add(_grainDirection_group[i]);
             
             if (!useAccumulatedPressure)
             {
@@ -3430,13 +3488,13 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
                 _posX_group[i].add(_posXMax[i].set("Play Position max " + ofToString(i + 1), 1.0, 0.0, 1.0));
                 _posX_group[i].add(_posX_connect[i].set("P Connect to " + ofToString(i + 1), 0, 0, 6));
                 _posX_group[i].setName("Position");
-                samplePanels[i].add(_posX_group[i]);
+                samplePanels[i]->add(_posX_group[i]);
             }
         }
         //load from the XML
-        samplePanels[i].loadFromFile(filePathPrefix + presetPath);
+        samplePanels[i]->loadFromFile(filePathPrefix + presetPath);
         //set the XML path manually so the native save and recal settings buttons work properly with our settings
-        samplePanels[i].setFileName(filePathPrefix + presetPath);
+       // samplePanels[i]->setFileName(filePathPrefix + presetPath);
 
         switch (_window_type_id[i]) {
             case 0:
@@ -3520,8 +3578,8 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
         // setup the waveform preview and the position of the GUI modules
 			drawGrains[i] = false;
 			waveformGraphics[i]->setWaveform(*sampleData[i], 0, ofColor(0, 100, 100, 255), uiWidth[i], uiHeigth[i]);
-			samplePanels[i].setPosition(uiX[i], uiMaxY[i] + 10);
-            effectsPanels[i].setPosition(uiX[i], uiMaxY[i] + 10);
+			samplePanels[i]->setPosition(uiX[i], uiMaxY[i] + 10);
+            effectsPanels[i]->setPosition(uiX[i], uiMaxY[i] + 10);
 
 
 #endif
@@ -3685,19 +3743,32 @@ void ofApp::populateVectors()
 		int					tmp_grainVoices;
 		grainVoices.push_back(tmp_grainVoices);
 
-		pdsp::SampleBuffer* tmp_sampleData = new pdsp::SampleBuffer();
+        
+//        auto tempPanel = make_shared<ofxPanel>();
+//        samplePanels.push_back(tempPanel);
+        
+        auto tmp_sampleData = make_shared<pdsp::SampleBuffer>();
+		//pdsp::SampleBuffer* tmp_sampleData = new pdsp::SampleBuffer();
 		sampleData.push_back(tmp_sampleData);
 
-		pdsp::GrainCloud* tmp_cloud = new pdsp::GrainCloud();
-		cloud.push_back(tmp_cloud);
+        auto tmp_cloud = make_shared<pdsp::GrainCloud>();
 
-		pdsp::ParameterAmp* tmp_ampControl = new pdsp::ParameterAmp();
+		///pdsp::GrainCloud* tmp_cloud = new pdsp::GrainCloud();
+		cloud.push_back(tmp_cloud);
+        
+        auto tmp_ampControl = make_shared<pdsp::ParameterAmp>();
+
+		//pdsp::ParameterAmp* tmp_ampControl = new pdsp::ParameterAmp();
 		ampControl.push_back(tmp_ampControl);
 
-		pdsp::PatchNode* tmp_posX = new pdsp::PatchNode();
+        auto tmp_posX = make_shared<pdsp::PatchNode>();
+
+		//pdsp::PatchNode* tmp_posX = new pdsp::PatchNode();
 		posX.push_back(tmp_posX);
 
-		pdsp::PatchNode* tmp_jitY = new pdsp::PatchNode();
+        auto tmp_jitY = make_shared<pdsp::PatchNode>();
+
+		//pdsp::PatchNode* tmp_jitY = new pdsp::PatchNode();
 		jitY.push_back(tmp_jitY);
 
 
@@ -3720,8 +3791,11 @@ void ofApp::populateVectors()
 		int					tmp_controlY;
 		controlY.push_back(tmp_controlY);
 
-		ofxPanel				tmp_samplePanels;
-		samplePanels.push_back(tmp_samplePanels);
+        
+        
+        auto tempPanel = make_shared<ofxPanel>();
+        samplePanels.push_back(tempPanel);
+		
         
         ofParameter<int>		tmp__window_type_id;
         _window_type_id.push_back(tmp__window_type_id);
@@ -3810,14 +3884,13 @@ void ofApp::populateVectors()
 		int tmp_zeroValues;
 		zeroValues.push_back(tmp_zeroValues);
 
-		string tempString;
-		filePathsSet1.push_back(tempString);
-		string tempString2;
-		filePathsSet2.push_back(tempString2);
-		string tempString3;
-		fileNamesSet1.push_back(tempString3);
-		string tempString4;
-		fileNamesSet2.push_back(tempString4);
+        for(int i = 0; i < NUMBER_OF_PRESETS; i++){
+                  string tempString;
+                  filePathsSet[i].push_back(tempString);
+                  
+                  string tempString1;
+                  fileNamesSet[i].push_back(tempString1);
+              }
 		
 		ChannelEffects thisEffectSet1;
         
@@ -3894,7 +3967,7 @@ void ofApp::populateVectors()
         EFFCompressorUnit tempeffCompressorsParams;
         effCompressorsParams.push_back(tempeffCompressorsParams);
         
-        ofxPanel effectPanel;
+        auto effectPanel = make_shared<ofxPanel>();
         effectsPanels.push_back(effectPanel);
 
        
@@ -4006,6 +4079,7 @@ void ofApp::clearEffectVectors(){
     //------------compressor
     compressors.clear();
 
+
 }
 #ifdef HAS_ADC
 void ofApp::calibrateOnStart() {
@@ -4023,7 +4097,7 @@ void ofApp::calibrateOnStart() {
 		a2dVal[i] = (data[i][1] << 8) & 0b1100000000;
 		a2dVal[i] |= (data[i][2] & 0xff);
 		zeroValues[i] = a2dVal[i];
-		cout << ofToString(unitID) + " zerValues for " + ofToString(i) + " = " + ofToString(zeroValues[i]) << endl;
+        ofLogVerbose("calibrateOnStart") << ofToString(unitID) + " zerValues for " + ofToString(i) + " = " + ofToString(zeroValues[i]) << endl;
 		if (oscDebug) {
 			recyclingMessage.addIntArg(zeroValues[i]);
 		}
@@ -4037,18 +4111,31 @@ void ofApp::calibrateOnStart() {
 void ofApp::readADCValues()
 {
     //read the values from the ADC (SPI serial) they come as integers, the resolution is 10bit
-	for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
+    //for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
 
-		data[i][0] = 1;
-		data[i][1] = 0b10000000 | (((a2dChannel[i] & 7) << 4));
-		data[i][2] = 0;
-		a2d.readWrite(data[i]);//sizeof(data) );
-		a2dVal[i] = 0;
-		a2dVal[i] = (data[i][1] << 8) & 0b1100000000;
-		a2dVal[i] |= (data[i][2] & 0xff);
+        //data[i][0] = 1;
+        //data[i][1] = 0b10000000 | (((a2dChannel[i] & 7) << 4));
+        //data[i][2] = 0;
+        //a2d.readWrite(data[i]);//sizeof(data) );
+        //a2dVal[i] = 0;
+        //a2dVal[i] = (data[i][1] << 8) & 0b1100000000;
+        //a2dVal[i] |= (data[i][2] & 0xff);
 
-		ofLogVerbose() << " a to d reading " + ofToString(i) + " = " + ofToString(a2dVal[i]) << endl;
-	}
+        //ofLogVerbose() << " a to d reading " + ofToString(i) + " = " + ofToString(a2dVal[i]) << endl;
+    //}
+    
+    for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
+
+        //data[i][0] = 1;
+        //data[i][1] = 0b10000000 | (((a2dChannel[i] & 7) << 4));
+        //data[i][2] = 0;
+        //a2d.readWrite(data[i]);//sizeof(data) );
+        a2dVal[i] = ofGetMouseX();
+        //a2dVal[i] = (data[i][1] << 8) & 0b1100000000;
+        //a2dVal[i] |= (data[i][2] & 0xff);
+
+        //ofLogVerbose() << " a to d reading " + ofToString(i) + " = " + ofToString(a2dVal[i]) << endl;
+    }
 }
 
 void ofApp::normaliseADCValues()
@@ -4065,12 +4152,12 @@ void ofApp::normaliseADCValues()
 		normalisedA2DValues[m] = ofMap(a2dVal[m], zeroValues[m], maxSensorValue, 0.0, 1.0, true);
 		if (normalisedA2DValues[m] < normalisedA2DValuesMin)
 		{
-			normalisedA2DValues[m] = 0;
+			normalisedA2DValues[m] = normalisedA2DValuesMin;
 		}
         else if(normalisedA2DValues[m] > normalisedA2DValuesMin){
             switch (curveSelector){
                 case 0:
-                    
+                    normalisedA2DValues[m] = normalisedA2DValues[m];
                     break;
                 case 1:
                     normalisedA2DValues[m] = sqrt(normalisedA2DValues[m]);
@@ -4559,7 +4646,7 @@ void ofApp::mousePressed(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
-    //when we let go of the mouse reset out granular stuff
+    //when we let go of the mouse reset out granappplular stuff
 #ifndef HAS_ADC
 	switch (operationMode)
 	{
@@ -4701,15 +4788,15 @@ void ofApp::gotMessage(ofMessage msg){
 	case BTN_MSG_A_SAVE_GRANULAR:
 		if (presetIndex == 1) {
 			for (int i = 0; i<numberOfSlots; i++) {
-				samplePanels[i].saveToFile(filePathPrefix + unitID + "_preset_1.xml");
-                effectsPanels[i].saveToFile(filePathPrefix + unitID + "_effectParameterSettings_preset_1.xml");
+				samplePanels[i]->saveToFile(filePathPrefix + unitID + "_preset_1.xml");
+                effectsPanels[i]->saveToFile(filePathPrefix + unitID + "_effectParameterSettings_preset_1.xml");
 
 			}
 		}
 		else if (presetIndex == 2) {
 			for (int i = 0; i<numberOfSlots; i++) {
-				samplePanels[i].saveToFile(filePathPrefix + unitID + "_preset_2.xml");
-                effectsPanels[i].saveToFile(filePathPrefix + unitID + "_effectParameterSettings_preset_2.xml");
+				samplePanels[i]->saveToFile(filePathPrefix + unitID + "_preset_2.xml");
+                effectsPanels[i]->saveToFile(filePathPrefix + unitID + "_effectParameterSettings_preset_2.xml");
 			}
 		}
 		break;
@@ -4724,36 +4811,28 @@ void ofApp::gotMessage(ofMessage msg){
 void ofApp::loadRoutine(int target) {
 #ifndef HAS_ADC
     // in the laptop mode you can load other audio files to preview
-	ampControl[target]->setv(0.0f);
-	drawGrains[target] = false;
+    ampControl[target]->setv(0.0f);
+    drawGrains[target] = false;
 
 
-	//Open the Open File Dialog
-	ofFileDialogResult openFileResult = ofSystemLoadDialog("select an audio sample");
+    //Open the Open File Dialog
+    ofFileDialogResult openFileResult = ofSystemLoadDialog("select an audio sample");
 
-	//Check if the user opened a file
-	if (openFileResult.bSuccess) {
+    //Check if the user opened a file
+    if (openFileResult.bSuccess) {
 
-		string path = openFileResult.getPath();
+        string path = openFileResult.getPath();
 
-		sampleData[target]->load(path);
-		waveformGraphics[target]->setWaveform(*sampleData[target], 0, ofColor(0, 100, 100, 255), uiWidth[target], uiHeigth[target]);
+        sampleData[target]->load(path);
+        waveformGraphics[target]->setWaveform(*sampleData[target], 0, ofColor(0, 100, 100, 255), uiWidth[target], uiHeigth[target]);
+        fileNamesSet[presetIndex][target] = openFileResult.getName();
 
-		if (presetIndex == 1)
-		{
-			fileNamesSet1[target] = openFileResult.getName();
-		}
-		if (presetIndex==2)
-		{
-			fileNamesSet2[target] = openFileResult.getName();
-		}
+        ofLogVerbose("file loaded");
 
-		ofLogVerbose("file loaded");
-
-	}
-	else {
-		ofLogVerbose("User hit cancel");
-	}
+    }
+    else {
+        ofLogVerbose("User hit cancel");
+    }
 #endif
 }
 
@@ -4809,7 +4888,7 @@ void ofApp::buttonStateMachine() {
 				m.addIntArg(3);
 				sender.sendMessage(m, false);
 			}
-			ofLogVerbose() << "triple click" << endl;
+			ofLogVerbose("buttonStateMachine") << "triple click" << endl;
 
 			if (oscDebug) {
 				ofxOscMessage m;
@@ -4817,7 +4896,7 @@ void ofApp::buttonStateMachine() {
 				m.addIntArg(1);
 				sender.sendMessage(m, false);
 			}
-			ofLogVerbose() << "Speaker Sync" << endl;
+			ofLogVerbose("buttonStateMachine") << "Speaker Sync" << endl;
 
 		}
 
@@ -4826,7 +4905,7 @@ void ofApp::buttonStateMachine() {
 			clicks = 0;
 			click1Time = 0;
 			click2Time = 0;
-			ofLogVerbose() << "double click" << endl;
+			ofLogVerbose("buttonStateMachine") << "double click" << endl;
 
 			if (oscDebug) {
 				ofxOscMessage m;
@@ -4842,7 +4921,7 @@ void ofApp::buttonStateMachine() {
 		{
 			clicks = 0;
 			click1Time = 0;
-			ofLogVerbose() << "single click" << endl;
+			ofLogVerbose("buttonStateMachine") << "single click" << endl;
 			if (oscDebug) {
 				ofxOscMessage m;
 				m.setAddress("/" + ofToString(unitID) + "/button");
@@ -4880,7 +4959,7 @@ void ofApp::buttonStateMachine() {
 				clik1ReleaseTime = ofGetElapsedTimeMillis();
 				if (clik1ReleaseTime - click1Time > 6000)
 				{
-					ofLogVerbose() << "6 second click" << endl;
+					ofLogVerbose("buttonStateMachine") << "6 second click" << endl;
 					click1Time = 0;
 					clicks = 0;
 					clik1ReleaseTime = 0;
@@ -4897,7 +4976,7 @@ void ofApp::buttonStateMachine() {
 
 				if (clik1ReleaseTime - click1Time > 3000)
 				{
-					ofLogVerbose() << "3 second click" << endl;
+					ofLogVerbose("buttonStateMachine") << "3 second click" << endl;
 					click1Time = 0;
 					clicks = 0;
 					clik1ReleaseTime = 0;

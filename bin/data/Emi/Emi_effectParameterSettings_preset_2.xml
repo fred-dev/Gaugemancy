@@ -15,7 +15,7 @@
 		<Delay_connect_to>0</Delay_connect_to>
 	</Chorus_slot_1>
 	<Filter_slot_1>
-		<Freq>16556</Freq>
+		<Freq>13677</Freq>
 		<Freq_Min>10816</Freq_Min>
 		<Freq_Max>20000</Freq_Max>
 		<Freq_connect_to>6</Freq_connect_to>
@@ -25,11 +25,11 @@
 		<Reso_connect_to>0</Reso_connect_to>
 	</Filter_slot_1>
 	<Reverb_slot_1>
-		<Send_>0.719388</Send_>
+		<Send_>0.591438</Send_>
 		<Send_Min>0.464286</Send_Min>
 		<Send_Max>0.872449</Send_Max>
 		<Send_Connect_To>5</Send_Connect_To>
-		<Time_>12.2832</Time_>
+		<Time_>9.75615</Time_>
 		<Time_Min>7.2449</Time_Min>
 		<Time_Max>15.3061</Time_Max>
 		<Time_Connect_To>3</Time_Connect_To>
@@ -63,7 +63,7 @@
 		<Ratio>10</Ratio>
 	</Compressor_slot_1>
 	<Decimator_slot_1>
-		<Rate>34537</Rate>
+		<Rate>42277</Rate>
 		<Rate_Min>44100</Rate_Min>
 		<Rate_Max>38250</Rate_Max>
 		<Rate_Connect_to>5</Rate_Connect_to>

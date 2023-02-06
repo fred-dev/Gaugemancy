@@ -66,7 +66,7 @@ public:
         ParamGroup.add(_e_reverb_in_density.set("Density ", 0.0, 0, 1));
         ParamGroup.add(_e_reverb_in_densityMin.set("Density Min", 0.0, 0, 1));
         ParamGroup.add(_e_reverb_in_densityMax.set("Density Max", 1, 0, 1));
-        ParamGroup.add(_e_reverb_in_densityConnectTo.set("Density COnnect To", 0, 1, 6));
+        ParamGroup.add(_e_reverb_in_densityConnectTo.set("Density Connect To", 0, 1, 6));
 
         ParamGroup.add(_e_reverb_in_hiCut.set("Hi cut ", 0.0, 0, 20000));
         ParamGroup.add(_e_reverb_in_hiCutMin.set("Hi cut Min", 0.0, 0, 20000));

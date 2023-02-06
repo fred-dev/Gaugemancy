@@ -40,6 +40,7 @@
 
 #define NUMBER_OF_SENSORS 6
 #define NUMBER_OF_EFFECTS 6
+#define NUMBER_OF_PRESETS 2
 
 // these are the different modes or scenes, these defines are used to make things easier to read, they are used to set the operationMode variable
 
@@ -238,7 +239,7 @@ class ofApp : public ofBaseApp{
 
 		void getAccumulatedPressure();
 
-		void applyDynamicValuesToParameters(int &k, std::vector<ofParameter<int>> connectTo, int v, std::vector<ofParameter<float>> parameter, std::vector<ofParameter<float>> parameterMin, std::vector<ofParameter<float>> parameterMax, string paramName);
+		void applyDynamicValuesToParameters(int k, std::vector<ofParameter<int>> connectTo, int v, std::vector<ofParameter<float>> parameter, std::vector<ofParameter<float>> parameterMin, std::vector<ofParameter<float>> parameterMax, string paramName);
 
 		void switchPresets();
 		int presetSwitchTimer;
@@ -266,11 +267,9 @@ class ofApp : public ofBaseApp{
 		ofxXmlSettings usernameXML;
 		ofxXmlSettings effectsPatchXML;
 
-		std::vector<string> filePathsSet1;
-		std::vector<string> fileNamesSet1;
-
-		std::vector<string> filePathsSet2;
-		std::vector<string> fileNamesSet2;
+		
+        std::vector<string> filePathsSet[NUMBER_OF_PRESETS];
+        std::vector<string> fileNamesSet[NUMBER_OF_PRESETS];
 
 		//OP_MODE_WAIT_FOR_NARRATION
 		void setupNarration();
@@ -359,15 +358,15 @@ class ofApp : public ofBaseApp{
 		std::vector<ofxSampleBufferPlotter*>  waveformGraphics;
 #endif
 		std::vector<int>					grainVoices;
-		std::vector<pdsp::SampleBuffer*>		sampleData;
-		std::vector<pdsp::GrainCloud*>		cloud;
-		std::vector<pdsp::ParameterAmp*> ampControl;
+		std::vector<shared_ptr<pdsp::SampleBuffer>>		sampleData;
+		std::vector<shared_ptr<pdsp::GrainCloud>>		cloud;
+		std::vector<shared_ptr<pdsp::ParameterAmp>> ampControl;
 
 
-		std::vector<pdsp::PatchNode*> posX;
+		std::vector<shared_ptr<pdsp::PatchNode>> posX;
 
 		//std::vector<pdsp::PatchNode>		posX;
-		std::vector<pdsp::PatchNode*> jitY;
+		std::vector<shared_ptr<pdsp::PatchNode>> jitY;
 
 		//std::vector<pdsp::PatchNode>		jitY;
 
@@ -382,7 +381,7 @@ class ofApp : public ofBaseApp{
 		std::vector<int>					controlX;
 		std::vector<int>					controlY;
 
-		std::vector<ofxPanel>				samplePanels;
+        std::vector<shared_ptr<ofxPanel>>			samplePanels;
     
         std::vector<ofParameterGroup>		_windowTypeGroup_group;
         std::vector<ofParameter<int>>       _window_type_id;
@@ -529,9 +528,9 @@ class ofApp : public ofBaseApp{
         bool hasReverb;
     };
     
-    std::vector<ofxPanel>				effectsPanels;
+    std::vector<shared_ptr<ofxPanel>>			effectsPanels;
     
-    std::vector<std::vector<ChannelEffects>> effectsPatching;
+        std::vector<std::vector<ChannelEffects>> effectsPatching;
     
     void loadEffectPatchSettings();
     

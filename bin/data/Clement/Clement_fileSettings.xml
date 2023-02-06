@@ -1,16 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PATHS>
-	<NARRATION_FILE>narrationcle1_Loud.wav</NARRATION_FILE>
-	<FILE_1A>CLDevice4Preset1.wav</FILE_1A>
-	<FILE_2A>CHDevice1Preset2.wav</FILE_2A>
-	<FILE_3A>CLDevice4Preset1.wav</FILE_3A>
+
+		<FILE_1A>CLDevice4Preset1.wav</FILE_1A>
+	<FILE_2A>CLDevice4Preset1.wav</FILE_2A>
+	<FILE_3A>CLDevice4Preset2.wav</FILE_3A>
 	<FILE_4A>CLDevice4Preset2.wav</FILE_4A>
-	<FILE_5A>EDevice3Preset1.wav</FILE_5A>
-	<FILE_6A>EDevice3Preset2.wav</FILE_6A>
-	<FILE_1B>CLDevice4Preset2.wav</FILE_1B>
-	<FILE_2B>EDevice3Preset2.wav</FILE_2B>
-	<FILE_3B>EDevice3Preset2.wav</FILE_3B>
-	<FILE_4B>EDevice3Preset2.wav</FILE_4B>
-	<FILE_5B>EDevice3Preset2.wav</FILE_5B>
-	<FILE_6B>EDevice3Preset2.wav</FILE_6B>
+	<FILE_5A>CLDevice4Preset3.wav</FILE_5A>
+	<FILE_6A>CLDevice4Preset3.wav</FILE_6A>
+	<FILE_1B>CLDevice4Preset4.wav</FILE_1B>
+	<FILE_2B>CLDevice4Preset4.wav</FILE_2B>
+	<FILE_3B>CLDevice4Preset1.wav</FILE_3B>
+	<FILE_4B>CLDevice4Preset1.wav</FILE_4B>
+	<FILE_5B>CLDevice4Preset2.wav</FILE_5B>
+	<FILE_6B>CLDevice4Preset2.wav</FILE_6B>
+
+
+	<FILE_1_1>CLDevice4Preset1.wav</FILE_1_1>
+	<FILE_2_1>CLDevice1Preset2.wav</FILE_2_1>
+	<FILE_3_1>CLDevice4Preset3.wav</FILE_3_1>
+	<FILE_4_1>CLDevice4Preset4.wav</FILE_4_1>
+	<FILE_5_1>CLDevice4Preset3.wav</FILE_5_1>
+	<FILE_6_1>CLDevice4Preset4.wav</FILE_6_1>
+
+	<FILE_1_2>CLDevice4Preset1.wav</FILE_1_2>
+	<FILE_2_2>CHDevice1Preset2.wav</FILE_2_2>
+	<FILE_3_2>CLDevice4Preset1.wav</FILE_3_2>
+	<FILE_4_2>CLDevice4Preset2.wav</FILE_4_2>
+	<FILE_5_2>CLDevice4Preset1.wav</FILE_5_2>
+	<FILE_6_2>CLDevice4Preset2.wav</FILE_6_2>
+
+	<FILE_1_3>CLDevice4Preset1.wav</FILE_1_3>
+	<FILE_3_3>CHDevice1Preset2.wav</FILE_3_3>
+	<FILE_3_3>CLDevice4Preset1.wav</FILE_3_3>
+	<FILE_4_3>CLDevice4Preset2.wav</FILE_4_3>
+	<FILE_5_3>CLDevice4Preset1.wav</FILE_5_3>
+	<FILE_6_3>CLDevice4Preset2.wav</FILE_6_3>
+
+	<FILE_1_4>CLDevice4Preset1.wav</FILE_1_4>
+	<FILE_3_4>CHDevice1Preset2.wav</FILE_3_4>
+	<FILE_3_4>CLDevice4Preset1.wav</FILE_3_4>
+	<FILE_4_4>CLDevice4Preset2.wav</FILE_4_4>
+	<FILE_5_4>CLDevice4Preset1.wav</FILE_5_4>
+	<FILE_6_4>CLDevice4Preset2.wav</FILE_6_4>
+	<NARRATION_FILE>narrationcle1_Loud_Cleaned.wav</NARRATION_FILE>
+
+
+
 </PATHS>

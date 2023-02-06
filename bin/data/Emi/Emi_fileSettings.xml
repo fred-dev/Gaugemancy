@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PATHS>
 	<NARRATION_FILE>narrationemimig1_Loud.wav</NARRATION_FILE>
-	<FILE_1A>EDevice3Preset1.wav</FILE_1A>
-	<FILE_2A>CHDevice1Preset2.wav</FILE_2A>
-	<FILE_3A>CLDevice4Preset1.wav</FILE_3A>
-	<FILE_4A>CLDevice4Preset2.wav</FILE_4A>
-	<FILE_5A>EDevice3Preset1.wav</FILE_5A>
-	<FILE_6A>EDevice3Preset2.wav</FILE_6A>
-	<FILE_1B>EDevice3Preset2.wav</FILE_1B>
-	<FILE_2B>EDevice3Preset2.wav</FILE_2B>
-	<FILE_3B>EDevice3Preset2.wav</FILE_3B>
-	<FILE_4B>EDevice3Preset2.wav</FILE_4B>
-	<FILE_5B>EDevice3Preset2.wav</FILE_5B>
-	<FILE_6B>EDevice3Preset2.wav</FILE_6B>
+	<FILE_1A>EDevice3Preset1A.wav</FILE_1A>
+	<FILE_2A>EDevice3Preset1B.wav</FILE_2A>
+	<FILE_3A>EDevice3Preset1C.wav</FILE_3A>
+	<FILE_4A>EDevice3Preset1D.wav</FILE_4A>
+	<FILE_5A>EDevice3Preset1E.wav</FILE_5A>
+	<FILE_6A>EDevice3Preset1F.wav</FILE_6A>
+	<FILE_1B>EDevice3Preset2A.wav</FILE_1B>
+	<FILE_2B>EDevice3Preset2B.wav</FILE_2B>
+	<FILE_3B>EDevice3Preset2C.wav</FILE_3B>
+	<FILE_4B>EDevice3Preset2D.wav</FILE_4B>
+	<FILE_5B>EDevice3Preset2E.wav</FILE_5B>
+	<FILE_6B>EDevice3Preset2F.wav</FILE_6B>
 </PATHS>

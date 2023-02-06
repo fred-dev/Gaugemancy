@@ -20,7 +20,7 @@ public:
         ParamGroup.add(_e_decomator_in_rate.set("Rate", 44100, 1, 44100));
         ParamGroup.add(_e_decomator_in_rateMin.set("Rate Min", 1, 1, 44100));
         ParamGroup.add(_e_decomator_in_rateMax.set("Rate Max", 44100, 1, 44100));
-        ParamGroup.add(_e_decomator_in_rateConnectTo.set("Rate Connect to", 0, 0, 6));
+        ParamGroup.add(_e_decomator_in_rateConnectTo.set("Rate Connect To", 0, 0, 6));
     }
     
     ofParameterGroup getParamGroup(){
