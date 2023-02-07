@@ -16,13 +16,14 @@ public:
     ofTrueTypeFont labelFont;
     bool buttonActive;
     void setup(string label, int message) {
-        ofLogVerbose()<<buttonName +  " button::setup() - hello!"<<endl;
         enableMouseEvents();
         enableKeyEvents();
         labelFont.load("verdana.ttf",15);
         buttonName=label;
         buttonMessage = message;
         buttonActive=false;
+        ofLogVerbose()<<buttonName +  " button::setup()"<<endl;
+
         
     }
     

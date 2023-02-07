@@ -2,72 +2,72 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-
-//setup function for the whole system, run once on startup
-
-//set the root path for all settings and audio (different for the PI - USB stick mounted via FSTAB, or the laptop version - relative to the exe
+    
+    //setup function for the whole system, run once on startup
+    
+    //set the root path for all settings and audio (different for the PI - USB stick mounted via FSTAB, or the laptop version - relative to the exe
 #ifdef HAS_ADC
-	filePathPrefix = "/media/Data/";
+    filePathPrefix = "/media/Data/";
 #else
-	filePathPrefix = ofToDataPath("");
+    filePathPrefix = ofToDataPath("");
 #endif
-
+    
 #ifndef HAS_ADC
-// prepare graphic components for the simulation visualiser - laptop version only
-	setupVisualiser();
+    // prepare graphic components for the simulation visualiser - laptop version only
+    setupVisualiser();
 #endif
-// init parameters we need
-	initParameters();
+    // init parameters we need
+    initParameters();
     
-// read settings from XML, user, all user settings and
-	setupParamsFromXML();
+    // read settings from XML, user, all user settings and
+    setupParamsFromXML();
     ofSleepMillis(20);
-
     
-// based on the XML settings populate the vectors with blanks
-	populateVectors();
+    
+    // based on the XML settings populate the vectors with blanks
+    populateVectors();
     ofSleepMillis(20);
-
+    
     populateEffectVectors();
     ofSleepMillis(20);
-
     
-// read the audio file paths from the XML so we know what to load
-	setupFilePaths();
+    
+    // read the audio file paths from the XML so we know what to load
+    setupFilePaths();
     
     // create the granualr objects we need and setup thier parameters from the ofParameter class
     setupGraincloud(filePathsSet[presetIndex-1], unitID + "_preset_" + ofToString(presetIndex) + ".xml");
     
 #ifndef HAS_ADC
-// setup graphic envirnment variables and FBOs - latop only
-	setupGraphicEnv();
-// setup the curves preview environment, this is a visualiser for viewing the curve applied to the sensor data- latop only
+    // setup graphic envirnment variables and FBOs - latop only
+    setupGraphicEnv();
+    // setup the curves preview environment, this is a visualiser for viewing the curve applied to the sensor data- latop only
     setupCurvesDisplay();
-// setup the curves preview line, this can change in app- latop only
+    // setup the curves preview line, this can change in app- latop only
     generateCurvedLine();
-// setup the on screen buttons- latop only, each mode has its own buttons
-	setupAllButtons();
+    // setup the on screen buttons- latop only, each mode has its own buttons
+    setupAllButtons();
 #endif
-
-
+    
+    
 #ifdef HAS_ADC
-//setup the SPI ADC - raspberry pi only
-	setupADC();
+    //setup the SPI ADC - raspberry pi only
+    setupADC();
     
-//setup the Blue LED pin- raspberry pi only
-	initLedBlue();
+    //setup the Blue LED pin- raspberry pi only
+    initLedBlue();
     
-//setup the red LED pin- raspberry pi only
+    //setup the red LED pin- raspberry pi only
     initLedRed();
     
-//setup the relay to control the speaker- raspberry pi only
-	setupSpeakerControl();
+    //setup the relay to control the speaker- raspberry pi only
+    setupSpeakerControl();
     
-//Turn on the speaker via the relay- raspberry pi only
+    //Turn on the speaker via the relay- raspberry pi only
     syncSpeaker();
     
-//setup the pin to accept input from the button- raspberry pi only
-	setupButton();
+    //setup the pin to accept input from the button- raspberry pi only
+    setupButton();
     
     if (presetIndex ==1) {
         blueLed.setal_gpio("1");
@@ -87,66 +87,66 @@ void ofApp::setup(){
     }
 #else
     
-// setup the font for showing messages on screen - latop only
-	messageFont.load("verdana.ttf", 40);
+    // setup the font for showing messages on screen - latop only
+    messageFont.load("verdana.ttf", 40);
 #endif
-
-// In the show some of the devices have a narration file, which will play when the performers touch the balls and increase pressure readings past a threshold. If it does not have a narration track it goes directly to the granular mode
-	if (!hasNarration)
-	{
+    
+    // In the show some of the devices have a narration file, which will play when the performers touch the balls and increase pressure readings past a threshold. If it does not have a narration track it goes directly to the granular mode
+    if (!hasNarration)
+    {
         goToMode(grainOperationModeTranslate);
-	}
-	if (hasNarration)
-	{
-		setupNarration();
-	}
-   
-	//-----------------init and start audio subsystem-------------
-	engine.listDevices();
+    }
+    if (hasNarration)
+    {
+        setupNarration();
+    }
+    
+    //-----------------init and start audio subsystem-------------
+    engine.listDevices();
     engine.setChannels(0,2);
     
-	engine.setDeviceID(audioDeviceId); // REMEMBER TO SET THIS AT THE RIGHT INDEX!!!!
-	engine.setup(44100, engineBufferSize, numberOfBuffers);
+    engine.setDeviceID(audioDeviceId); // REMEMBER TO SET THIS AT THE RIGHT INDEX!!!!
+    engine.setup(44100, engineBufferSize, numberOfBuffers);
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-// here we have the update loop with a switch for the different modes, runs as fast as possible
-	switch (operationMode)
-	{
-	case OP_MODE_SETUP:
-		updateInitMode();
-		break;
-	case OP_MODE_WAIT_FOR_NARRATION:
-		updateWaitForNarrMode();
-		break;
-	case OP_MODE_PLAY_NARRATION:
-		updatePlayNarrMode();
-		break;
-	case OP_MODE_SWITCH_PRESETS:
-		updateSwitchPresetsMode();
-		break;
-	case OP_MODE_MULTI_GRAIN_MODE:
-		updateMultiGrainMode();
-		break;
-	case OP_MODE_SINGLE_GRAIN_MODE:
-		updateSingleGrainMode();
-		break;
+    // here we have the update loop with a switch for the different modes, runs as fast as possible
+    switch (operationMode)
+    {
+        case OP_MODE_SETUP:
+            updateInitMode();
+            break;
+        case OP_MODE_WAIT_FOR_NARRATION:
+            updateWaitForNarrMode();
+            break;
+        case OP_MODE_PLAY_NARRATION:
+            updatePlayNarrMode();
+            break;
+        case OP_MODE_SWITCH_PRESETS:
+            updateSwitchPresetsMode();
+            break;
+        case OP_MODE_MULTI_GRAIN_MODE:
+            updateMultiGrainMode();
+            break;
+        case OP_MODE_SINGLE_GRAIN_MODE:
+            updateSingleGrainMode();
+            break;
 #ifndef HAS_ADC
-	case OP_MODE_NARRATION_GUI:
-		updateNarrGuiMode();
-		break;
-	case OP_MODE_SIMULATION_MULTI:
-		updateSimulationMultiMode();
-		break;
-	case OP_MODE_SIMULATION_SINGLE:
-		updateSimulationSingleMode();
-		break;
+        case OP_MODE_NARRATION_GUI:
+            updateNarrGuiMode();
+            break;
+        case OP_MODE_SIMULATION_MULTI:
+            updateSimulationMultiMode();
+            break;
+        case OP_MODE_SIMULATION_SINGLE:
+            updateSimulationSingleMode();
+            break;
 #endif
-	case OP_MODE_NARRATION_GLITCH:
-		updateNarrationGlitchMode();
-		break;
-	}
+        case OP_MODE_NARRATION_GLITCH:
+            updateNarrationGlitchMode();
+            break;
+    }
 }
 
 // here we have the draw loop with a switch for the different modes, runs at the screens refresh rate, - laptop only
@@ -154,41 +154,41 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 #ifndef HAS_ADC
-
-	switch (operationMode)
-	{
-	case OP_MODE_SETUP:
-		drawInitMode();
-		break;
-	case OP_MODE_WAIT_FOR_NARRATION:
-		drawWaitForNarrMode();
-		break;
-	case OP_MODE_PLAY_NARRATION:
-		drawPlayNarrMode();
-		break;
-	case OP_MODE_SWITCH_PRESETS:
-		drawSwitchPresetsMode();
-		break;
-	case OP_MODE_MULTI_GRAIN_MODE:
-		drawMultiGrainMode();
-		break;
-	case OP_MODE_SINGLE_GRAIN_MODE:
-		drawSingleGrainMode();
-		break;
-	case OP_MODE_NARRATION_GUI:
-		drawNarrGuiMode();
-		break;
-	case OP_MODE_SIMULATION_MULTI:
-		drawSimulationMultiMode();
-		break;
-	case OP_MODE_SIMULATION_SINGLE:
-		drawSimulationSingleMode();
-		break;
-	case OP_MODE_NARRATION_GLITCH:
-		drawNarrationGlitchMode();
-		break;
-	}
-	drawMessages();
+    
+    switch (operationMode)
+    {
+        case OP_MODE_SETUP:
+            drawInitMode();
+            break;
+        case OP_MODE_WAIT_FOR_NARRATION:
+            drawWaitForNarrMode();
+            break;
+        case OP_MODE_PLAY_NARRATION:
+            drawPlayNarrMode();
+            break;
+        case OP_MODE_SWITCH_PRESETS:
+            drawSwitchPresetsMode();
+            break;
+        case OP_MODE_MULTI_GRAIN_MODE:
+            drawMultiGrainMode();
+            break;
+        case OP_MODE_SINGLE_GRAIN_MODE:
+            drawSingleGrainMode();
+            break;
+        case OP_MODE_NARRATION_GUI:
+            drawNarrGuiMode();
+            break;
+        case OP_MODE_SIMULATION_MULTI:
+            drawSimulationMultiMode();
+            break;
+        case OP_MODE_SIMULATION_SINGLE:
+            drawSimulationSingleMode();
+            break;
+        case OP_MODE_NARRATION_GLITCH:
+            drawNarrationGlitchMode();
+            break;
+    }
+    drawMessages();
 #endif
 }
 
@@ -206,9 +206,9 @@ float ofApp::quarticEaseIn(float value){
 
 //processes sensor and simulation input to an inverted exponential curve
 float ofApp::exponentialEaseOut (float value){
-   
+    
     return (value==0) ? 1.0 : 1.0 * (-pow(2.0, -10.0 * value/0.0) + 1.0) ;
-
+    
 }
 
 //processes sensor and simulation input to an inverted quartic curve
@@ -220,51 +220,51 @@ float ofApp::quarticEaseOut(float value){
 #ifndef HAS_ADC
 
 void ofApp::setupVisualiser() {
-// create the 2 colour 3d cross that visualises simulated sensor input
-	ofLogVerbose() << "setup visualiser" << endl;
-	barLength = 500;
-	barWidth = 30;
-	for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
-		barsEmpty[i].set(barWidth, barLength, barWidth);
-		barsFull[i].set(barWidth + 2, barLength + 2, barWidth + 2);
-
-	}
-	barsEmpty[0].setPosition(0, -barLength / 2, 0);
-	barsEmpty[1].setPosition(0, barLength / 2, 0);
-	barsFull[0].setPosition(0, -barLength / 2, 0);
-	barsFull[1].setPosition(0, barLength / 2, 0);
-
-	barsEmpty[2].setPosition(-barLength / 2, 0, 0);
-	barsEmpty[2].rotateDeg(90, 0, 0, 1);
-
-	barsFull[2].setPosition(-barLength / 2, 0, 0);
-	barsFull[2].rotateDeg(90, 0, 0, 1);
-
-	barsEmpty[3].setPosition(barLength / 2, 0, 0);
-	barsEmpty[3].rotateDeg(-90, 0, 0, 1);
-	barsFull[3].setPosition(barLength / 2, 0, 0);
-	barsFull[3].rotateDeg(-90, 0, 0, 1);
-
-	barsEmpty[4].setPosition(0, 0, -barLength / 2);
-	barsEmpty[4].rotateDeg(90, 1, 0, 0);
-	barsFull[4].setPosition(0, 0, -barLength / 2);
-	barsFull[4].rotateDeg(90, 1, 0, 0);
-
-	barsEmpty[5].setPosition(0, 0, barLength / 2);
-	barsEmpty[5].rotateDeg(-90, 1, 0, 0);
-	barsFull[5].setPosition(0, 0, barLength / 2);
-	barsFull[5].rotateDeg(-90, 1, 0, 0);
-	ofLogVerbose() << "Display setup" << endl;
+    // create the 2 colour 3d cross that visualises simulated sensor input
+    ofLogNotice() << "setup visualiser" << endl;
+    barLength = 500;
+    barWidth = 30;
+    for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
+        barsEmpty[i].set(barWidth, barLength, barWidth);
+        barsFull[i].set(barWidth + 2, barLength + 2, barWidth + 2);
+        
+    }
+    barsEmpty[0].setPosition(0, -barLength / 2, 0);
+    barsEmpty[1].setPosition(0, barLength / 2, 0);
+    barsFull[0].setPosition(0, -barLength / 2, 0);
+    barsFull[1].setPosition(0, barLength / 2, 0);
+    
+    barsEmpty[2].setPosition(-barLength / 2, 0, 0);
+    barsEmpty[2].rotateDeg(90, 0, 0, 1);
+    
+    barsFull[2].setPosition(-barLength / 2, 0, 0);
+    barsFull[2].rotateDeg(90, 0, 0, 1);
+    
+    barsEmpty[3].setPosition(barLength / 2, 0, 0);
+    barsEmpty[3].rotateDeg(-90, 0, 0, 1);
+    barsFull[3].setPosition(barLength / 2, 0, 0);
+    barsFull[3].rotateDeg(-90, 0, 0, 1);
+    
+    barsEmpty[4].setPosition(0, 0, -barLength / 2);
+    barsEmpty[4].rotateDeg(90, 1, 0, 0);
+    barsFull[4].setPosition(0, 0, -barLength / 2);
+    barsFull[4].rotateDeg(90, 1, 0, 0);
+    
+    barsEmpty[5].setPosition(0, 0, barLength / 2);
+    barsEmpty[5].rotateDeg(-90, 1, 0, 0);
+    barsFull[5].setPosition(0, 0, barLength / 2);
+    barsFull[5].rotateDeg(-90, 1, 0, 0);
+    ofLogNotice() << "Display setup" << endl;
 }
 
 void ofApp::setupGraphicEnv()
 {
     // jst setting up screen stuff
-	ofLogVerbose() << "setup grapic environment" << endl;
-	ofSetVerticalSync(true);
-	ofBackground(0);
-	barsFbo.allocate(600, 600);
-	cam.setOrientation(glm::vec3(20, 20, 20));
+    ofLogNotice() << "setup grapic environment" << endl;
+    ofSetVerticalSync(true);
+    ofBackground(0);
+    barsFbo.allocate(600, 600);
+    cam.setOrientation(glm::vec3(20, 20, 20));
 }
 
 
@@ -325,11 +325,11 @@ void ofApp::drawCurvesDisplay(int x, int y, int width, int height){
     ofDrawRectangle(simulationArea);
     ofSetColor(255);
     ofDrawBitmapString(curvesNames[curveSelector], simulationArea.x + 5, simulationArea.y + 15);
-
+    
     ofPopStyle();
 }
 void ofApp::drawCurvesDisplaySimulationSingle(int x, int y, int width, int height){
-// not implemented yet, should show a white ball at the current position on the curve during simulation fo single mode
+    // not implemented yet, should show a white ball at the current position on the curve during simulation fo single mode
     curvesFbo.begin();
     ofClear(0,0,0);
     ofPushStyle();
@@ -344,13 +344,13 @@ void ofApp::drawCurvesDisplaySimulationSingle(int x, int y, int width, int heigh
             break;
         case 1:
             ofDrawCircle(ofMap(x, 0, 1.0, 500, 0), ofMap(x, 0, 1.0, 500, 0), 15);
-
+            
             //normalisedA2DValues[j]  = sqrt(normalisedA2DValues[j] );
             ofDrawCircle(x, y, 15);
             break;
         case 2:
             ofDrawCircle(ofMap(x, 0, 1.0, 500, 0), ofMap(x, 0, 1.0, 500, 0), 15);
-
+            
             //normalisedA2DValues[j]  = quarticEaseIn(normalisedA2DValues[j] );
             ofDrawCircle(x, y, 15);
             break;
@@ -371,7 +371,7 @@ void ofApp::drawCurvesDisplaySimulationSingle(int x, int y, int width, int heigh
     ofPopStyle();
 }
 void ofApp::drawCurvesDisplaySimulationMulti(int x, int y, int width, int height){
-// not implemented yet, should show a white ball at the current position on the curve during simulation fo multi mode
+    // not implemented yet, should show a white ball at the current position on the curve during simulation fo multi mode
     curvesFbo.begin();
     ofClear(0,0,0);
     ofPushStyle();
@@ -414,28 +414,28 @@ void ofApp::loadEffectPatchSettings()
             ampControl[i]->disconnectAll();
             outputAmpL[i]->disconnectAll();
             outputAmpR[i]->disconnectAll();
-
-            ofLogVerbose()<< "Removing bitcrusher from slot " + ofToString(i+1) << endl;
+            
+            ofLogNotice()<< "Removing bitcrusher from slot " + ofToString(i+1) << endl;
             bitCrusherLs[i]->disconnectAll();
             bitCrusherRs[i]->disconnectAll();
             
-            ofLogVerbose()<< "Removing decimator from slot " + ofToString(i+1) << endl;
+            ofLogNotice()<< "Removing decimator from slot " + ofToString(i+1) << endl;
             decimatorLs[i]->disconnectAll();
             decimatorRs[i]->disconnectAll();
             
-            ofLogVerbose()<< "Removing chorus from slot " + ofToString(i+1) << endl;
+            ofLogNotice()<< "Removing chorus from slot " + ofToString(i+1) << endl;
             choruss[i]->disconnectAll();
             
-            ofLogVerbose()<< "Removing filter from slot " + ofToString(i+1) << endl;
+            ofLogNotice()<< "Removing filter from slot " + ofToString(i+1) << endl;
             multiLadderFilterLs[i]->disconnectAll();
             multiLadderFilterRs[i]->disconnectAll();
             
-            ofLogVerbose()<< "Removing delay from slot " + ofToString(i+1) << endl;
+            ofLogNotice()<< "Removing delay from slot " + ofToString(i+1) << endl;
             delayLs[i]->disconnectAll();
             delayRs[i]->disconnectAll();
             delaySends[i]->disconnectAll();
-
-            ofLogVerbose()<< "Removing reverb from slot " + ofToString(i+1) << endl;
+            
+            ofLogNotice()<< "Removing reverb from slot " + ofToString(i+1) << endl;
             reverbs[i]->disconnectAll();
             reverbSends[i]->disconnectAll();
         }
@@ -449,93 +449,93 @@ void ofApp::loadEffectPatchSettings()
         for (int j = 0; j < NUMBER_OF_PRESETS; j++)
         {
             if (!effectsPatchXML.load(filePathPrefix + unitID + "_effectSettings_preset_" + ofToString(j+1)+".xml")) {
-                ofLogVerbose() << "Effect settings preset " + ofToString(j+1) + " not loaded" << endl;
+                ofLogNotice() << "Effect settings preset " + ofToString(j+1) + " not loaded" << endl;
             }
             else {
-                ofLogVerbose() << "Effect settings preset " + ofToString(j+1) + " loaded" << endl;
+                ofLogNotice() << "Effect settings preset " + ofToString(j+1) + " loaded" << endl;
                 
                 for (int i = 0; i < numberOfSlots; i++)
                 {
                     effectsPatching[j][i].hasBitCrusher = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":BIT_CRUSH", 0);
-                    ofLogVerbose() << "SLOTS:SLOT_" + ofToString(i + 1) + ":BIT_CRUSH " + ofToString(effectsPatching[j][i].hasBitCrusher) << endl;
+                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":BIT_CRUSH " + ofToString(effectsPatching[j][i].hasBitCrusher) << endl;
                     
                     effectsPatching[j][i].hasDecimator = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":DECIMATOR", 0);
-                    ofLogVerbose() << "SLOTS:SLOT_" + ofToString(i + 1) + ":DECIMATOR " + ofToString(effectsPatching[j][i].hasDecimator) << endl;
+                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":DECIMATOR " + ofToString(effectsPatching[j][i].hasDecimator) << endl;
                     
                     effectsPatching[j][i].hasChorus = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":CHORUS", 0);
-                    ofLogVerbose() << "SLOTS:SLOT_" + ofToString(i + 1) + ":CHORUS " + ofToString(effectsPatching[j][i].hasChorus) << endl;
+                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":CHORUS " + ofToString(effectsPatching[j][i].hasChorus) << endl;
                     
                     effectsPatching[j][i].hasFilter = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":FILTER", 0);
-                    ofLogVerbose() << "SLOTS:SLOT_" + ofToString(i + 1) + ":FILTER " + ofToString(effectsPatching[j][i].hasFilter) << endl;
+                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":FILTER " + ofToString(effectsPatching[j][i].hasFilter) << endl;
                     
                     effectsPatching[j][i].hasDelay = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":DELAY", 0);
-                    ofLogVerbose() << "SLOTS:SLOT_" + ofToString(i + 1) + ":DELAY " + ofToString(effectsPatching[j][i].hasDelay) << endl;
+                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":DELAY " + ofToString(effectsPatching[j][i].hasDelay) << endl;
                     
                     effectsPatching[j][i].hasReverb = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":REVERB", 0);
-                    ofLogVerbose() << "SLOTS:SLOT_" + ofToString(i + 1) + ":REVERB " + ofToString(effectsPatching[j][i].hasReverb) << endl;
+                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":REVERB " + ofToString(effectsPatching[j][i].hasReverb) << endl;
                 }
             }
         }
     }
     
-//create and add the parameters for each slot, not finished or implemented
+    //create and add the parameters for each slot, not finished or implemented
     
     for (int j = 0; j < numberOfSlots; j++)
     {
         
-             effectsPanels[j]->clear();
+        effectsPanels[j]->clear();
         
-       
+        
         effectsPanels[j]->setup("Effects Slot "+ ofToString(j+1),filePathPrefix + unitID + "_effectParameterSettings_preset_" + ofToString(presetIndex) + ".xml");
         
         if(effectsPatching[presetIndex-1][j].hasBitCrusher){
             effBitCrushersParams[j].setup();
-            ofLogVerbose()<< "adding bit crusher to slot " + ofToString(j+1) << endl;
+            ofLogNotice()<< "adding bit crusher to slot " + ofToString(j+1) << endl;
             effBitCrushersParams[j].setParameterGroupName("Bitcrusher slot " + ofToString(j+1));
             effectsPanels[j]->add(effBitCrushersParams[j].getParamGroup());
         }
         
         if(effectsPatching[presetIndex-1][j].hasDecimator){
             effDecimatorsParams[j].setup();
-            ofLogVerbose()<< "adding decimator to slot " + ofToString(j+1) << endl;
+            ofLogNotice()<< "adding decimator to slot " + ofToString(j+1) << endl;
             effDecimatorsParams[j].setParameterGroupName("Decimator slot " + ofToString(j+1));
             effectsPanels[j]->add(effDecimatorsParams[j].getParamGroup());
         }
         if(effectsPatching[presetIndex-1][j].hasChorus){
             effChorussParams[j].setup();
-            ofLogVerbose()<< "adding chorus to slot " + ofToString(j) << endl;
+            ofLogNotice()<< "adding chorus to slot " + ofToString(j) << endl;
             effChorussParams[j].setParameterGroupName("Chorus slot " + ofToString(j+1));
             effectsPanels[j]->add(effChorussParams[j].getParamGroup());
         }
         if(effectsPatching[presetIndex-1][j].hasFilter){
             effFiltersParams[j].setup();
-            ofLogVerbose()<< "adding filter to slot " + ofToString(j) << endl;
+            ofLogNotice()<< "adding filter to slot " + ofToString(j) << endl;
             effFiltersParams[j].setParameterGroupName("Filter slot " + ofToString(j+1));
             effectsPanels[j]->add(effFiltersParams[j].getParamGroup());
         }
         if(effectsPatching[presetIndex-1][j].hasDelay){
             effDelaysParams[j].setup();
-            ofLogVerbose()<< "adding delay to slot " + ofToString(j) << endl;
+            ofLogNotice()<< "adding delay to slot " + ofToString(j) << endl;
             effDelaysParams[j].setParameterGroupName("Delay slot " + ofToString(j+1));
             effectsPanels[j]->add(effDelaysParams[j].getParamGroup());
         }
         if(effectsPatching[presetIndex-1][j].hasReverb){
             effReverbsParams[j].setup();
-            ofLogVerbose()<< "adding reverb to slot " + ofToString(j) << endl;
+            ofLogNotice()<< "adding reverb to slot " + ofToString(j) << endl;
             effReverbsParams[j].setParameterGroupName("Reverb slot " + ofToString(j+1));
             effectsPanels[j]->add(effReverbsParams[j].getParamGroup());
         }
         
         effCompressorsParams[j].setup();
-        ofLogVerbose()<< "adding compressor to slot " + ofToString(j) << endl;
+        ofLogNotice()<< "adding compressor to slot " + ofToString(j) << endl;
         effCompressorsParams[j].setParameterGroupName("Compressor slot " + ofToString(j+1));
         effectsPanels[j]->add(effCompressorsParams[j].getParamGroup());
         
-    
-            effectsPanels[j]->loadFromFile(filePathPrefix + unitID + "_effectParameterSettings_preset_" + ofToString(presetIndex) + ".xml");
+        
+        effectsPanels[j]->loadFromFile(filePathPrefix + unitID + "_effectParameterSettings_preset_" + ofToString(presetIndex) + ".xml");
         
         
-   
+        
         
     }
     
@@ -546,7 +546,7 @@ void ofApp::loadEffectPatchSettings()
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >>engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >>engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with no effects" << endl;
+            ofLogNotice() << "Patching chain with no effects" << endl;
         }
         
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
@@ -559,7 +559,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -571,7 +571,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -583,7 +583,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -595,7 +595,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -607,7 +607,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -616,7 +616,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -625,7 +625,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -637,7 +637,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -649,7 +649,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -661,7 +661,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -670,7 +670,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -679,7 +679,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -691,7 +691,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -703,7 +703,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -712,7 +712,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -721,7 +721,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -733,7 +733,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -742,7 +742,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -751,7 +751,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -760,7 +760,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -769,13 +769,13 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -787,7 +787,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -799,7 +799,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -808,7 +808,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -817,7 +817,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -829,7 +829,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -838,7 +838,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -847,7 +847,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -856,7 +856,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -865,13 +865,13 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -883,7 +883,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -892,7 +892,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -901,7 +901,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -910,7 +910,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -919,37 +919,37 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0)>> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1)>> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -961,7 +961,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -970,7 +970,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -979,7 +979,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -988,7 +988,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -997,13 +997,13 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -1012,7 +1012,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -1021,19 +1021,19 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -1042,7 +1042,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -1051,25 +1051,25 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasReverb)
         {
@@ -1078,7 +1078,7 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDelay)
         {
@@ -1087,31 +1087,31 @@ void ofApp::loadEffectPatchSettings()
             
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher)
         {
             cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
             cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogVerbose() << "Patching chain with effects" << endl;
+            ofLogNotice() << "Patching chain with effects" << endl;
         }
         
         ofSleepMillis(300);
@@ -1120,49 +1120,49 @@ void ofApp::loadEffectPatchSettings()
 
 
 void ofApp::exit() {
-
-// this is called when the app exits, we unload the audio files
-	for (int i = 0; i < numberOfSlots; i++) {
-		grainVoices[i] = cloud[i]->getVoicesNum();
-		if (sampleData[i]->loaded())
-		{
-			ampControl[i]->set(0.0f);
-			sampleData[i]->unLoad();
-		}
-	}
-
+    
+    // this is called when the app exits, we unload the audio files
+    for (int i = 0; i < numberOfSlots; i++) {
+        grainVoices[i] = cloud[i]->getVoicesNum();
+        if (sampleData[i]->loaded())
+        {
+            ampControl[i]->set(0.0f);
+            sampleData[i]->unLoad();
+        }
+    }
+    
 #ifdef HAS_ADC
-// on exit we turn our lights, off, turn off the speaker and if it is set on the XML sutdown the raspberry pi
-	blueLed.setal_gpio("0");
-	redLed.setal_gpio("0");
-	relayOut.setal_gpio("1");
-	ofSleepMillis(400);
-	relayOut.setal_gpio("0");
-	ofLogVerbose() << "relay setup" << endl;
-
-	if (doShutdown) {
-		string cmd = "sudo shutdown -h now";           // create the command
-		ofSystem(cmd.c_str());
-	}
+    // on exit we turn our lights, off, turn off the speaker and if it is set on the XML sutdown the raspberry pi
+    blueLed.setal_gpio("0");
+    redLed.setal_gpio("0");
+    relayOut.setal_gpio("1");
+    ofSleepMillis(400);
+    relayOut.setal_gpio("0");
+    ofLogNotice() << "relay setup" << endl;
+    
+    if (doShutdown) {
+        string cmd = "sudo shutdown -h now";           // create the command
+        ofSystem(cmd.c_str());
+    }
 #endif
 }
 
 void ofApp::initParameters()
 {
-//gettting some simple stuff ready for running
-	firstRun = true;
+    //gettting some simple stuff ready for running
+    firstRun = true;
 #ifdef HAS_ADC
-	clicks = 0;
-	waitingForClick = true;
+    clicks = 0;
+    waitingForClick = true;
 #endif
-	presetIndex = 1;
-	isCheckingHitPeaks = false;
-	isCheckingHitTroughs = false;
-	narrationIsPlaying = false;
-	presetSwitchTimer = ofGetElapsedTimeMillis();
+    presetIndex = 1;
+    isCheckingHitPeaks = false;
+    isCheckingHitTroughs = false;
+    narrationIsPlaying = false;
+    presetSwitchTimer = ofGetElapsedTimeMillis();
     
     
-
+    
 #ifndef HAS_ADC
     windowTypeNames[0]="Rectangular";
     windowTypeNames[1]= "Triangular";
@@ -1204,67 +1204,67 @@ void ofApp::exitInitMode()
 void ofApp::setupWaitForNarrMode()
 {
     // each mode has a setup method called when we switch to that mode, only the laptop version uses a screen so only that has the setup buttons
-	ofLogVerbose() << "setup wait for narration mode" << endl;
+    ofLogNotice() << "setup wait for narration mode" << endl;
 #ifndef HAS_ADC
-	enableModeButtons(waitForNarrButtons, totalButtonsModeWaitForNarr);
+    enableModeButtons(waitForNarrButtons, totalButtonsModeWaitForNarr);
 #endif
-
+    
 }
 
 void ofApp::updateWaitForNarrMode()
 {
-	
-// if it is a raspbery pi we are waiting either for an amount of time to pass, or for a sensor to be pushed past the threshold, when that happens we switch modes to playing narration
+    
+    // if it is a raspbery pi we are waiting either for an amount of time to pass, or for a sensor to be pushed past the threshold, when that happens we switch modes to playing narration
 #ifdef HAS_ADC
-	deviceOnlyUpdateRoutine(); // this polls all the electronics on the Raspberry pi
-	if (hasNarration && shouldTriggerNarrationPlay && narrationUsesSensor)
-	{
-		for (int i = 0; i < NUMBER_OF_SENSORS; i++)
-		{
-			if (normalisedA2DValues[i]>narrationGlitchThreshold)
-			{
-				narration.play();
-				shouldTriggerNarrationPlay = false;
-				narrationIsPlaying = true;
-				i = NUMBER_OF_SENSORS;
-				ofLogVerbose() << "Triggered Narration play" << endl;
-				goToMode(OP_MODE_PLAY_NARRATION);
-			}
-		}
-	}
+    deviceOnlyUpdateRoutine(); // this polls all the electronics on the Raspberry pi
+    if (hasNarration && shouldTriggerNarrationPlay && narrationUsesSensor)
+    {
+        for (int i = 0; i < NUMBER_OF_SENSORS; i++)
+        {
+            if (normalisedA2DValues[i]>narrationGlitchThreshold)
+            {
+                narration.play();
+                shouldTriggerNarrationPlay = false;
+                narrationIsPlaying = true;
+                i = NUMBER_OF_SENSORS;
+                ofLogNotice() << "Triggered Narration play" << endl;
+                goToMode(OP_MODE_PLAY_NARRATION);
+            }
+        }
+    }
 #endif
-
-	if (ofGetElapsedTimeMillis()>5000 && !narrationUsesSensor)
-	{
-		narration.play();
-		shouldTriggerNarrationPlay = false;
-		narrationIsPlaying = true;
-		ofLogVerbose() << "Triggered Narration play" << endl;
-		goToMode(OP_MODE_PLAY_NARRATION);
-	}
+    
+    if (ofGetElapsedTimeMillis()>5000 && !narrationUsesSensor)
+    {
+        narration.play();
+        shouldTriggerNarrationPlay = false;
+        narrationIsPlaying = true;
+        ofLogNotice() << "Triggered Narration play" << endl;
+        goToMode(OP_MODE_PLAY_NARRATION);
+    }
 }
 
 #ifndef HAS_ADC
 // we just draw the waveforom and wait
 void ofApp::drawWaitForNarrMode()
 {
-	ofPushStyle();
-	ofSetColor(ofColor(0, 255, 255));
-	ofNoFill();
-	ofSetRectMode(OF_RECTMODE_CORNER);
-	ofDrawRectangle(narrUiX, narrUiY, narrUiWidth, narrUiHeigth);
-	narrWaveformGraphics.draw(narrUiX, narrUiY);
-	ofPopStyle();
-	drawModeButtons(waitForNarrButtons, totalButtonsModeWaitForNarr);
-
+    ofPushStyle();
+    ofSetColor(ofColor(0, 255, 255));
+    ofNoFill();
+    ofSetRectMode(OF_RECTMODE_CORNER);
+    ofDrawRectangle(narrUiX, narrUiY, narrUiWidth, narrUiHeigth);
+    narrWaveformGraphics.draw(narrUiX, narrUiY);
+    ofPopStyle();
+    drawModeButtons(waitForNarrButtons, totalButtonsModeWaitForNarr);
+    
 }
 #endif
 
 void ofApp::exitWaitForNarrMode()
 {
-// when we exit a mode we disale the buttons
+    // when we exit a mode we disale the buttons
 #ifndef HAS_ADC
-	disableModeButtons(waitForNarrButtons, totalButtonsModeWaitForNarr);
+    disableModeButtons(waitForNarrButtons, totalButtonsModeWaitForNarr);
 #endif
 }
 
@@ -1273,76 +1273,76 @@ void ofApp::exitWaitForNarrMode()
 // every mod ehas its own createButtons method (these are called in the initial setup, as I need to give them unique names I made this shitty way to do it, but it looks way to big to do what it does.
 void ofApp::createWaitForNarrModeButtons()
 {
-	for (int i = 0; i < totalButtonsModeWaitForNarr; i++)
-	{
-		switch (i)
-		{
-		case 0:
-			waitForNarrButtons[i].setup("Play", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
-			waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			waitForNarrButtons[i].disableAllEvents();
-			break;
-		case 1:
-			waitForNarrButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
-			waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			waitForNarrButtons[i].disableAllEvents();
-			break;
-		case 2:
-			waitForNarrButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
-			waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			waitForNarrButtons[i].disableAllEvents();
-			break;
-		case 3:
-			waitForNarrButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
-			waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			waitForNarrButtons[i].disableAllEvents();
-			break;
-		case 4:
-			waitForNarrButtons[i].setup("Program Grain", BTN_MSG_M_OP_MODE_GRAIN_MODE);
-			waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			waitForNarrButtons[i].disableAllEvents();
-			break;
-		case 5:
-			waitForNarrButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
-			waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			waitForNarrButtons[i].disableAllEvents();
-			break;
-		}
-	}
+    for (int i = 0; i < totalButtonsModeWaitForNarr; i++)
+    {
+        switch (i)
+        {
+            case 0:
+                waitForNarrButtons[i].setup("Play", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
+                waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                waitForNarrButtons[i].disableAllEvents();
+                break;
+            case 1:
+                waitForNarrButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
+                waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                waitForNarrButtons[i].disableAllEvents();
+                break;
+            case 2:
+                waitForNarrButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
+                waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                waitForNarrButtons[i].disableAllEvents();
+                break;
+            case 3:
+                waitForNarrButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
+                waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                waitForNarrButtons[i].disableAllEvents();
+                break;
+            case 4:
+                waitForNarrButtons[i].setup("Program Grain", BTN_MSG_M_OP_MODE_GRAIN_MODE);
+                waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                waitForNarrButtons[i].disableAllEvents();
+                break;
+            case 5:
+                waitForNarrButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
+                waitForNarrButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                waitForNarrButtons[i].disableAllEvents();
+                break;
+        }
+    }
 }
 #endif
 void ofApp::setupPlayNarrMode()
 {
-//again a setup method for a mode, this time playing narration, it is like this so I can come and go to that mode no matter where I am in the software
-	ofLogVerbose() << "setup play narration mode" << endl;
-	if (narrationIsPlaying)
-	{
-		if (narration.getIsPaused())
-		{
-			narration.pause(false);
-			ofLogVerbose() << "Unpausing narration" << endl;
-		}
-	}
-	if (!narrationIsPlaying && !narration.getIsPaused())
-	{
-		narration.play();
-		shouldTriggerNarrationPlay = false;
-		narrationIsPlaying = true;
-		ofLogVerbose() << "Triggered Narration play" << endl;
-	}
+    //again a setup method for a mode, this time playing narration, it is like this so I can come and go to that mode no matter where I am in the software
+    ofLogNotice() << "setup play narration mode" << endl;
+    if (narrationIsPlaying)
+    {
+        if (narration.getIsPaused())
+        {
+            narration.pause(false);
+            ofLogNotice() << "Unpausing narration" << endl;
+        }
+    }
+    if (!narrationIsPlaying && !narration.getIsPaused())
+    {
+        narration.play();
+        shouldTriggerNarrationPlay = false;
+        narrationIsPlaying = true;
+        ofLogNotice() << "Triggered Narration play" << endl;
+    }
 #ifndef HAS_ADC
-	enableModeButtons(playNarrationButtons, totalButtonsModePlayNarration);
+    enableModeButtons(playNarrationButtons, totalButtonsModePlayNarration);
 #endif
 }
 
 void ofApp::updatePlayNarrMode()
 {
-// if the narration is finished (I dont have a real callback) we need to switch modes
-	if (narration.getPosition()>0.998)
-	{
-		narrationIsPlaying = false;
-		ofLogVerbose() << "Narration is over setting up granulars" << endl;
-		narrAmpControl.set(0.0f);
+    // if the narration is finished (I dont have a real callback) we need to switch modes
+    if (narration.getPosition()>0.998)
+    {
+        narrationIsPlaying = false;
+        ofLogNotice() << "Narration is over setting up granulars" << endl;
+        narrAmpControl.set(0.0f);
         
 #ifndef HAS_ADC
         goToMode(grainOperationModeTranslate);
@@ -1366,121 +1366,121 @@ void ofApp::updatePlayNarrMode()
             redLed.setal_gpio("1");
         }
         goToMode(grainOperationModeTranslate);
-
+        
 #endif
-         hasNarration = false;
-	}
+        hasNarration = false;
+    }
     
 #ifdef HAS_ADC
-// poll the device
-
-	deviceOnlyUpdateRoutine();
+    // poll the device
     
-// if the narration is playing and a sensor is pushed it takes us to the narration granular (glitch) mode. It pauses the narration and uses that position as the base for the playhead position in the narration granualr
-	for (int k = 0; k < NUMBER_OF_SENSORS; k++) {
-		if (normalisedA2DValues[k] > narrationGlitchThreshold && !hasGlitchSource)
-		{
-			ofLogVerbose() << "Sensor " + ofToString(k) + " is triggered doing narration glitch with a value of " + ofToString(normalisedA2DValues[k]) << endl;
-			narrrationGlitchSensor = k;
-			doNarrationGlitch = true;
-			narration.pause(true);
-			narrAmpControl.set(1.0);
-			hasGlitchSource = true;
-			k = NUMBER_OF_SENSORS;
-			goToMode(OP_MODE_NARRATION_GLITCH);
-
-		}
-	}
+    deviceOnlyUpdateRoutine();
+    
+    // if the narration is playing and a sensor is pushed it takes us to the narration granular (glitch) mode. It pauses the narration and uses that position as the base for the playhead position in the narration granualr
+    for (int k = 0; k < NUMBER_OF_SENSORS; k++) {
+        if (normalisedA2DValues[k] > narrationGlitchThreshold && !hasGlitchSource)
+        {
+            ofLogNotice() << "Sensor " + ofToString(k) + " is triggered doing narration glitch with a value of " + ofToString(normalisedA2DValues[k]) << endl;
+            narrrationGlitchSensor = k;
+            doNarrationGlitch = true;
+            narration.pause(true);
+            narrAmpControl.set(1.0);
+            hasGlitchSource = true;
+            k = NUMBER_OF_SENSORS;
+            goToMode(OP_MODE_NARRATION_GLITCH);
+            
+        }
+    }
 #endif
 }
 
 #ifndef HAS_ADC
 void ofApp::drawPlayNarrMode()
 {
-//just shows us a waveform and prgress playead line
-	ofPushStyle();
-	ofSetColor(ofColor(0, 255, 255));
-	ofNoFill();
-	ofSetRectMode(OF_RECTMODE_CORNER);
-	ofDrawRectangle(narrUiX, narrUiY, narrUiWidth, narrUiHeigth);
-	narrWaveformGraphics.draw(narrUiX, narrUiY);
-	ofSetColor(255);
-	ofDrawLine(ofMap(narration.getPosition(), 0.0, 1.0, narrUiX, narrUiMaxX), narrUiY, ofMap(narration.getPosition(), 0.0, 1.0, narrUiX, narrUiMaxX), narrUiMaxY);
-	ofPopStyle();
-	drawModeButtons(playNarrationButtons, totalButtonsModePlayNarration);
-
+    //just shows us a waveform and prgress playead line
+    ofPushStyle();
+    ofSetColor(ofColor(0, 255, 255));
+    ofNoFill();
+    ofSetRectMode(OF_RECTMODE_CORNER);
+    ofDrawRectangle(narrUiX, narrUiY, narrUiWidth, narrUiHeigth);
+    narrWaveformGraphics.draw(narrUiX, narrUiY);
+    ofSetColor(255);
+    ofDrawLine(ofMap(narration.getPosition(), 0.0, 1.0, narrUiX, narrUiMaxX), narrUiY, ofMap(narration.getPosition(), 0.0, 1.0, narrUiX, narrUiMaxX), narrUiMaxY);
+    ofPopStyle();
+    drawModeButtons(playNarrationButtons, totalButtonsModePlayNarration);
+    
 }
 #endif
 
 void ofApp::exitPlayNarrMode()
 {
 #ifndef HAS_ADC
-	disableModeButtons(playNarrationButtons, totalButtonsModePlayNarration);
+    disableModeButtons(playNarrationButtons, totalButtonsModePlayNarration);
 #endif
-	if (narrationIsPlaying)
-	{
-		if (!narration.getIsPaused())
-		{
-			narration.pause(true);
-			ofLogVerbose() << "Pausing narration" << endl;
-		}
-	}
+    if (narrationIsPlaying)
+    {
+        if (!narration.getIsPaused())
+        {
+            narration.pause(true);
+            ofLogNotice() << "Pausing narration" << endl;
+        }
+    }
 }
 
 #ifndef HAS_ADC
 void ofApp::createPlayNarrationModeButtons()
 {
-// another button setup
-	for (int i = 0; i < totalButtonsModePlayNarration; i++)
-	{
-		switch (i)
-		{
-		case 0:
-			playNarrationButtons[i].setup("Toggle Glitch", BTN_MSG_M_OP_MODE_NARRATION_GLITCH);
-			playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			playNarrationButtons[i].disableAllEvents();
-			break;
-		case 1:
-			playNarrationButtons[i].setup("Restart Narration", BTN_MSG_A_RESTART_NARRATION);
-			playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			playNarrationButtons[i].disableAllEvents();
-			break;
-		case 2:
-			playNarrationButtons[i].setup("Pause Narration", BTN_MSG_A_PAUSE_NARRATION);
-			playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			playNarrationButtons[i].disableAllEvents();
-			break;
-		case 3:
-			playNarrationButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
-			playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			playNarrationButtons[i].disableAllEvents();
-			break;
-		case 4:
-			playNarrationButtons[i].setup("Program Grain", BTN_MSG_M_OP_MODE_GRAIN_MODE);
-			playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			playNarrationButtons[i].disableAllEvents();
-			break;
-		case 5:
-			playNarrationButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
-			playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			playNarrationButtons[i].disableAllEvents();
-			break;
-		}
-	}
+    // another button setup
+    for (int i = 0; i < totalButtonsModePlayNarration; i++)
+    {
+        switch (i)
+        {
+            case 0:
+                playNarrationButtons[i].setup("Toggle Glitch", BTN_MSG_M_OP_MODE_NARRATION_GLITCH);
+                playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                playNarrationButtons[i].disableAllEvents();
+                break;
+            case 1:
+                playNarrationButtons[i].setup("Restart Narration", BTN_MSG_A_RESTART_NARRATION);
+                playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                playNarrationButtons[i].disableAllEvents();
+                break;
+            case 2:
+                playNarrationButtons[i].setup("Pause Narration", BTN_MSG_A_PAUSE_NARRATION);
+                playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                playNarrationButtons[i].disableAllEvents();
+                break;
+            case 3:
+                playNarrationButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
+                playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                playNarrationButtons[i].disableAllEvents();
+                break;
+            case 4:
+                playNarrationButtons[i].setup("Program Grain", BTN_MSG_M_OP_MODE_GRAIN_MODE);
+                playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                playNarrationButtons[i].disableAllEvents();
+                break;
+            case 5:
+                playNarrationButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
+                playNarrationButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                playNarrationButtons[i].disableAllEvents();
+                break;
+        }
+    }
 }
 #endif
 
 void ofApp::setupSwitchPresetsMode()
 {
-// This does not really have to be a mode but I kept the pattern, here I can switch from one preset to another, the preset contains files to be loaded to the granualr and settings to be loaded that define how the granualr reacts to the sensor data.
-	ofLogVerbose() << "setup switch presets" << endl;
+    // This does not really have to be a mode but I kept the pattern, here I can switch from one preset to another, the preset contains files to be loaded to the granualr and settings to be loaded that define how the granualr reacts to the sensor data.
+    ofLogNotice() << "setup switch presets" << endl;
 #ifndef HAS_ADC
-	enableModeButtons(switchPresetsButtons, totalButtonsModSwitchPresets);
+    enableModeButtons(switchPresetsButtons, totalButtonsModSwitchPresets);
 #endif
-
-	switchPresets();
+    
+    switchPresets();
     goToMode(grainOperationModeTranslate);
-   
+    
 }
 
 void ofApp::updateSwitchPresetsMode()
@@ -1490,18 +1490,18 @@ void ofApp::updateSwitchPresetsMode()
 #ifndef HAS_ADC
 void ofApp::drawSwitchPresetsMode()
 {
-	drawModeButtons(switchPresetsButtons, totalButtonsModSwitchPresets);
-
+    drawModeButtons(switchPresetsButtons, totalButtonsModSwitchPresets);
+    
 }
 #endif
 
 void ofApp::exitSwitchPresetsMode()
 {
 #ifndef HAS_ADC
-	disableModeButtons(switchPresetsButtons, totalButtonsModSwitchPresets);
+    disableModeButtons(switchPresetsButtons, totalButtonsModSwitchPresets);
 #endif
-	ofLogVerbose() << "exit switch presets" << endl;
-
+    ofLogNotice() << "exit switch presets" << endl;
+    
 }
 
 
@@ -1509,107 +1509,107 @@ void ofApp::exitSwitchPresetsMode()
 void ofApp::createSwitchPresetsModeButtons()
 {
     
-	for (int i = 0; i < totalButtonsModSwitchPresets; i++)
-	{
-		switch (i)
-		{
-		case 0:
-			switchPresetsButtons[i].setup("Save", BTN_MSG_A_SAVE_GRANULAR);
-			switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			switchPresetsButtons[i].disableAllEvents();
-			break;
-		case 1:
-			switchPresetsButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
-			switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			switchPresetsButtons[i].disableAllEvents();
-			break;
-		case 2:
-			switchPresetsButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
-			switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			switchPresetsButtons[i].disableAllEvents();
-			break;
-		case 3:
-			switchPresetsButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
-			switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			switchPresetsButtons[i].disableAllEvents();
-			break;
-		case 4:
-			switchPresetsButtons[i].setup("Program Grain", BTN_MSG_M_OP_MODE_GRAIN_MODE);
-			switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			switchPresetsButtons[i].disableAllEvents();
-			break;
-		case 5:
-			switchPresetsButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
-			switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			switchPresetsButtons[i].disableAllEvents();
-			break;
-		}
-	}
+    for (int i = 0; i < totalButtonsModSwitchPresets; i++)
+    {
+        switch (i)
+        {
+            case 0:
+                switchPresetsButtons[i].setup("Save", BTN_MSG_A_SAVE_GRANULAR);
+                switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                switchPresetsButtons[i].disableAllEvents();
+                break;
+            case 1:
+                switchPresetsButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
+                switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                switchPresetsButtons[i].disableAllEvents();
+                break;
+            case 2:
+                switchPresetsButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
+                switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                switchPresetsButtons[i].disableAllEvents();
+                break;
+            case 3:
+                switchPresetsButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
+                switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                switchPresetsButtons[i].disableAllEvents();
+                break;
+            case 4:
+                switchPresetsButtons[i].setup("Program Grain", BTN_MSG_M_OP_MODE_GRAIN_MODE);
+                switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                switchPresetsButtons[i].disableAllEvents();
+                break;
+            case 5:
+                switchPresetsButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
+                switchPresetsButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                switchPresetsButtons[i].disableAllEvents();
+                break;
+        }
+    }
 }
 #endif
 
 void ofApp::setupMultiGrainMode()
 {
-	ofLogVerbose() << "setup multi mode" << endl;
+    ofLogNotice() << "setup multi mode" << endl;
 #ifndef HAS_ADC
-	enableModeButtons(multiGrainModeButtons, totalButtonsModeMultiGrain);
+    enableModeButtons(multiGrainModeButtons, totalButtonsModeMultiGrain);
 #endif
 }
 
 void ofApp::updateMultiGrainMode() {
-
+    
 #ifdef HAS_ADC
-	deviceOnlyUpdateRoutine();
+    deviceOnlyUpdateRoutine();
 #endif // HAS_ADC
-// just need to check if it is the first time, to know what we have to setup if we change presets
-	if (firstRun)
-	{
-		firstRun = false;
-	}
-
-// as long as we are not pressing the mouse lets see what the parameters should be
-	if (!ofGetMousePressed())
-	{
-		updateParametersFromValuesMulti();
+    // just need to check if it is the first time, to know what we have to setup if we change presets
+    if (firstRun)
+    {
+        firstRun = false;
+    }
+    
+    // as long as we are not pressing the mouse lets see what the parameters should be
+    if (!ofGetMousePressed())
+    {
+        updateParametersFromValuesMulti();
         
-	}
+    }
     updateEffects();
 }
 #ifndef HAS_ADC
 void ofApp::mapSimulatedDataSingle()
 {
     // in signle grain mode we need to fake our ADC input, if the sensor is part of the simulation we give it a value, we then map that value back to the range we want as input
-	for (int j = 0; j < NUMBER_OF_SENSORS; j++) {
-		if (sensorSimActive[j]) {
-			a2dVal[j] = simulatedInput;
-			normalisedA2DValues[j] = ofMap(a2dVal[j], 0, 1024, 0.0, 1.0, true);
-			compressionSims[j] = normalisedA2DValues[j];
-		}
-	}
-	
-// we need to apply the parameters from the simulated sensor data to each of the granulars
-	for (int s = 0; s < numberOfSlots; s++)
-	{
-		controlX[s] = ofMap(accumulatedPressureNormalised, 0.0, 1.0, uiX[s], uiMaxX[s], true);
-		controlY[s] = ofMap(_volume[s], 0.0, 1.0, uiMaxY[s], uiY[s]);
-		accumulatedPressureNormalised >> cloud[s]->in_position();
-		_spread[s] >> cloud[s]->in_position_jitter();
-		_in_length[s] >> cloud[s]->in_length();
-		_in_density[s] >> cloud[s]->in_density();
-		_in_distance_jitter[s] >> cloud[s]->in_distance_jitter();
-		_in_pitch_jitter[s] >> cloud[s]->in_pitch_jitter();
-		_grainDirection[s] >> cloud[s]->in_direction();
-		_in_pitch[s] >> cloud[s]->in_pitch();
-	}
+    for (int j = 0; j < NUMBER_OF_SENSORS; j++) {
+        if (sensorSimActive[j]) {
+            a2dVal[j] = simulatedInput;
+            normalisedA2DValues[j] = ofMap(a2dVal[j], 0, 1024, 0.0, 1.0, true);
+            compressionSims[j] = normalisedA2DValues[j];
+        }
+    }
+    
+    // we need to apply the parameters from the simulated sensor data to each of the granulars
+    for (int s = 0; s < numberOfSlots; s++)
+    {
+        controlX[s] = ofMap(accumulatedPressureNormalised, 0.0, 1.0, uiX[s], uiMaxX[s], true);
+        controlY[s] = ofMap(_volume[s], 0.0, 1.0, uiMaxY[s], uiY[s]);
+        accumulatedPressureNormalised >> cloud[s]->in_position();
+        _spread[s] >> cloud[s]->in_position_jitter();
+        _in_length[s] >> cloud[s]->in_length();
+        _in_density[s] >> cloud[s]->in_density();
+        _in_distance_jitter[s] >> cloud[s]->in_distance_jitter();
+        _in_pitch_jitter[s] >> cloud[s]->in_pitch_jitter();
+        _grainDirection[s] >> cloud[s]->in_direction();
+        _in_pitch[s] >> cloud[s]->in_pitch();
+    }
 }
 
 void ofApp::mapSimulatedDataMulti()
 {
     // in multi mode the data is different, again we map the simulation instead of the incomg data from the ADC, but here we apply the curve to the data as well
-	for (int j = 0; j < NUMBER_OF_SENSORS; j++) {
-		if (sensorSimActive[j]) {
-			a2dVal[j] = simulatedInput;
-			normalisedA2DValues[j] = ofMap(a2dVal[j], 0, 1024, 0.0, 1.0);
+    for (int j = 0; j < NUMBER_OF_SENSORS; j++) {
+        if (sensorSimActive[j]) {
+            a2dVal[j] = simulatedInput;
+            normalisedA2DValues[j] = ofMap(a2dVal[j], 0, 1024, 0.0, 1.0);
             switch (curveSelector){
                 case 0:
                     break;
@@ -1623,46 +1623,46 @@ void ofApp::mapSimulatedDataMulti()
                     normalisedA2DValues[j]  = exponentialEaseIn(normalisedA2DValues[j] );
                     break;
             }
-			compressionSims[j] = normalisedA2DValues[j];
-		}
-	}
+            compressionSims[j] = normalisedA2DValues[j];
+        }
+    }
     
     // we need to apply the parameters from the simulated sensor data to each of the granulars
-
-	for (int s = 0; s < numberOfSlots; s++)
-	{
-		controlX[s] = ofMap(_posX[s], 0.0, 1.0, uiX[s], uiMaxX[s]);
-		controlY[s] = ofMap(_volume[s], 0.0, 1.0, uiMaxY[s], uiY[s]);
-		_posX[s] >> cloud[s]->in_position();
-		_spread[s] >> cloud[s]->in_position_jitter();
-		_in_length[s] >> cloud[s]->in_length();
-		_in_density[s] >> cloud[s]->in_density();
-		_in_distance_jitter[s] >> cloud[s]->in_distance_jitter();
-		_in_pitch_jitter[s] >> cloud[s]->in_pitch_jitter();
-		_grainDirection[s] >> cloud[s]->in_direction();
-		_in_pitch[s] >> cloud[s]->in_pitch();
-		
-	}
+    
+    for (int s = 0; s < numberOfSlots; s++)
+    {
+        controlX[s] = ofMap(_posX[s], 0.0, 1.0, uiX[s], uiMaxX[s]);
+        controlY[s] = ofMap(_volume[s], 0.0, 1.0, uiMaxY[s], uiY[s]);
+        _posX[s] >> cloud[s]->in_position();
+        _spread[s] >> cloud[s]->in_position_jitter();
+        _in_length[s] >> cloud[s]->in_length();
+        _in_density[s] >> cloud[s]->in_density();
+        _in_distance_jitter[s] >> cloud[s]->in_distance_jitter();
+        _in_pitch_jitter[s] >> cloud[s]->in_pitch_jitter();
+        _grainDirection[s] >> cloud[s]->in_direction();
+        _in_pitch[s] >> cloud[s]->in_pitch();
+        
+    }
 }
 
 void ofApp::generateSimulatedData()
 {
     // we generate simulated data, it is int based and can have a max limit and speed set by the GUI, when the simulation is done we go back to the granular mode I use grainOperationModeTranslate, instead of the granular mode directly as this way the ssytem knows if it is single or multi and takes us to and from the crrect simulation or granular mode form any mode.
-		if (simulationRising && simulationRunning) {
-			simulatedInput += compressionSimSpeed;
-
-			if (simulatedInput>compressionSimExtent) {
-				simulationRising = false;
-			}
-		}
-		if (!simulationRising && simulationRunning) {
-			simulatedInput -= compressionSimSpeed;
-
-			if (simulatedInput <= 0) {
-				goToMode(grainOperationModeTranslate);
-							
-			}
-		}
+    if (simulationRising && simulationRunning) {
+        simulatedInput += compressionSimSpeed;
+        
+        if (simulatedInput>compressionSimExtent) {
+            simulationRising = false;
+        }
+    }
+    if (!simulationRising && simulationRunning) {
+        simulatedInput -= compressionSimSpeed;
+        
+        if (simulatedInput <= 0) {
+            goToMode(grainOperationModeTranslate);
+            
+        }
+    }
 }
 
 void ofApp::drawMultiGrainMode()
@@ -1677,189 +1677,189 @@ void ofApp::drawMultiGrainMode()
         
     }
     drawGrainClouds();
-	mainGui.draw();
-	drawModeButtons(multiGrainModeButtons, totalButtonsModeMultiGrain);
-
+    mainGui.draw();
+    drawModeButtons(multiGrainModeButtons, totalButtonsModeMultiGrain);
+    
 }
 
 void ofApp::drawMessages()
 {
     // we draw the name and preset to the screen
-	ofPushStyle();
-	ofSetColor(255);
-	
+    ofPushStyle();
+    ofSetColor(255);
+    
     messageFont.drawString("Gaugemancy Control 1.0       User: " + unitID + " Preset: " + ofToString(presetIndex), 40, 60);
-		
-	ofPopStyle();
+    
+    ofPopStyle();
 }
 
 void ofApp::drawGrainClouds()
 {
-	//this draws each granular module, with a waveform and display of the individual grains
-	ofPushView();
-	ofSetLineWidth(1.0f);
-	for (int j = 0; j < numberOfSlots; ++j) {
-		ofPushStyle();
-		ofSetColor(ofColor(0, 255, 255));
-		ofNoFill();
-		ofSetRectMode(OF_RECTMODE_CORNER);
-		ofDrawRectangle(uiX[j], uiY[j], uiWidth[j], uiHeigth[j]);
-
-		waveformGraphics[j]->draw(uiX[j], uiY[j]);
-	
-			ofDrawBitmapString(fileNamesSet[presetIndex-1][j], uiX[j] + 5, uiY[j] + 15);
-
-		
-	
-		if (drawGrains[j]) {
-			//draw position crossdraw grains
+    //this draws each granular module, with a waveform and display of the individual grains
+    ofPushView();
+    ofSetLineWidth(1.0f);
+    for (int j = 0; j < numberOfSlots; ++j) {
+        ofPushStyle();
+        ofSetColor(ofColor(0, 255, 255));
+        ofNoFill();
+        ofSetRectMode(OF_RECTMODE_CORNER);
+        ofDrawRectangle(uiX[j], uiY[j], uiWidth[j], uiHeigth[j]);
+        
+        waveformGraphics[j]->draw(uiX[j], uiY[j]);
+        
+        ofDrawBitmapString(fileNamesSet[presetIndex-1][j], uiX[j] + 5, uiY[j] + 15);
+        
+        
+        
+        if (drawGrains[j]) {
+            //draw position crossdraw grains
             
-			ofDrawLine(ofMap(positionFromTime, 0, 1, uiX[j], uiMaxX[j]), uiY[j], ofMap(positionFromTime, 0, 1, uiX[j], uiMaxX[j]), uiMaxY[j]);
-			ofDrawLine(uiX[j], controlY[j], uiMaxX[j], controlY[j]);
-			//draw grains
-			ofSetRectMode(OF_RECTMODE_CENTER);
-			int grainsY = uiY[j] + uiHeigth[j] / 2;
-			for (int k = 0; k < grainVoices[j]; ++k) {
-				float xpos = uiX[j] + (uiWidth[j] * cloud[j]->meter_position(k));
-				float dimensionX = cloud[j]->meter_env(k) * 10;
-				float dimensionY = cloud[j]->meter_env(k) * 50;
-				ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
-			}
-		}
-		ofSetColor(255);
-		ofDrawBitmapString("Slot " + ofToString(j + 1), uiX[j] + 5, uiHeigth[j] + uiY[j] - 10);
-		ofPopStyle();
+            ofDrawLine(ofMap(positionFromTime, 0, 1, uiX[j], uiMaxX[j]), uiY[j], ofMap(positionFromTime, 0, 1, uiX[j], uiMaxX[j]), uiMaxY[j]);
+            ofDrawLine(uiX[j], controlY[j], uiMaxX[j], controlY[j]);
+            //draw grains
+            ofSetRectMode(OF_RECTMODE_CENTER);
+            int grainsY = uiY[j] + uiHeigth[j] / 2;
+            for (int k = 0; k < grainVoices[j]; ++k) {
+                float xpos = uiX[j] + (uiWidth[j] * cloud[j]->meter_position(k));
+                float dimensionX = cloud[j]->meter_env(k) * 10;
+                float dimensionY = cloud[j]->meter_env(k) * 50;
+                ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
+            }
+        }
+        ofSetColor(255);
+        ofDrawBitmapString("Slot " + ofToString(j + 1), uiX[j] + 5, uiHeigth[j] + uiY[j] - 10);
+        ofPopStyle();
         if(drawEffects){
             effectsPanels[j]->draw();
-
+            
         }
         if(!drawEffects){
             samplePanels[j]->draw();
-
+            
         }
-	}
-	ofPopView();
+    }
+    ofPopView();
 }
 
 void ofApp::drawSimulationBars()
 {
-//this draws the sensor simulation, it is in a 3D environment (you can rotate and zoom on the preview with a mouse, inside the interaction area rectangle
-	ofBackground(0);
-	cam.setDistance(camDistance);
-	simulationArea.set(ofRectangle(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * totalButtonsModeSimulationAccu, BUTTON_WIDTH, BUTTON_WIDTH));
-	cam.setControlArea(simulationArea);
-
-	ofPushStyle();
-	barsFbo.begin();
-	ofPushView();
-	ofEnableDepthTest();
-	ofClear(0, 0, 0);
-	cam.begin();
-	for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
-		ofSetColor(255);
-		barsFull[i].draw();
-	}
-
-	for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
-		ofSetColor(255, 0, 0);
-		barsEmpty[i].draw();
-	}
-	cam.end();
-	ofPopView();
-	ofDisableDepthTest();
-	barsFbo.end();
-	ofPopStyle();
-
-	ofPushStyle();
-	barsFbo.draw(simulationArea);
-	ofPopStyle();
-
-	ofPushStyle();
-	ofSetColor(0, 0, 255);
-	ofNoFill();
-	ofDrawRectangle(simulationArea);
-	ofPopStyle();
-
-	
+    //this draws the sensor simulation, it is in a 3D environment (you can rotate and zoom on the preview with a mouse, inside the interaction area rectangle
+    ofBackground(0);
+    cam.setDistance(camDistance);
+    simulationArea.set(ofRectangle(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * totalButtonsModeSimulationAccu, BUTTON_WIDTH, BUTTON_WIDTH));
+    cam.setControlArea(simulationArea);
+    
+    ofPushStyle();
+    barsFbo.begin();
+    ofPushView();
+    ofEnableDepthTest();
+    ofClear(0, 0, 0);
+    cam.begin();
+    for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
+        ofSetColor(255);
+        barsFull[i].draw();
+    }
+    
+    for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
+        ofSetColor(255, 0, 0);
+        barsEmpty[i].draw();
+    }
+    cam.end();
+    ofPopView();
+    ofDisableDepthTest();
+    barsFbo.end();
+    ofPopStyle();
+    
+    ofPushStyle();
+    barsFbo.draw(simulationArea);
+    ofPopStyle();
+    
+    ofPushStyle();
+    ofSetColor(0, 0, 255);
+    ofNoFill();
+    ofDrawRectangle(simulationArea);
+    ofPopStyle();
+    
+    
 }
 #endif
 
 void ofApp::exitMultiGrainMode()
 {
-	ofLogVerbose() << "exit multi mode" << endl;
+    ofLogNotice() << "exit multi mode" << endl;
 #ifndef HAS_ADC
-
-	disableModeButtons(multiGrainModeButtons, totalButtonsModeMultiGrain);
+    
+    disableModeButtons(multiGrainModeButtons, totalButtonsModeMultiGrain);
 #endif
 }
 
 #ifndef HAS_ADC
 void ofApp::createMultiGrainModeButtons()
 {
-	for (int i = 0; i < totalButtonsModeMultiGrain; i++)
-	{
-		switch (i)
-		{
-		case 0:
-			multiGrainModeButtons[i].setup("Save", BTN_MSG_A_SAVE_GRANULAR);
-			multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			multiGrainModeButtons[i].disableAllEvents();
-			break;
-		case 1:
-			multiGrainModeButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
-			multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			multiGrainModeButtons[i].disableAllEvents();
-			break;
-		case 2:
-			multiGrainModeButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
-			multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			multiGrainModeButtons[i].disableAllEvents();
-			break;
-		case 3:
-			multiGrainModeButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
-			multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			multiGrainModeButtons[i].disableAllEvents();
-			break;
-		case 4:
-			multiGrainModeButtons[i].setup("Simulation/Curve", BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY);
-			multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			multiGrainModeButtons[i].disableAllEvents();
-			break;
-		case 5:
-			multiGrainModeButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
-			multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			multiGrainModeButtons[i].disableAllEvents();
-			break;
-		}
-	}
+    for (int i = 0; i < totalButtonsModeMultiGrain; i++)
+    {
+        switch (i)
+        {
+            case 0:
+                multiGrainModeButtons[i].setup("Save", BTN_MSG_A_SAVE_GRANULAR);
+                multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                multiGrainModeButtons[i].disableAllEvents();
+                break;
+            case 1:
+                multiGrainModeButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
+                multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                multiGrainModeButtons[i].disableAllEvents();
+                break;
+            case 2:
+                multiGrainModeButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
+                multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                multiGrainModeButtons[i].disableAllEvents();
+                break;
+            case 3:
+                multiGrainModeButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
+                multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                multiGrainModeButtons[i].disableAllEvents();
+                break;
+            case 4:
+                multiGrainModeButtons[i].setup("Simulation/Curve", BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY);
+                multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                multiGrainModeButtons[i].disableAllEvents();
+                break;
+            case 5:
+                multiGrainModeButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
+                multiGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                multiGrainModeButtons[i].disableAllEvents();
+                break;
+        }
+    }
 }
 #endif
 
 void ofApp::setupSingleGrainMode()
 {
-	ofLogVerbose() << "setup single grain mode" << endl;
+    ofLogNotice() << "setup single grain mode" << endl;
 #ifndef HAS_ADC
-	enableModeButtons(SingleGrainModeButtons, totalButtonsModeSingleGrain);
+    enableModeButtons(SingleGrainModeButtons, totalButtonsModeSingleGrain);
 #endif
 }
 
 void ofApp::updateSingleGrainMode()
 {
 #ifdef HAS_ADC
-	deviceOnlyUpdateRoutine();
+    deviceOnlyUpdateRoutine();
 #endif // HAS_ADC
-
-	if (firstRun)
-	{
-		firstRun = false;
-	}
-
-	if (!ofGetMousePressed())
-	{
-		updateParametersFromValuesSingle();
-       
-	}
-     updateEffects();
+    
+    if (firstRun)
+    {
+        firstRun = false;
+    }
+    
+    if (!ofGetMousePressed())
+    {
+        updateParametersFromValuesSingle();
+        
+    }
+    updateEffects();
 }
 
 #ifndef HAS_ADC
@@ -1873,80 +1873,80 @@ void ofApp::drawSingleGrainMode()
         drawCurvesDisplay(simulationArea.x,simulationArea.y,simulationArea.width,simulationArea.height);
         
     }
-	drawGrainClouds();
-	mainGui.draw();
-	drawModeButtons(SingleGrainModeButtons, totalButtonsModeSingleGrain);
-
+    drawGrainClouds();
+    mainGui.draw();
+    drawModeButtons(SingleGrainModeButtons, totalButtonsModeSingleGrain);
+    
 }
 #endif
 
 void ofApp::exitSingleGrainMode()
 {
-	ofLogVerbose() << "exit Single mode" << endl;
+    ofLogNotice() << "exit Single mode" << endl;
 #ifndef HAS_ADC
-	disableModeButtons(SingleGrainModeButtons, totalButtonsModeSingleGrain);
+    disableModeButtons(SingleGrainModeButtons, totalButtonsModeSingleGrain);
 #endif
 }
 
 #ifndef HAS_ADC
 void ofApp::createSingleGrainModeModeButtons()
 {
-	for (int i = 0; i < totalButtonsModeSingleGrain; i++)
-	{
-		switch (i)
-		{
-		case 0:
-			SingleGrainModeButtons[i].setup("Save", BTN_MSG_A_SAVE_GRANULAR);
-			SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			SingleGrainModeButtons[i].disableAllEvents();
-			break;
-		case 1:
-			SingleGrainModeButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
-			SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			SingleGrainModeButtons[i].disableAllEvents();
-			break;
-		case 2:
-			SingleGrainModeButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
-			SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			SingleGrainModeButtons[i].disableAllEvents();
-			break;
-		case 3:
-            SingleGrainModeButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
-			SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			SingleGrainModeButtons[i].disableAllEvents();
-			break;
-		case 4:
-			SingleGrainModeButtons[i].setup("Simulation/Curve", BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY);
-			SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			SingleGrainModeButtons[i].disableAllEvents();
-			break;
-		case 5:
-			SingleGrainModeButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
-			SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			SingleGrainModeButtons[i].disableAllEvents();
-			break;
-		}
-	}
+    for (int i = 0; i < totalButtonsModeSingleGrain; i++)
+    {
+        switch (i)
+        {
+            case 0:
+                SingleGrainModeButtons[i].setup("Save", BTN_MSG_A_SAVE_GRANULAR);
+                SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                SingleGrainModeButtons[i].disableAllEvents();
+                break;
+            case 1:
+                SingleGrainModeButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
+                SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                SingleGrainModeButtons[i].disableAllEvents();
+                break;
+            case 2:
+                SingleGrainModeButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
+                SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                SingleGrainModeButtons[i].disableAllEvents();
+                break;
+            case 3:
+                SingleGrainModeButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
+                SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                SingleGrainModeButtons[i].disableAllEvents();
+                break;
+            case 4:
+                SingleGrainModeButtons[i].setup("Simulation/Curve", BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY);
+                SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                SingleGrainModeButtons[i].disableAllEvents();
+                break;
+            case 5:
+                SingleGrainModeButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
+                SingleGrainModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                SingleGrainModeButtons[i].disableAllEvents();
+                break;
+        }
+    }
 }
 
 
 
 void ofApp::setupNarrGuiMode()
 {
-	ofLogVerbose() << "setup narration gui mode" << endl;
-	enableModeButtons(narrGuiModeButtons, totalButtonsModeNarrGui);
+    ofLogNotice() << "setup narration gui mode" << endl;
+    enableModeButtons(narrGuiModeButtons, totalButtonsModeNarrGui);
 }
 
 void ofApp::updateNarrGuiMode()
 {
     // when we are programming the narration granular we need to aplpy the settings
-	narr_in_position_jitter >> narrCloud.in_position_jitter();
-	narr_in_length >> narrCloud.in_length();
-	narr_in_density >> narrCloud.in_density();
-	narr_in_distance_jitter >> narrCloud.in_distance_jitter();
-	narr_in_pitch_jitter >> narrCloud.in_pitch_jitter();
-	narr_in_pitch >> narrCloud.in_pitch();
-	narr_grainDirection >> narrCloud.in_direction();
+    narr_in_position_jitter >> narrCloud.in_position_jitter();
+    narr_in_length >> narrCloud.in_length();
+    narr_in_density >> narrCloud.in_density();
+    narr_in_distance_jitter >> narrCloud.in_distance_jitter();
+    narr_in_pitch_jitter >> narrCloud.in_pitch_jitter();
+    narr_in_pitch >> narrCloud.in_pitch();
+    narr_grainDirection >> narrCloud.in_direction();
     narrCompressorControls._e_compressor_in_gain >> narrOutControlL.in_mod();
     narrCompressorControls._e_compressor_in_gain >> narrOutControlR.in_mod();
     narrCompressorControls._e_compressor_in_attack >> narrOutCompressor.in_attack();
@@ -1961,208 +1961,208 @@ void ofApp::updateNarrGuiMode()
 void ofApp::drawNarrGuiMode()
 {
     // when we are programming the narration granular we need to see the waveform and the GUI
-
-	ofPushStyle();
-	ofSetColor(ofColor(0, 255, 255));
-	ofNoFill();
-	ofSetRectMode(OF_RECTMODE_CORNER);
-	ofDrawRectangle(narrUiX, narrUiY, narrUiWidth, narrUiHeigth);
-	narrWaveformGraphics.draw(narrUiX, narrUiY);
-
-	if (narrDrawGrains) {
-		ofDrawLine(narrControlX, narrUiY, narrControlX, narrUiMaxY);
-		ofDrawLine(narrUiX, narrControlY, narrUiMaxX, narrControlY);
-		ofSetRectMode(OF_RECTMODE_CENTER);
-		int grainsY = narrUiY + narrUiHeigth / 2;
-		for (int k = 0; k < narrGrainVoices; ++k) {
-			float xpos = narrUiX + (narrUiWidth * narrCloud.meter_position(k));
-			float dimensionX = narrCloud.meter_env(k) * 10;
-			float dimensionY = narrCloud.meter_env(k) * 50;
-			ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
-		}
-	}
-
-	ofPopStyle();
-
-	narrPanel.draw();
-	drawModeButtons(narrGuiModeButtons, totalButtonsModeNarrGui);
-
+    
+    ofPushStyle();
+    ofSetColor(ofColor(0, 255, 255));
+    ofNoFill();
+    ofSetRectMode(OF_RECTMODE_CORNER);
+    ofDrawRectangle(narrUiX, narrUiY, narrUiWidth, narrUiHeigth);
+    narrWaveformGraphics.draw(narrUiX, narrUiY);
+    
+    if (narrDrawGrains) {
+        ofDrawLine(narrControlX, narrUiY, narrControlX, narrUiMaxY);
+        ofDrawLine(narrUiX, narrControlY, narrUiMaxX, narrControlY);
+        ofSetRectMode(OF_RECTMODE_CENTER);
+        int grainsY = narrUiY + narrUiHeigth / 2;
+        for (int k = 0; k < narrGrainVoices; ++k) {
+            float xpos = narrUiX + (narrUiWidth * narrCloud.meter_position(k));
+            float dimensionX = narrCloud.meter_env(k) * 10;
+            float dimensionY = narrCloud.meter_env(k) * 50;
+            ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
+        }
+    }
+    
+    ofPopStyle();
+    
+    narrPanel.draw();
+    drawModeButtons(narrGuiModeButtons, totalButtonsModeNarrGui);
+    
 }
 
 void ofApp::exitNarrGuiMode()
 {
-	disableModeButtons(narrGuiModeButtons, totalButtonsModeNarrGui);
+    disableModeButtons(narrGuiModeButtons, totalButtonsModeNarrGui);
 }
 
 void ofApp::createNarrGuiModeButtons()
 {
-	for (int i = 0; i < totalButtonsModeNarrGui; i++)
-	{
-		switch (i)
-		{
-		case 0:
-			narrGuiModeButtons[i].setup("Save", BTN_MSG_A_SAVE_NARRATION);
-			narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrGuiModeButtons[i].disableAllEvents();
-			break;
-		case 1:
-			narrGuiModeButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
-			narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrGuiModeButtons[i].disableAllEvents();
-			break;
-		case 2:
-			narrGuiModeButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
-			narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrGuiModeButtons[i].disableAllEvents();
-			break;
-		case 3:
-			narrGuiModeButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
-			narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrGuiModeButtons[i].disableAllEvents();
-			break;
-		case 4:
-			narrGuiModeButtons[i].setup("Program Grain", BTN_MSG_M_OP_MODE_GRAIN_MODE);
-			narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrGuiModeButtons[i].disableAllEvents();
-			break;
-		case 5:
-			narrGuiModeButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
-			narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrGuiModeButtons[i].disableAllEvents();
-			break;
-		}
-	}
+    for (int i = 0; i < totalButtonsModeNarrGui; i++)
+    {
+        switch (i)
+        {
+            case 0:
+                narrGuiModeButtons[i].setup("Save", BTN_MSG_A_SAVE_NARRATION);
+                narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrGuiModeButtons[i].disableAllEvents();
+                break;
+            case 1:
+                narrGuiModeButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
+                narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrGuiModeButtons[i].disableAllEvents();
+                break;
+            case 2:
+                narrGuiModeButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
+                narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrGuiModeButtons[i].disableAllEvents();
+                break;
+            case 3:
+                narrGuiModeButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
+                narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrGuiModeButtons[i].disableAllEvents();
+                break;
+            case 4:
+                narrGuiModeButtons[i].setup("Program Grain", BTN_MSG_M_OP_MODE_GRAIN_MODE);
+                narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrGuiModeButtons[i].disableAllEvents();
+                break;
+            case 5:
+                narrGuiModeButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
+                narrGuiModeButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrGuiModeButtons[i].disableAllEvents();
+                break;
+        }
+    }
 }
 
 
 void ofApp::setupSimulationMultiMode()
 {
-	ofLogVerbose() << "setup simulation multi mode" << endl;
-	for (int s = 0; s < numberOfSlots; s++)
-	{
-		drawGrains[s] = true;
-	}
-	enableModeButtons(simulationMultiButtons, totalButtonsModeSimulationMulti);
+    ofLogNotice() << "setup simulation multi mode" << endl;
+    for (int s = 0; s < numberOfSlots; s++)
+    {
+        drawGrains[s] = true;
+    }
+    enableModeButtons(simulationMultiButtons, totalButtonsModeSimulationMulti);
 }
 
 void ofApp::updateSimulationMultiMode()
 {
-
-	if (firstRun)
-	{
-		firstRun = false;
-	}
-
-	simulationGFXUpdateRoutine();
-
-	
-	updateParametersFromValuesMulti();
-	updateEffectsSimulation();
-	
-	generateSimulatedData();
-	mapSimulatedDataMulti();
-	
+    
+    if (firstRun)
+    {
+        firstRun = false;
+    }
+    
+    simulationGFXUpdateRoutine();
+    
+    
+    updateParametersFromValuesMulti();
+    updateEffectsSimulation();
+    
+    generateSimulatedData();
+    mapSimulatedDataMulti();
+    
 }
 
 void ofApp::drawSimulationMultiMode()
 {
     if(simulationNotCurve){
         drawSimulationBars();
-
+        
     }
     else {
         drawCurvesDisplaySimulationMulti(simulationArea.x,simulationArea.y,simulationArea.width,simulationArea.height);
-
+        
     }
-	drawGrainClouds();
-	mainGui.draw();
-
-	drawModeButtons(simulationMultiButtons, totalButtonsModeSimulationMulti);
+    drawGrainClouds();
+    mainGui.draw();
+    
+    drawModeButtons(simulationMultiButtons, totalButtonsModeSimulationMulti);
 }
 
 
 void ofApp::exitSimulationMultiMode()
 {
-	ofLogVerbose() << "Exit simulation multi mode" << endl;
-
-	simulatedInput = 0;
-	runSimulation = false;
-	simulationRising = true;
-	simulationRunning = false;
-	disableModeButtons(simulationMultiButtons, totalButtonsModeSimulationMulti);
-	resetValuesAfterChanges();
-	for (int s = 0; s < numberOfSlots; s++)
-	{
-		drawGrains[s] = false;
-	}
+    ofLogNotice() << "Exit simulation multi mode" << endl;
+    
+    simulatedInput = 0;
+    runSimulation = false;
+    simulationRising = true;
+    simulationRunning = false;
+    disableModeButtons(simulationMultiButtons, totalButtonsModeSimulationMulti);
+    resetValuesAfterChanges();
+    for (int s = 0; s < numberOfSlots; s++)
+    {
+        drawGrains[s] = false;
+    }
 }
 
 void ofApp::createSimulationMultiModeButtons()
 {
-	for (int i = 0; i < totalButtonsModeSimulationMulti; i++)
-	{
-		switch (i)
-		{
-		case 0:
-			simulationMultiButtons[i].setup("Save", BTN_MSG_A_SAVE_GRANULAR);
-			simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationMultiButtons[i].disableAllEvents();
-			break;
-		case 1:
-			simulationMultiButtons[i].setup("Pause Simulation", BTN_MSG_A_PAUSE_SIMULATION);
-			simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationMultiButtons[i].disableAllEvents();
-			break;
-		case 2:
-			simulationMultiButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
-			simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationMultiButtons[i].disableAllEvents();
-			break;
-		case 3:
-			simulationMultiButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
-			simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationMultiButtons[i].disableAllEvents();
-			break;
-		case 4:
-			simulationMultiButtons[i].setup("Simulation/Curve", BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY);
-			simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationMultiButtons[i].disableAllEvents();
-			break;
-		case 5:
-			simulationMultiButtons[i].setup("Switch Presets", 666);
-			simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationMultiButtons[i].disableAllEvents();
-			break;
-		}
-	}
+    for (int i = 0; i < totalButtonsModeSimulationMulti; i++)
+    {
+        switch (i)
+        {
+            case 0:
+                simulationMultiButtons[i].setup("Save", BTN_MSG_A_SAVE_GRANULAR);
+                simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationMultiButtons[i].disableAllEvents();
+                break;
+            case 1:
+                simulationMultiButtons[i].setup("Pause Simulation", BTN_MSG_A_PAUSE_SIMULATION);
+                simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationMultiButtons[i].disableAllEvents();
+                break;
+            case 2:
+                simulationMultiButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
+                simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationMultiButtons[i].disableAllEvents();
+                break;
+            case 3:
+                simulationMultiButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
+                simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationMultiButtons[i].disableAllEvents();
+                break;
+            case 4:
+                simulationMultiButtons[i].setup("Simulation/Curve", BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY);
+                simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationMultiButtons[i].disableAllEvents();
+                break;
+            case 5:
+                simulationMultiButtons[i].setup("Switch Presets", 666);
+                simulationMultiButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationMultiButtons[i].disableAllEvents();
+                break;
+        }
+    }
 }
 
 void ofApp::setupSimulationSingleMode()
 {
-	ofLogVerbose() << "setup simulation single mode" << endl;
-	for (int s = 0; s < numberOfSlots; s++)
-	{
-		drawGrains[s] = true;
-	}
-	enableModeButtons(simulationSingleButtons, totalButtonsModeSimulationAccu);
+    ofLogNotice() << "setup simulation single mode" << endl;
+    for (int s = 0; s < numberOfSlots; s++)
+    {
+        drawGrains[s] = true;
+    }
+    enableModeButtons(simulationSingleButtons, totalButtonsModeSimulationAccu);
 }
 
 void ofApp::updateSimulationSingleMode()
 {
-	drawModeButtons(simulationSingleButtons, totalButtonsModeSimulationAccu);
-
-	if (firstRun)
-	{
-		firstRun = false;
-	}
-
-	simulationGFXUpdateRoutine();
-
-	
-	
-
-	generateSimulatedData();
-	mapSimulatedDataSingle();
+    drawModeButtons(simulationSingleButtons, totalButtonsModeSimulationAccu);
+    
+    if (firstRun)
+    {
+        firstRun = false;
+    }
+    
+    simulationGFXUpdateRoutine();
+    
+    
+    
+    
+    generateSimulatedData();
+    mapSimulatedDataSingle();
     updateParametersFromValuesSingle();
     updateEffectsSimulation();
 }
@@ -2177,81 +2177,81 @@ void ofApp::drawSimulationSingleMode()
         drawCurvesDisplaySimulationSingle(simulationArea.x,simulationArea.y,simulationArea.width,simulationArea.height);
         
     }
-	drawGrainClouds();
-	mainGui.draw();
-	drawModeButtons(simulationSingleButtons, totalButtonsModeSimulationAccu);
-
+    drawGrainClouds();
+    mainGui.draw();
+    drawModeButtons(simulationSingleButtons, totalButtonsModeSimulationAccu);
+    
 }
 
 void ofApp::exitSimulationSingleMode()
 {
-	ofLogVerbose() << "Exit simulation single mode" << endl;
-	resetValuesAfterChanges();
-	simulatedInput = 0;
-	runSimulation = false;
-	simulationRising = true;
-	simulationRunning = false;
-	for (int s = 0; s < numberOfSlots; s++)
-	{
-		drawGrains[s] = false;
-	}
-	disableModeButtons(simulationSingleButtons, totalButtonsModeSimulationAccu);
+    ofLogNotice() << "Exit simulation single mode" << endl;
+    resetValuesAfterChanges();
+    simulatedInput = 0;
+    runSimulation = false;
+    simulationRising = true;
+    simulationRunning = false;
+    for (int s = 0; s < numberOfSlots; s++)
+    {
+        drawGrains[s] = false;
+    }
+    disableModeButtons(simulationSingleButtons, totalButtonsModeSimulationAccu);
 }
 
 void ofApp::createSimulationSingleModeButtons()
 {
-	for (int i = 0; i < totalButtonsModeSimulationAccu; i++)
-	{
-		switch (i)
-		{
-		case 0:
-			simulationSingleButtons[i].setup("Save", BTN_MSG_A_SAVE_GRANULAR);
-			simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationSingleButtons[i].disableAllEvents();
-			break;
-		case 1:
-			simulationSingleButtons[i].setup("Pause Simulation", BTN_MSG_A_PAUSE_SIMULATION);
-			simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationSingleButtons[i].disableAllEvents();
-			break;
-		case 2:
-			simulationSingleButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
-			simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationSingleButtons[i].disableAllEvents();
-			break;
-		case 3:
-			simulationSingleButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
-			simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationSingleButtons[i].disableAllEvents();
-			break;
-		case 4:
-			simulationSingleButtons[i].setup("Simulation/Curve", BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY);
-			simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationSingleButtons[i].disableAllEvents();
-			break;
-		case 5:
-			simulationSingleButtons[i].setup("Switch Presets", 666);
-			simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			simulationSingleButtons[i].disableAllEvents();
-			break;
-		}
-	}
+    for (int i = 0; i < totalButtonsModeSimulationAccu; i++)
+    {
+        switch (i)
+        {
+            case 0:
+                simulationSingleButtons[i].setup("Save", BTN_MSG_A_SAVE_GRANULAR);
+                simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationSingleButtons[i].disableAllEvents();
+                break;
+            case 1:
+                simulationSingleButtons[i].setup("Pause Simulation", BTN_MSG_A_PAUSE_SIMULATION);
+                simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationSingleButtons[i].disableAllEvents();
+                break;
+            case 2:
+                simulationSingleButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
+                simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationSingleButtons[i].disableAllEvents();
+                break;
+            case 3:
+                simulationSingleButtons[i].setup("Effects or Granular", BTN_MSG_A_EFFECTS_OR_GRANULAR);
+                simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationSingleButtons[i].disableAllEvents();
+                break;
+            case 4:
+                simulationSingleButtons[i].setup("Simulation/Curve", BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY);
+                simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationSingleButtons[i].disableAllEvents();
+                break;
+            case 5:
+                simulationSingleButtons[i].setup("Switch Presets", 666);
+                simulationSingleButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                simulationSingleButtons[i].disableAllEvents();
+                break;
+        }
+    }
 }
 
 #endif
 void ofApp::setupNarrationGlitchMode()
 {
 #ifndef HAS_ADC
-	enableModeButtons(narrationGlitchButtons, totalButtonsModeNarrationGlitch);
+    enableModeButtons(narrationGlitchButtons, totalButtonsModeNarrationGlitch);
 #endif
-	narr_in_position_jitter >> narrCloud.in_position_jitter();
-	narr_in_length >> narrCloud.in_length();
-	narr_in_density >> narrCloud.in_density();
-	narr_in_distance_jitter >> narrCloud.in_distance_jitter();
-	narr_in_pitch_jitter >> narrCloud.in_pitch_jitter();
-	narr_in_pitch >> narrCloud.in_pitch();
-	narr_grainDirection >> narrCloud.in_direction();
-	narrAmpControl.set(1.0);
+    narr_in_position_jitter >> narrCloud.in_position_jitter();
+    narr_in_length >> narrCloud.in_length();
+    narr_in_density >> narrCloud.in_density();
+    narr_in_distance_jitter >> narrCloud.in_distance_jitter();
+    narr_in_pitch_jitter >> narrCloud.in_pitch_jitter();
+    narr_in_pitch >> narrCloud.in_pitch();
+    narr_grainDirection >> narrCloud.in_direction();
+    narrAmpControl.set(1.0);
     narrCompressorControls._e_compressor_in_gain >> narrOutControlL.in_mod();
     narrCompressorControls._e_compressor_in_gain >> narrOutControlR.in_mod();
     narrCompressorControls._e_compressor_in_attack >> narrOutCompressor.in_attack();
@@ -2260,111 +2260,111 @@ void ofApp::setupNarrationGlitchMode()
     narrCompressorControls._e_compressor_in_release >> narrOutCompressor.in_release();
     narrCompressorControls._e_compressor_in_threshold >> narrOutCompressor.in_threshold();
     narrCompressorControls._e_compressor_comp_meter.set(narrOutCompressor.meter_GR());
-	ofLogVerbose() << "setup narration glitch mode" << endl;
-
+    ofLogNotice() << "setup narration glitch mode" << endl;
+    
 }
 
 void ofApp::updateNarrationGlitchMode()
 {
     // we get to narration glitch mode on the device by pressing one of the sensors, that sensor value is then used to move the playhead of the narraiton granular. If the sensor values goes below the threshold we go back to the  narration play mode
 #ifdef HAS_ADC
-	deviceOnlyUpdateRoutine();
-	narration.getPosition() + ofMap(normalisedA2DValues[narrrationGlitchSensor], 0.0, 1.0, -1.0 * narrationGlitchStrand, 0) >> narrCloud.in_position();
-
-	if (normalisedA2DValues[narrrationGlitchSensor] < narrationGlitchThreshold)
-	{
-		goToMode(OP_MODE_PLAY_NARRATION);
-	}
-	// if we are on a laptop the sensor data is take from the mouse x position
+    deviceOnlyUpdateRoutine();
+    narration.getPosition() + ofMap(normalisedA2DValues[narrrationGlitchSensor], 0.0, 1.0, -1.0 * narrationGlitchStrand, 0) >> narrCloud.in_position();
+    
+    if (normalisedA2DValues[narrrationGlitchSensor] < narrationGlitchThreshold)
+    {
+        goToMode(OP_MODE_PLAY_NARRATION);
+    }
+    // if we are on a laptop the sensor data is take from the mouse x position
 #else
-	(narration.getPosition() + ofMap(narrationGlitchPlayheadPos, 0.0, 1.0, -1.0 * narrationGlitchStrand, 0, true))  >> narrCloud.in_position();
-	narrControlX = ofMap(narration.getPosition() + ofMap(narrationGlitchPlayheadPos, 0.0, 1.0, -1.0 * narrationGlitchStrand, 0), 0, 1, narrUiX, narrUiMaxX);
-	ofLogVerbose() << ofToString(narrControlX) << endl;
+    (narration.getPosition() + ofMap(narrationGlitchPlayheadPos, 0.0, 1.0, -1.0 * narrationGlitchStrand, 0, true))  >> narrCloud.in_position();
+    narrControlX = ofMap(narration.getPosition() + ofMap(narrationGlitchPlayheadPos, 0.0, 1.0, -1.0 * narrationGlitchStrand, 0), 0, 1, narrUiX, narrUiMaxX);
+    ofLogNotice() << ofToString(narrControlX) << endl;
 #endif
     
     
-
- 
+    
+    
 }
 
 #ifndef HAS_ADC
 void ofApp::drawNarrationGlitchMode()
 {
     // again for the glitch, or narration programming mode we need to see the waveform and GUI
-	ofPushView();
-	ofPushStyle();
-	ofSetColor(ofColor(0, 255, 255));
-	ofNoFill();
-	ofSetRectMode(OF_RECTMODE_CORNER);
-	ofDrawRectangle(narrUiX, narrUiY, narrUiWidth, narrUiHeigth);
-	narrWaveformGraphics.draw(narrUiX, narrUiY);
-	ofSetColor(255);
-	ofDrawLine(narrControlX, narrUiY, narrControlX, narrUiMaxY);
-	ofSetRectMode(OF_RECTMODE_CENTER);
-	int grainsY = narrUiY + narrUiHeigth / 2;
-	for (int k = 0; k < narrGrainVoices; ++k) {
-		float xpos = narrUiX + (narrUiWidth * narrCloud.meter_position(k));
-		float dimensionX = narrCloud.meter_env(k) * 10;
-		float dimensionY = narrCloud.meter_env(k) * 50;
+    ofPushView();
+    ofPushStyle();
+    ofSetColor(ofColor(0, 255, 255));
+    ofNoFill();
+    ofSetRectMode(OF_RECTMODE_CORNER);
+    ofDrawRectangle(narrUiX, narrUiY, narrUiWidth, narrUiHeigth);
+    narrWaveformGraphics.draw(narrUiX, narrUiY);
+    ofSetColor(255);
+    ofDrawLine(narrControlX, narrUiY, narrControlX, narrUiMaxY);
+    ofSetRectMode(OF_RECTMODE_CENTER);
+    int grainsY = narrUiY + narrUiHeigth / 2;
+    for (int k = 0; k < narrGrainVoices; ++k) {
+        float xpos = narrUiX + (narrUiWidth * narrCloud.meter_position(k));
+        float dimensionX = narrCloud.meter_env(k) * 10;
+        float dimensionY = narrCloud.meter_env(k) * 50;
         ofSetColor(255);
-		ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
-	}
-	ofPopStyle();
-	ofPopView();
-	drawModeButtons(narrationGlitchButtons, totalButtonsModeNarrationGlitch);
+        ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
+    }
+    ofPopStyle();
+    ofPopView();
+    drawModeButtons(narrationGlitchButtons, totalButtonsModeNarrationGlitch);
 }
 #endif
 
 void ofApp::exitNarrationGlitchMode()
 {
 #ifndef HAS_ADC
-	disableModeButtons(narrationGlitchButtons, totalButtonsModeNarrationGlitch);
+    disableModeButtons(narrationGlitchButtons, totalButtonsModeNarrationGlitch);
 #endif
-	0.0 >> narrCloud.in_position();
-	narrAmpControl.set(0.0);
+    0.0 >> narrCloud.in_position();
+    narrAmpControl.set(0.0);
     hasGlitchSource = false;
-		
+    
 }
 
 #ifndef HAS_ADC
 void ofApp::createNarrationGlitchModeButtons()
 {
-	for (int i = 0; i < totalButtonsModeNarrationGlitch; i++)
-	{
-		switch (i)
-		{
-		case 0:
-			narrationGlitchButtons[i].setup("Toggle Glitch", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
-			narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrationGlitchButtons[i].disableAllEvents();
-			break;
-		case 1:
-			narrationGlitchButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
-			narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrationGlitchButtons[i].disableAllEvents();
-			break;
-		case 2:
-			narrationGlitchButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
-			narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrationGlitchButtons[i].disableAllEvents();
-			break;
-		case 3:
-			narrationGlitchButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
-			narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrationGlitchButtons[i].disableAllEvents();
-			break;
-		case 4:
-			narrationGlitchButtons[i].setup("Program Grain", BTN_MSG_M_OP_MODE_GRAIN_MODE);
-			narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrationGlitchButtons[i].disableAllEvents();
-			break;
-		case 5:
-			narrationGlitchButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
-			narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
-			narrationGlitchButtons[i].disableAllEvents();
-			break;
-		}
-	}
+    for (int i = 0; i < totalButtonsModeNarrationGlitch; i++)
+    {
+        switch (i)
+        {
+            case 0:
+                narrationGlitchButtons[i].setup("Toggle Glitch", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
+                narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrationGlitchButtons[i].disableAllEvents();
+                break;
+            case 1:
+                narrationGlitchButtons[i].setup("Run Simulation", BTN_MSG_M_OP_MODE_SIMULATION);
+                narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrationGlitchButtons[i].disableAllEvents();
+                break;
+            case 2:
+                narrationGlitchButtons[i].setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
+                narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrationGlitchButtons[i].disableAllEvents();
+                break;
+            case 3:
+                narrationGlitchButtons[i].setup("Program Narration", BTN_MSG_M_OP_MODE_NARRATION_GUI);
+                narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrationGlitchButtons[i].disableAllEvents();
+                break;
+            case 4:
+                narrationGlitchButtons[i].setup("Program Grain", BTN_MSG_M_OP_MODE_GRAIN_MODE);
+                narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrationGlitchButtons[i].disableAllEvents();
+                break;
+            case 5:
+                narrationGlitchButtons[i].setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
+                narrationGlitchButtons[i].set(ofGetWidth() - (BUTTON_WIDTH + 10), 40 + 65 * i, BUTTON_WIDTH, BUTTON_HEIGHT);
+                narrationGlitchButtons[i].disableAllEvents();
+                break;
+        }
+    }
 }
 #endif
 
@@ -2415,41 +2415,41 @@ void ofApp::goToMode(int mode)
 
 void ofApp::exitAnyMode()
 {
-	switch (operationMode)
-	{
-	case OP_MODE_SETUP:
-		exitInitMode();
-		break;
-	case OP_MODE_WAIT_FOR_NARRATION:
-		exitWaitForNarrMode();
-		break;
-	case OP_MODE_PLAY_NARRATION:
-		exitPlayNarrMode();
-		break;
-	case OP_MODE_SWITCH_PRESETS:
-		exitSwitchPresetsMode();
-		break;
-	case OP_MODE_MULTI_GRAIN_MODE:
-		exitMultiGrainMode();
-		break;
-	case OP_MODE_SINGLE_GRAIN_MODE:
-		exitSingleGrainMode();
-		break;
+    switch (operationMode)
+    {
+        case OP_MODE_SETUP:
+            exitInitMode();
+            break;
+        case OP_MODE_WAIT_FOR_NARRATION:
+            exitWaitForNarrMode();
+            break;
+        case OP_MODE_PLAY_NARRATION:
+            exitPlayNarrMode();
+            break;
+        case OP_MODE_SWITCH_PRESETS:
+            exitSwitchPresetsMode();
+            break;
+        case OP_MODE_MULTI_GRAIN_MODE:
+            exitMultiGrainMode();
+            break;
+        case OP_MODE_SINGLE_GRAIN_MODE:
+            exitSingleGrainMode();
+            break;
 #ifndef HAS_ADC
-	case OP_MODE_NARRATION_GUI:
-		exitNarrGuiMode();
-		break;
-	case OP_MODE_SIMULATION_MULTI:
-		exitSimulationMultiMode();
-		break;
-	case OP_MODE_SIMULATION_SINGLE:
-		exitSimulationSingleMode();
-		break;
+        case OP_MODE_NARRATION_GUI:
+            exitNarrGuiMode();
+            break;
+        case OP_MODE_SIMULATION_MULTI:
+            exitSimulationMultiMode();
+            break;
+        case OP_MODE_SIMULATION_SINGLE:
+            exitSimulationSingleMode();
+            break;
 #endif
-	case OP_MODE_NARRATION_GLITCH:
-		exitNarrationGlitchMode();
-		break;
-	}
+        case OP_MODE_NARRATION_GLITCH:
+            exitNarrationGlitchMode();
+            break;
+    }
 }
 
 
@@ -2457,139 +2457,142 @@ void ofApp::setupParamsFromXML()
 {
     // partty!! this is where I read all the settings for the system. To make in manageable the settings are named with the performers names as a prefix, the user profile is set in the username.xml. This is then used to decide which settings to use. becuase the system runs on a raspberry pi and that pie is stuck deep inside the unit, and I dont want thme to have to log in, conect to wife etc, I just map a USP stick to a fixed path on the PI. the settings and audio files are altered day to day by replacing them or adding them to the USB stick and starting the device.
     // get the username
-	if (!usernameXML.load(filePathPrefix + "username.xml")) {
-		ofLogVerbose() << "Username settings not loaded" << endl;
-
-	}
-	else {
-		ofLogVerbose() << "Username settings loaded" << endl;
-	}
+    if (!usernameXML.load(filePathPrefix + "username.xml")) {
+        ofLogNotice() << "Username settings not loaded" << endl;
+        
+    }
+    else {
+        ofLogNotice() << "Username settings loaded" << endl;
+    }
     
     ofSleepMillis(50);
-	unitID = usernameXML.getValue("NAMES:USERNAME", "NO_UNIT_ID");
-	ofLogVerbose() << "UNIT_ID = " + ofToString(unitID) << endl;
+    unitID = usernameXML.getValue("NAMES:USERNAME", "NO_UNIT_ID");
+    ofLogNotice() << "UNIT_ID = " + ofToString(unitID) << endl;
     filePathPrefix = filePathPrefix + unitID + "/";
-    ofLogVerbose()<< "Root user data path is " + filePathPrefix <<endl;
-
-// based on the username load that app settings profile
-	if (!appSettingsXML.load(filePathPrefix  + unitID + "_appSettings.xml")) {
-		ofLogVerbose() << "App settings not loaded" << endl;
-
-	}
-	else {
-		ofLogVerbose() << "App settings loaded" << endl;
-	}
+    ofLogNotice()<< "Root user data path is " + filePathPrefix <<endl;
+    
+    // based on the username load that app settings profile
+    if (!appSettingsXML.load(filePathPrefix  + unitID + "_appSettings.xml")) {
+        ofLogNotice() << "App settings not loaded" << endl;
+        
+    }
+    else {
+        ofLogNotice() << "App settings loaded" << endl;
+    }
     // I can change log levels to give me different kinds of feedback from the system when I am debugging (via ssh or VNC)
-	logLevel = appSettingsXML.getValue("SETTINGS:LOG_LEVEL", 1);
-	switch (logLevel)
-	{
-	case 0:
-		ofSetLogLevel(OF_LOG_VERBOSE);
-		break;
-	case 1:
-		ofSetLogLevel(OF_LOG_ERROR);
-		break;
-	case 2:
-		ofSetLogLevel(OF_LOG_SILENT);
-		break;
-
-	}
-
-//do we have a narration file
-	hasNarration = appSettingsXML.getValue("SETTINGS:HAS_NARRATION", 0);
-	ofLogVerbose() << "HAS_NARRATION = " + ofToString(hasNarration) << endl;
+    logLevel = appSettingsXML.getValue("SETTINGS:LOG_LEVEL", 1);
+    switch (logLevel)
+    {
+        case 0:
+            ofSetLogLevel(OF_LOG_VERBOSE);
+            break;
+        case 1:
+            ofSetLogLevel(OF_LOG_ERROR);
+            break;
+        case 2:
+            ofSetLogLevel(OF_LOG_NOTICE);
+            break;
+        case 3:
+            ofSetLogLevel(OF_LOG_SILENT);
+            break;
+            
+    }
     
-//what volume to we play the narration at
-	narrationVolume = appSettingsXML.getValue("SETTINGS:NARRATION_VOLUME", 1.0);
-	ofLogVerbose() << "NARRATION_VOLUME = " + ofToString(narrationVolume) << endl;
-
-// sensor input threshold for moving between narration play and narration granular
+    //do we have a narration file
+    hasNarration = appSettingsXML.getValue("SETTINGS:HAS_NARRATION", 0);
+    ofLogNotice() << "HAS_NARRATION = " + ofToString(hasNarration) << endl;
+    
+    //what volume to we play the narration at
+    narrationVolume = appSettingsXML.getValue("SETTINGS:NARRATION_VOLUME", 1.0);
+    ofLogNotice() << "NARRATION_VOLUME = " + ofToString(narrationVolume) << endl;
+    
+    // sensor input threshold for moving between narration play and narration granular
     narrationGlitchThreshold = appSettingsXML.getValue("SETTINGS:NARRATION_GLITCH_THRESH", 0.025);
-    ofLogVerbose() << "NARRATION_GLITCH_THRESH = " + ofToString(narrationGlitchThreshold) << endl;
+    ofLogNotice() << "NARRATION_GLITCH_THRESH = " + ofToString(narrationGlitchThreshold) << endl;
     
-// when the sensor data is used to manipulate the narration granular how far should it move the playhead
+    // when the sensor data is used to manipulate the narration granular how far should it move the playhead
     narrationGlitchStrand = appSettingsXML.getValue("SETTINGS:NARRATION_GLITCH_STRAND", 0.0025);
-    ofLogVerbose() << "NARRATION_GLITCH_STRAND = " + ofToString(narrationGlitchStrand) << endl;
+    ofLogNotice() << "NARRATION_GLITCH_STRAND = " + ofToString(narrationGlitchStrand) << endl;
     
-// if the unit has narration we have an option of how it is started, it can run automatically after some time, or it can be triggered by pushing the sensor
+    // if the unit has narration we have an option of how it is started, it can run automatically after some time, or it can be triggered by pushing the sensor
     narrationUsesSensor = appSettingsXML.getValue("SETTINGS:NARR_PLAY_WITH_SENSOR", false);
-    ofLogVerbose() << "NARR_PLAY_WITH_SENSOR = " + ofToString(narrationUsesSensor) << endl;
+    ofLogNotice() << "NARR_PLAY_WITH_SENSOR = " + ofToString(narrationUsesSensor) << endl;
     
-// what is the maximum value we think a performer can get to, we will use this for the top end of the value scaling
-	maxSensorValue = appSettingsXML.getValue("SETTINGS:MAX_SENSOR_VALUE", 520);
-	ofLogVerbose() << "MAX_SENSOR_VALUE = " + ofToString(maxSensorValue) << endl;
-
-// sensor input threshold for engaging interaction (otherise the units will make random sounds from noise in the ADC
+    // what is the maximum value we think a performer can get to, we will use this for the top end of the value scaling
+    maxSensorValue = appSettingsXML.getValue("SETTINGS:MAX_SENSOR_VALUE", 520);
+    ofLogNotice() << "MAX_SENSOR_VALUE = " + ofToString(maxSensorValue) << endl;
+    
+    // sensor input threshold for engaging interaction (otherise the units will make random sounds from noise in the ADC
     normalisedA2DValuesMin = appSettingsXML.getValue("SETTINGS:ACTIVE_THRESHOLD", 0.0025);
-    ofLogVerbose() << "ACTIVE_THRESHOLD = " + ofToString(normalisedA2DValuesMin) << endl;
+    ofLogNotice() << "ACTIVE_THRESHOLD = " + ofToString(normalisedA2DValuesMin) << endl;
     
-// chose a curve to transform incoming sensor or simulation data
+    // chose a curve to transform incoming sensor or simulation data
     curveSelector = appSettingsXML.getValue("SETTINGS:EASING_SELECTOR", 0);
-    ofLogVerbose() << "EASING_SELECTOR = " + ofToString(curveSelector) << endl;
-
-// accumulated or multi mode uses the combination of all sensor input to move the plahead of the granular objects. So the full postion is only reached by pressing all the balls in at once. The performers cannot push all in at once so instead of dividing the aggregated sensor data by 6 I divide it by this (it was 4 as that is how many sensors they can engage at once, but it was still too hard to for them to reach the end point so here it is a shitty hack
+    ofLogNotice() << "EASING_SELECTOR = " + ofToString(curveSelector) << endl;
+    
+    // accumulated or multi mode uses the combination of all sensor input to move the plahead of the granular objects. So the full postion is only reached by pressing all the balls in at once. The performers cannot push all in at once so instead of dividing the aggregated sensor data by 6 I divide it by this (it was 4 as that is how many sensors they can engage at once, but it was still too hard to for them to reach the end point so here it is a shitty hack
     accumulationDenominator = appSettingsXML.getValue("SETTINGS:ACCUMULATION_DENOMINATOR", 4);
-    ofLogVerbose() << "ACCUMULATION_DENOMINATOR = " + ofToString(accumulationDenominator) << endl;
+    ofLogNotice() << "ACCUMULATION_DENOMINATOR = " + ofToString(accumulationDenominator) << endl;
     
-// On some systems I can reduce the latency by reducing the audio buffer size
+    // On some systems I can reduce the latency by reducing the audio buffer size
     engineBufferSize = appSettingsXML.getValue("SETTINGS:BUFFER_SIZE", 512);
-    ofLogVerbose() << "BUFFER_SIZE = " + ofToString(engineBufferSize) << endl;
+    ofLogNotice() << "BUFFER_SIZE = " + ofToString(engineBufferSize) << endl;
     
-// On some systems I can reduce the latency by reducing the number of buffers
+    // On some systems I can reduce the latency by reducing the number of buffers
     numberOfBuffers = appSettingsXML.getValue("SETTINGS:NUMBER_OF_BUFFERS", 3);
-    ofLogVerbose() << "NUMBER_OF_BUFFERS = " + ofToString(numberOfBuffers) << endl;
+    ofLogNotice() << "NUMBER_OF_BUFFERS = " + ofToString(numberOfBuffers) << endl;
     
-// Here we can change the audio device for different soundcards
+    // Here we can change the audio device for different soundcards
     audioDeviceId = appSettingsXML.getValue("SETTINGS:AUDIO_DEVICE_ID", 1);
-    ofLogVerbose() << "AUDIO_DEVICE_ID = " + ofToString(audioDeviceId) << endl;
-
+    ofLogNotice() << "AUDIO_DEVICE_ID = " + ofToString(audioDeviceId) << endl;
     
-// this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between letting of the push and the next push
+    
+    // this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between letting of the push and the next push
     useHitGesture = appSettingsXML.getValue("SETTINGS:HIT_TO_CHANGE_PRESETS", false);
-    ofLogVerbose() << "HIT_TO_CHANGE_PRESETS = " + ofToString(useHitGesture) << endl;
-// this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between letting of the push and the next push
+    ofLogNotice() << "HIT_TO_CHANGE_PRESETS = " + ofToString(useHitGesture) << endl;
+    // this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between letting of the push and the next push
     maxTroughDuration = appSettingsXML.getValue("SETTINGS:MAX_TROUGH_DURATION", 250);
-    ofLogVerbose() << "MAX_TROUGH_DURATION = " + ofToString(maxTroughDuration) << endl;
+    ofLogNotice() << "MAX_TROUGH_DURATION = " + ofToString(maxTroughDuration) << endl;
     
-// this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between a push and the letting off the push
+    // this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between a push and the letting off the push
     maxPeakDuration = appSettingsXML.getValue("SETTINGS:MAX_PEAK_DURATION", 80);
-    ofLogVerbose() << "MAX_PEAK_DURATION = " + ofToString(maxPeakDuration) << endl;
+    ofLogNotice() << "MAX_PEAK_DURATION = " + ofToString(maxPeakDuration) << endl;
     
-// this is for a gestural input, where the performers squeeze several sensors rapidly, number of pushes need to trigger an action
+    // this is for a gestural input, where the performers squeeze several sensors rapidly, number of pushes need to trigger an action
     requiredHits = appSettingsXML.getValue("SETTINGS:REQUIRED_HITS", 8);
-    ofLogVerbose() << "REQUIRED_HITS = " + ofToString(requiredHits) << endl;
+    ofLogNotice() << "REQUIRED_HITS = " + ofToString(requiredHits) << endl;
     
-// this is for a gestural input, where the performers squeeze several sensors rapidly, how hard does a press have to be
+    // this is for a gestural input, where the performers squeeze several sensors rapidly, how hard does a press have to be
     hitThreshHold = appSettingsXML.getValue("SETTINGS:HIT_THRESHOLD", 0.085);
-    ofLogVerbose() << "HIT_THRESHOLD = " + ofToString(hitThreshHold) << endl;
+    ofLogNotice() << "HIT_THRESHOLD = " + ofToString(hitThreshHold) << endl;
     
-// this is for a gestural input, where the performers squeeze several sensors rapidly, how soft does a non press have to be
+    // this is for a gestural input, where the performers squeeze several sensors rapidly, how soft does a non press have to be
     troughThreshold = appSettingsXML.getValue("SETTINGS:TROUGH_THRESHOLD", 0.025);
-    ofLogVerbose() << "TROUGH_THRESHOLD = " + ofToString(troughThreshold) << endl;
+    ofLogNotice() << "TROUGH_THRESHOLD = " + ofToString(troughThreshold) << endl;
     
-// in accumulated pressure we go to single grain mode
+    // in accumulated pressure we go to single grain mode
     useAccumulatedPressure = appSettingsXML.getValue("SETTINGS:ACCUMULATED_PRESSURE", false);
-    ofLogVerbose() << "ACCUMULATED_PRESSURE = " + ofToString(useAccumulatedPressure) << endl;
+    ofLogNotice() << "ACCUMULATED_PRESSURE = " + ofToString(useAccumulatedPressure) << endl;
     
     for(int i = 0; i < NUMBER_OF_PRESETS; i++){
         timeAdvanceInterval[i] = appSettingsXML.getValue("SETTINGS:TIME_ADVANCE_INTERVAL_" + ofToString(i+1), 0.0002);
-        ofLogVerbose() << "TIME_ADVANCE_INTERVAL = " + ofToString(timeAdvanceInterval[i]) << endl;
+        ofLogNotice() << "TIME_ADVANCE_INTERVAL = " + ofToString(timeAdvanceInterval[i]) << endl;
     }
     
-
+    
     
     // change the number of slots and the simulation and grain modes depending on the accumulated pressure setting
     if (useAccumulatedPressure)
     {
         numberOfSlots = 1;
-        ofLogVerbose() << "Using 1 slot and accumulated pressure" << endl;
+        ofLogNotice() << "Using 1 slot and accumulated pressure" << endl;
         grainOperationModeTranslate = OP_MODE_SINGLE_GRAIN_MODE;
         simulationOperationModeTranslate = OP_MODE_SIMULATION_SINGLE;
     }
     else if (!useAccumulatedPressure)
     {
         numberOfSlots = 6;
-        ofLogVerbose() << "Using 6 slots and mappable pressure pressure" << endl;
+        ofLogNotice() << "Using 6 slots and mappable pressure pressure" << endl;
         
         grainOperationModeTranslate = OP_MODE_MULTI_GRAIN_MODE;
         simulationOperationModeTranslate = OP_MODE_SIMULATION_MULTI;
@@ -2597,117 +2600,117 @@ void ofApp::setupParamsFromXML()
     
     
     
-//not implemented yet, but if the systems need to on a network and talking to me or each other should I set the IP
-	setLocalIp = appSettingsXML.getValue("SETTINGS:SET_LOCAL_IP", false);
-	ofLogVerbose() << "SET_LOCAL_IP = " + ofToString(setLocalIp) << endl;
-
-//not implemented yet, but if the systems need to on a network and talking to me and I should set the IP what should I set it to
-	localIpFromXML = appSettingsXML.getValue("SETTINGS:XML_IP", "192.168.1.15");
-	ofLogVerbose() << "XML_IP = " + ofToString(localIpFromXML) << endl;
-
-//not implemented yet, but if the systems need to on a network and talking to me should I set the IP to DHCP
-	setLocalToDHCP = appSettingsXML.getValue("SETTINGS:SET_DHCP", false);
-	ofLogVerbose() << "SET_DHCP = " + ofToString(setLocalToDHCP) << endl;
-
-//not implemented yet, but if the systems need to on a network and talking to me I use OSC, which is packaged UDP messages, this is the local port
+    //not implemented yet, but if the systems need to on a network and talking to me or each other should I set the IP
+    setLocalIp = appSettingsXML.getValue("SETTINGS:SET_LOCAL_IP", false);
+    ofLogNotice() << "SET_LOCAL_IP = " + ofToString(setLocalIp) << endl;
+    
+    //not implemented yet, but if the systems need to on a network and talking to me and I should set the IP what should I set it to
+    localIpFromXML = appSettingsXML.getValue("SETTINGS:XML_IP", "192.168.1.15");
+    ofLogNotice() << "XML_IP = " + ofToString(localIpFromXML) << endl;
+    
+    //not implemented yet, but if the systems need to on a network and talking to me should I set the IP to DHCP
+    setLocalToDHCP = appSettingsXML.getValue("SETTINGS:SET_DHCP", false);
+    ofLogNotice() << "SET_DHCP = " + ofToString(setLocalToDHCP) << endl;
+    
+    //not implemented yet, but if the systems need to on a network and talking to me I use OSC, which is packaged UDP messages, this is the local port
     localOSCPport = appSettingsXML.getValue("SETTINGS:LOCAL_OSC_PORT", 1234);
-	ofLogVerbose() << "LOCAL_OSC_PORT = " + ofToString(localOSCPport) << endl;
-
-//This is implemented, I can send OSC data (for now debug data), this is the remote port
-	remoteOSCPort = appSettingsXML.getValue("SETTINGS:REMOTE_OSC_PORT", 1235);
-	ofLogVerbose() << "REMOTE_OSC_PORT = " + ofToString(remoteOSCPort) << endl;
-
-//This is implemented, I can send OSC data (for now debug data), this is the remote IP
-	remoteOSCIp = appSettingsXML.getValue("SETTINGS:REMOTE_OSC_IP", "192.168.178.236");
-	ofLogVerbose() << "REMOTE_OSC_IP = " + ofToString(remoteOSCIp) << endl;
+    ofLogNotice() << "LOCAL_OSC_PORT = " + ofToString(localOSCPport) << endl;
     
-//If OSC debug is on, it will send OSC messages as well as console debug messages
-	oscDebug = appSettingsXML.getValue("SETTINGS:OSC_DEBUG", false);
-	ofLogVerbose() << "OSC_DEBUG = " + ofToString(oscDebug) << endl;
-
-//not implemented if OSC live is on, it will send OSC messages to allow me to duplicate the interaction on a laptop in real time when the room is too big for the built in speakers
-	oscLive = appSettingsXML.getValue("SETTINGS:OSC_LIVE", false);
-	ofLogVerbose() << "OSC_LIVE =" + ofToString(oscLive) << endl;
+    //This is implemented, I can send OSC data (for now debug data), this is the remote port
+    remoteOSCPort = appSettingsXML.getValue("SETTINGS:REMOTE_OSC_PORT", 1235);
+    ofLogNotice() << "REMOTE_OSC_PORT = " + ofToString(remoteOSCPort) << endl;
+    
+    //This is implemented, I can send OSC data (for now debug data), this is the remote IP
+    remoteOSCIp = appSettingsXML.getValue("SETTINGS:REMOTE_OSC_IP", "192.168.178.236");
+    ofLogNotice() << "REMOTE_OSC_IP = " + ofToString(remoteOSCIp) << endl;
+    
+    //If OSC debug is on, it will send OSC messages as well as console debug messages
+    oscDebug = appSettingsXML.getValue("SETTINGS:OSC_DEBUG", false);
+    ofLogNotice() << "OSC_DEBUG = " + ofToString(oscDebug) << endl;
+    
+    //not implemented if OSC live is on, it will send OSC messages to allow me to duplicate the interaction on a laptop in real time when the room is too big for the built in speakers
+    oscLive = appSettingsXML.getValue("SETTINGS:OSC_LIVE", false);
+    ofLogNotice() << "OSC_LIVE =" + ofToString(oscLive) << endl;
     
 #ifdef HAS_ADC
-//device only if we are counting double or trupple presses on the soft button, how long to wait before we reset counting
+    //device only if we are counting double or trupple presses on the soft button, how long to wait before we reset counting
     buttonPressTimeOut = appSettingsXML.getValue("SETTINGS:BUTTON_PRESS_MAX_WAIT", 220);
-    ofLogVerbose() << "BUTTON_PRESS_MAX_WAIT = " + ofToString(buttonPressTimeOut) << endl;
+    ofLogNotice() << "BUTTON_PRESS_MAX_WAIT = " + ofToString(buttonPressTimeOut) << endl;
     
-// should the application close from a button interaction
+    // should the application close from a button interaction
     shutdownPress = appSettingsXML.getValue("SETTINGS:SH_P", false);
-    ofLogVerbose() << "SH_P = " + ofToString(shutdownPress) << endl;
+    ofLogNotice() << "SH_P = " + ofToString(shutdownPress) << endl;
     
-// should the application closing shut town the raspberry pi
+    // should the application closing shut town the raspberry pi
     doShutdown = appSettingsXML.getValue("SETTINGS:D_SH", false);
-    ofLogVerbose() << "D_SH = " + ofToString(doShutdown) << endl;
+    ofLogNotice() << "D_SH = " + ofToString(doShutdown) << endl;
 #endif
     
-// if we have OSCdebug on setup the packet sender and then send the data below
-	if (oscDebug) {
-		sender.setup(remoteOSCIp, remoteOSCPort);
-	}
-
-	if (oscDebug) {
-		recyclingMessage.clear();
-		recyclingMessage.setAddress("/" + ofToString(unitID) + "/localOSCPport");
-		recyclingMessage.addIntArg(localOSCPport);
-		sender.sendMessage(recyclingMessage, false);
-	}
+    // if we have OSCdebug on setup the packet sender and then send the data below
+    if (oscDebug) {
+        sender.setup(remoteOSCIp, remoteOSCPort);
+    }
+    
+    if (oscDebug) {
+        recyclingMessage.clear();
+        recyclingMessage.setAddress("/" + ofToString(unitID) + "/localOSCPport");
+        recyclingMessage.addIntArg(localOSCPport);
+        sender.sendMessage(recyclingMessage, false);
+    }
 #ifdef HAS_ADC
-	if (oscDebug) {
-		recyclingMessage.clear();
-		recyclingMessage.setAddress("/" + ofToString(unitID) + "/shutdownPress");
-		recyclingMessage.addIntArg(shutdownPress);
-		sender.sendMessage(recyclingMessage, false);
-	}
-
-	if (oscDebug) {
-		recyclingMessage.clear();
-		recyclingMessage.setAddress("/" + ofToString(unitID) + "/doShutdown");
-		recyclingMessage.addIntArg(doShutdown);
-		sender.sendMessage(recyclingMessage, false);
-	}
+    if (oscDebug) {
+        recyclingMessage.clear();
+        recyclingMessage.setAddress("/" + ofToString(unitID) + "/shutdownPress");
+        recyclingMessage.addIntArg(shutdownPress);
+        sender.sendMessage(recyclingMessage, false);
+    }
+    
+    if (oscDebug) {
+        recyclingMessage.clear();
+        recyclingMessage.setAddress("/" + ofToString(unitID) + "/doShutdown");
+        recyclingMessage.addIntArg(doShutdown);
+        sender.sendMessage(recyclingMessage, false);
+    }
 #endif
-	if (setLocalIp) {
-		ofSystem("dhclient -v -r");
-		ofSystem("ifconfig eth0 " + localIpFromXML);
-	}
-
-	if (setLocalToDHCP) {
-		ofSystem("dhclient eth0 -v");
-	}
-
-	//ofToString(unitID) + "/" +
-	if (oscDebug) {
-		recyclingMessage.clear();
-		recyclingMessage.setAddress("/" + ofToString(unitID) + "/unitID");
-		recyclingMessage.addStringArg(unitID);
-		sender.sendMessage(recyclingMessage, false);
-	}
-
-	if (oscDebug) {
-		recyclingMessage.clear();
-		recyclingMessage.setAddress("/" + ofToString(unitID) + "/filePathPrefix");
-		recyclingMessage.addStringArg(filePathPrefix);
-		sender.sendMessage(recyclingMessage, false);
-	}
+    if (setLocalIp) {
+        ofSystem("dhclient -v -r");
+        ofSystem("ifconfig eth0 " + localIpFromXML);
+    }
+    
+    if (setLocalToDHCP) {
+        ofSystem("dhclient eth0 -v");
+    }
+    
+    //ofToString(unitID) + "/" +
+    if (oscDebug) {
+        recyclingMessage.clear();
+        recyclingMessage.setAddress("/" + ofToString(unitID) + "/unitID");
+        recyclingMessage.addStringArg(unitID);
+        sender.sendMessage(recyclingMessage, false);
+    }
+    
+    if (oscDebug) {
+        recyclingMessage.clear();
+        recyclingMessage.setAddress("/" + ofToString(unitID) + "/filePathPrefix");
+        recyclingMessage.addStringArg(filePathPrefix);
+        sender.sendMessage(recyclingMessage, false);
+    }
 }
 
 void ofApp::setupFilePaths()
 {
-// reads the file paths of the audio files we need for te preset
-	if (fileSettingsXML.loadFile(filePathPrefix + unitID + "_fileSettings.xml")) {
-		ofLogVerbose() << "File settings loaded" << endl;
+    // reads the file paths of the audio files we need for te preset
+    if (fileSettingsXML.loadFile(filePathPrefix + unitID + "_fileSettings.xml")) {
+        ofLogNotice() << "File settings loaded" << endl;
         ofSleepMillis(50);
-		for (int i = 0; i < numberOfSlots; i++) {
-            ofLogVerbose() << "Getting audio file paths from " + unitID +  "_fileSettings: Slot " + ofToString(i + 1)<< endl;
+        for (int i = 0; i < numberOfSlots; i++) {
+            ofLogNotice() << "Getting audio file paths from " + unitID +  "_fileSettings: Slot " + ofToString(i + 1)<< endl;
             
             for (int j=0; j < NUMBER_OF_PRESETS; j++) {
                 filePathsSet[j][i] = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "_" + ofToString(j+1), "Grain_" + ofToString(i + 1) + ".mp3");
-                ofLogVerbose() << "Preset " +ofToString(j)+ " File path slot " + ofToString(i + 1) + " = " + filePathsSet[j][i] << endl;
+                ofLogNotice() << "Preset " +ofToString(j)+ " File path slot " + ofToString(i + 1) + " = " + filePathsSet[j][i] << endl;
                 fileNamesSet[j][i] = fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "_" + ofToString(j+1), "Grain_" + ofToString(i + 1) + ".mp3");
-                ofLogVerbose() << "Preset " +ofToString(j)+ " File name slot " + ofToString(i + 1) + " = " + fileNamesSet[j][i] << endl;
+                ofLogNotice() << "Preset " +ofToString(j)+ " File name slot " + ofToString(i + 1) + " = " + fileNamesSet[j][i] << endl;
                 
                 if (oscDebug) {
                     // if we are using OSC debug send the names
@@ -2716,122 +2719,127 @@ void ofApp::setupFilePaths()
                     recyclingMessage.addStringArg(filePathsSet[j][i]);
                 }
             }
-		}
-        if (oscDebug) {
-             sender.sendMessage(recyclingMessage, false);
         }
-	}
-	else
-		ofLogVerbose() << "File settings not loaded" << endl;
-
-	narrationFilePath = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:NARRATION_FILE", "Mono_20hz_-20db_netV.wav");
+        if (oscDebug) {
+            sender.sendMessage(recyclingMessage, false);
+        }
+    }
+    else
+        ofLogNotice() << "File settings not loaded" << endl;
+    
+    narrationFilePath = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:NARRATION_FILE", "Mono_20hz_-20db_netV.wav");
 }
 
 #ifdef HAS_ADC
 
 void ofApp::setupADC()
 {
-	//setup the SPI interface for rading sensor data - raspberry pi only
-	a2d.setup("/dev/spidev0.0", SPI_MODE_0, 1000000, 8);
-
-	for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
-		a2dChannel[i] = i;
-
-	}
-
-	if (oscDebug) {
-		recyclingMessage.clear();
-		recyclingMessage.setAddress("/" + ofToString(unitID) + "/a2dSetup");
-		recyclingMessage.addIntArg(1);
-		sender.sendMessage(recyclingMessage, false);
-	}
-
-	ofLogVerbose() << "adc setup" << endl;
-
+    //setup the SPI interface for rading sensor data - raspberry pi only
+    a2d.setup("/dev/spidev0.0", SPI_MODE_0, 1000000, 8);
+    
+    for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
+        a2dChannel[i] = i;
+        
+    }
+    
+    if (oscDebug) {
+        recyclingMessage.clear();
+        recyclingMessage.setAddress("/" + ofToString(unitID) + "/a2dSetup");
+        recyclingMessage.addIntArg(1);
+        sender.sendMessage(recyclingMessage, false);
+    }
+    
+    ofLogNotice() << "adc setup" << endl;
+    
 }
 
 void ofApp::setupButton()
-{
-    //setup the soft button for interaction - raspberry pi only
-	button.setup("19", "in", "high");
-	button.export_gpio();
-	button.setdir_gpio("in");
 
-	if (oscDebug) {
-		recyclingMessage.clear();
-		recyclingMessage.setAddress("/" + ofToString(unitID) + "/button");
-		recyclingMessage.addIntArg(1);
-		sender.sendMessage(recyclingMessage, false);
-	}
+{
+    
+    //    gpio17.setup("17");
+    //                gpio17.export_gpio();
+    //                            gpio17.setdir_gpio("in");
+    //setup the soft button for interaction - raspberry pi only
+    button.setup("19", "in", "high");
+    button.export_gpio();
+    //button.setdir_gpio("in");
+    
+    if (oscDebug) {
+        recyclingMessage.clear();
+        recyclingMessage.setAddress("/" + ofToString(unitID) + "/button");
+        recyclingMessage.addIntArg(1);
+        sender.sendMessage(recyclingMessage, false);
+    }
 }
 
 
 void ofApp::initLedBlue()
 {
     //setup the blue LED pin for feedback - raspberry pi only
-	blueLed.setup("5");
-	blueLed.export_gpio();
-	blueLed.setdir_gpio("out");
-	ofSleepMillis(200);
-	blueLed.setal_gpio("1");
+    blueLed.setup("5");
+    blueLed.export_gpio();
+    blueLed.setdir_gpio("out");
+    ofSleepMillis(200);
+    blueLed.setal_gpio("1");
     ofSleepMillis(500);
     blueLed.setal_gpio("0");
-
-	if (oscDebug) {
-		recyclingMessage.clear();
-		recyclingMessage.setAddress("/" + ofToString(unitID) + "/blueLed");
-		recyclingMessage.addIntArg(1);
-		sender.sendMessage(recyclingMessage, false);
-	}
-	ofLogVerbose() << "Blue LED setup" << endl;
+    
+    if (oscDebug) {
+        recyclingMessage.clear();
+        recyclingMessage.setAddress("/" + ofToString(unitID) + "/blueLed");
+        recyclingMessage.addIntArg(1);
+        sender.sendMessage(recyclingMessage, false);
+    }
+    ofLogNotice() << "Blue LED setup" << endl;
 }
 
 void ofApp::initLedRed()
 {
     //setup the red LED pin for feedback - raspberry pi only
-	redLed.setup("6");
-	redLed.export_gpio();
-	redLed.setdir_gpio("out");
-	ofSleepMillis(200);
-	redLed.setal_gpio("1");
-	ofSleepMillis(200);
-	redLed.setal_gpio("0");
-
-	if (oscDebug) {
-		recyclingMessage.clear();
-		recyclingMessage.setAddress("/" + ofToString(unitID) + "/redLed");
-		recyclingMessage.addIntArg(1);
-		sender.sendMessage(recyclingMessage, false);
-	}
-
-	ofLogVerbose() << "Red LED setup" << endl;
+    redLed.setup("6");
+    redLed.export_gpio();
+    redLed.setdir_gpio("out");
+    ofSleepMillis(200);
+    redLed.setal_gpio("1");
+    ofSleepMillis(200);
+    redLed.setal_gpio("0");
+    
+    if (oscDebug) {
+        recyclingMessage.clear();
+        recyclingMessage.setAddress("/" + ofToString(unitID) + "/redLed");
+        recyclingMessage.addIntArg(1);
+        sender.sendMessage(recyclingMessage, false);
+    }
+    
+    ofLogNotice() << "Red LED setup" << endl;
 }
 
 void ofApp::setupSpeakerControl()
 {
     //setup the relay to turn the speaker on and off - raspberry pi only
-	ofLogVerbose() << "setup speaker control" << endl;
-	relayOut.setup("13");
-	relayOut.export_gpio();
-	relayOut.setdir_gpio("out");
-	ofSleepMillis(200);
-
-	if (oscDebug) {
-		recyclingMessage.clear();
-		recyclingMessage.setAddress("/" + ofToString(unitID) + "/relayOut");
-		recyclingMessage.addIntArg(1);
-		sender.sendMessage(recyclingMessage, false);
-	}
-	ofLogVerbose() << "relay setup" << endl;
+    ofLogNotice() << "setup speaker control" << endl;
+    relayOut.setup("13");
+    relayOut.export_gpio();
+    relayOut.setdir_gpio("out");
+    ofSleepMillis(200);
+    
+    if (oscDebug) {
+        recyclingMessage.clear();
+        recyclingMessage.setAddress("/" + ofToString(unitID) + "/relayOut");
+        recyclingMessage.addIntArg(1);
+        sender.sendMessage(recyclingMessage, false);
+    }
+    ofLogNotice() << "relay setup" << endl;
 }
 
 void ofApp::syncSpeaker()
 {
     //Turn on the speaker - raspberry pi only
-	relayOut.setal_gpio("1");
-	ofSleepMillis(400);
-	relayOut.setal_gpio("0");
-
+    relayOut.setal_gpio("1");
+    ofSleepMillis(400);
+    relayOut.setal_gpio("0");
+    
 }
 
 #endif // HAS_ADC
@@ -2840,27 +2848,8 @@ void ofApp::syncSpeaker()
 void ofApp::updateParametersFromValuesSingle()
 {
     // go through the parameters of all the granular objects, if a parameters is connected to incoming sensor data, map that data appropriately, can also come from the simulator
-	for (int k = 0; k < numberOfSlots; k++) {
-		for (int v = 0; v < NUMBER_OF_SENSORS; v++) {				
-			applyDynamicValuesToParameters(k, in_length_connect, v, _in_length, _in_lengthMin, _in_lengthMax, "grain length");
-			applyDynamicValuesToParameters(k, in_density_connect, v, _in_density, _in_densityMin, _in_densityMax, "density" );
-			applyDynamicValuesToParameters(k, in_distJit_connect, v, _in_distance_jitter, _in_distance_jitterMin, _in_distance_jitterMax, "distance jitter");
-			applyDynamicValuesToParameters(k, in_pitch_connect, v, _in_pitch, _in_pitchMin, _in_pitchMax, "pitch");
-			applyDynamicValuesToParameters(k, in_pitchJit_connect, v, _in_pitch_jitter, _in_pitch_jitterMin, _in_pitch_jitterMax, "pitch jitter");
-			applyDynamicValuesToParameters(k, _volume_connect, v, _volume, _volumeMin, _volumeMax, "volume");
-            applyDynamicValuesToParameters(k, _spread_connect, v, _spread, _spreadMin, _spreadMax, "spread");
-
-            
-		}
-	}
-	getAccumulatedPressure();
-}
-
-void ofApp::updateParametersFromValuesMulti()
-{
-    // go through the parameters of all the granular objects, if a parameters is connected to incoming sensor data, map that data appropriately, can also come from the simulator
-	for (int k = 0; k < numberOfSlots; k++) {
-		for (int v = 0; v < NUMBER_OF_SENSORS; v++) {
+    for (int k = 0; k < numberOfSlots; k++) {
+        for (int v = 0; v < NUMBER_OF_SENSORS; v++) {
             applyDynamicValuesToParameters(k, in_length_connect, v, _in_length, _in_lengthMin, _in_lengthMax, "grain length");
             applyDynamicValuesToParameters(k, in_density_connect, v, _in_density, _in_densityMin, _in_densityMax, "density" );
             applyDynamicValuesToParameters(k, in_distJit_connect, v, _in_distance_jitter, _in_distance_jitterMin, _in_distance_jitterMax, "distance jitter");
@@ -2868,20 +2857,39 @@ void ofApp::updateParametersFromValuesMulti()
             applyDynamicValuesToParameters(k, in_pitchJit_connect, v, _in_pitch_jitter, _in_pitch_jitterMin, _in_pitch_jitterMax, "pitch jitter");
             applyDynamicValuesToParameters(k, _volume_connect, v, _volume, _volumeMin, _volumeMax, "volume");
             applyDynamicValuesToParameters(k, _spread_connect, v, _spread, _spreadMin, _spreadMax, "spread");
-			applyDynamicValuesToParameters(k, _posX_connect, v, _posX, _posXMin, _posXMax, "position");
+            
+            
+        }
+    }
+    getAccumulatedPressure();
+}
 
-		}
-	}
-		for (int i = 0; i < numberOfSlots; i++) {
-			_posX[i] >> cloud[i]->in_position();
-			_spread[i] >> cloud[i]->in_position_jitter();
-			_in_length[i] >> cloud[i]->in_length();
-			_in_density[i] >> cloud[i]->in_density();
-			_in_distance_jitter[i] >> cloud[i]->in_distance_jitter();
-			_in_pitch_jitter[i] >> cloud[i]->in_pitch_jitter();
-			_grainDirection[i] >> cloud[i]->in_direction();
-			_in_pitch[i] >> cloud[i]->in_pitch();
-		}
+void ofApp::updateParametersFromValuesMulti()
+{
+    // go through the parameters of all the granular objects, if a parameters is connected to incoming sensor data, map that data appropriately, can also come from the simulator
+    for (int k = 0; k < numberOfSlots; k++) {
+        for (int v = 0; v < NUMBER_OF_SENSORS; v++) {
+            applyDynamicValuesToParameters(k, in_length_connect, v, _in_length, _in_lengthMin, _in_lengthMax, "grain length");
+            applyDynamicValuesToParameters(k, in_density_connect, v, _in_density, _in_densityMin, _in_densityMax, "density" );
+            applyDynamicValuesToParameters(k, in_distJit_connect, v, _in_distance_jitter, _in_distance_jitterMin, _in_distance_jitterMax, "distance jitter");
+            applyDynamicValuesToParameters(k, in_pitch_connect, v, _in_pitch, _in_pitchMin, _in_pitchMax, "pitch");
+            applyDynamicValuesToParameters(k, in_pitchJit_connect, v, _in_pitch_jitter, _in_pitch_jitterMin, _in_pitch_jitterMax, "pitch jitter");
+            applyDynamicValuesToParameters(k, _volume_connect, v, _volume, _volumeMin, _volumeMax, "volume");
+            applyDynamicValuesToParameters(k, _spread_connect, v, _spread, _spreadMin, _spreadMax, "spread");
+            applyDynamicValuesToParameters(k, _posX_connect, v, _posX, _posXMin, _posXMax, "position");
+            
+        }
+    }
+    for (int i = 0; i < numberOfSlots; i++) {
+        _posX[i] >> cloud[i]->in_position();
+        _spread[i] >> cloud[i]->in_position_jitter();
+        _in_length[i] >> cloud[i]->in_length();
+        _in_density[i] >> cloud[i]->in_density();
+        _in_distance_jitter[i] >> cloud[i]->in_distance_jitter();
+        _in_pitch_jitter[i] >> cloud[i]->in_pitch_jitter();
+        _grainDirection[i] >> cloud[i]->in_direction();
+        _in_pitch[i] >> cloud[i]->in_pitch();
+    }
 }
 void ofApp::UpdatePlayheadWithTimer(){
     positionFromTime += timeAdvanceInterval[presetIndex-1];
@@ -2899,79 +2907,79 @@ void ofApp::UpdatePlayheadWithTimer(){
 }
 void ofApp::getAccumulatedPressure()
 {
-	// if we are in accumulated pressure or single grain mode, we get our playhead position from the total of all the sensors
-		accumulatedPressure = 0;
-
-		for (int p = 0; p < NUMBER_OF_SENSORS; p++)
-		{
-			if (normalisedA2DValues[p]>0.01)
-			{
-				accumulatedPressure += normalisedA2DValues[p];
-			}
-		}
+    // if we are in accumulated pressure or single grain mode, we get our playhead position from the total of all the sensors
+    accumulatedPressure = 0;
+    
+    for (int p = 0; p < NUMBER_OF_SENSORS; p++)
+    {
+        if (normalisedA2DValues[p]>0.01)
+        {
+            accumulatedPressure += normalisedA2DValues[p];
+        }
+    }
     // and then we map it and normalise it- first we get how many sensors could be pushed at once and map it between that possible total and 0 and 1
-		accumulatedPressureNormalised = ofMap(accumulatedPressure, 0.0, accumulationDenominator, 0.0, 1.0);
+    accumulatedPressureNormalised = ofMap(accumulatedPressure, 0.0, accumulationDenominator, 0.0, 1.0);
     
     //then we comensate for the normalisedA2DValuesMin, which is the threshold for engaging the playhead (we dont want to lose this bit of resolution in the file or have a jump
-        accumulatedPressureNormalised = ofMap(accumulatedPressureNormalised, normalisedA2DValuesMin, 1.0, 0.0, 1.0);
-
-    // if afer all that mapping we are over the threshold then apply the curves to the data
-		if (accumulatedPressureNormalised>normalisedA2DValuesMin)
-		{
-            switch (curveSelector){
-                case 0:
-                    accumulatedPressureNormalised = accumulatedPressureNormalised;
-                    break;
-                case 1:
-                    accumulatedPressureNormalised = sqrt(accumulatedPressureNormalised);
-                    break;
-                case 2:
-                    accumulatedPressureNormalised = quarticEaseIn(accumulatedPressureNormalised);
-                    break;
-                case 3:
-                    accumulatedPressureNormalised = exponentialEaseIn(accumulatedPressureNormalised);
-                    break;
-            }
+    accumulatedPressureNormalised = ofMap(accumulatedPressureNormalised, normalisedA2DValuesMin, 1.0, 0.0, 1.0);
     
-    //then apply the curved data to the granular and set the volume as it should be (could be mapped to a sensor)
-			//accumulatedPressureNormalised >> cloud[0]->in_position();
-            UpdatePlayheadWithTimer();
-			ampControl[0]->set(_volume[0]);
-			ofLogVerbose() << "Accumulated pressure is " + ofToString(accumulatedPressureNormalised) << endl;
-
-		}
+    // if afer all that mapping we are over the threshold then apply the curves to the data
+    if (accumulatedPressureNormalised>normalisedA2DValuesMin)
+    {
+        switch (curveSelector){
+            case 0:
+                accumulatedPressureNormalised = accumulatedPressureNormalised;
+                break;
+            case 1:
+                accumulatedPressureNormalised = sqrt(accumulatedPressureNormalised);
+                break;
+            case 2:
+                accumulatedPressureNormalised = quarticEaseIn(accumulatedPressureNormalised);
+                break;
+            case 3:
+                accumulatedPressureNormalised = exponentialEaseIn(accumulatedPressureNormalised);
+                break;
+        }
+        
+        //then apply the curved data to the granular and set the volume as it should be (could be mapped to a sensor)
+        //accumulatedPressureNormalised >> cloud[0]->in_position();
+        UpdatePlayheadWithTimer();
+        ampControl[0]->set(_volume[0]);
+        ofLogVerbose() << "Accumulated pressure is " + ofToString(accumulatedPressureNormalised) << endl;
+        
+    }
     // of it does not pass the threshold then reset the volume and playhead position
-		else if (accumulatedPressureNormalised<normalisedA2DValuesMin) {
-			0.0 >> cloud[0]->in_position();
-			ampControl[0]->set(0.0);
-		}
+    else if (accumulatedPressureNormalised<normalisedA2DValuesMin) {
+        0.0 >> cloud[0]->in_position();
+        ampControl[0]->set(0.0);
+    }
 #ifndef HAS_ADC
     if (timeUpdateFromKey) {
         UpdatePlayheadWithTimer();
         ampControl[0]->set(_volume[0]);
     }
 #endif
-	
+    
 }
 
 void ofApp::applyDynamicValuesToParameters(int &k, std::vector<ofParameter<int>> connectTo, int v, std::vector<ofParameter<float>> parameter, std::vector<ofParameter<float>> parameterMin, std::vector<ofParameter<float>> parameterMax, string paramName)
 {
     // if a parameter is mapped to a sensor then apply the data and map it between the min and max
-	if (connectTo[k] == v + 1) {
-
-		if (normalisedA2DValues[v]<normalisedA2DValuesMin)
-		{
-			ampControl[k]->set(0.0);
-		}
-		else
-		{
-			//drawGrains[k] = true;
-			parameter[k] = ofMap(normalisedA2DValues[v], 0.0, 1.0, parameterMin[k], parameterMax[k]);
-			ampControl[k]->set(_volume[k]);
-		}
-
-		ofLogVerbose() << paramName + " on slot " + ofToString(k) + " = " + ofToString(parameter[k]) + " mapped between " + ofToString(parameterMin[k]) + " and " + ofToString(parameterMax[k]) + " on sensor " + ofToString(v+1)<< endl;
-	}
+    if (connectTo[k] == v + 1) {
+        
+        if (normalisedA2DValues[v]<normalisedA2DValuesMin)
+        {
+            ampControl[k]->set(0.0);
+        }
+        else
+        {
+            //drawGrains[k] = true;
+            parameter[k] = ofMap(normalisedA2DValues[v], 0.0, 1.0, parameterMin[k], parameterMax[k]);
+            ampControl[k]->set(_volume[k]);
+        }
+        
+        ofLogVerbose() << paramName + " on slot " + ofToString(k) + " = " + ofToString(parameter[k]) + " mapped between " + ofToString(parameterMin[k]) + " and " + ofToString(parameterMax[k]) + " on sensor " + ofToString(v+1)<< endl;
+    }
 }
 
 
@@ -3032,7 +3040,7 @@ void ofApp::transferEfffectParamtersToUnits(){
             effDelaysParams[j]._e_delay_in_time >> delayRs[j]->in_time();
             effDelaysParams[j]._e_delay_in_damping >> delayRs[j]->in_damping();
             effDelaysParams[j]._e_delay_in_feedback >> delayRs[j]->in_feedback();
-
+            
         }
         if(effectsPatching[presetIndex-1][j].hasReverb){
             
@@ -3048,14 +3056,14 @@ void ofApp::transferEfffectParamtersToUnits(){
         }
         effCompressorsParams[j]._e_compressor_in_gain >> outputAmpL[j]->in_mod();
         effCompressorsParams[j]._e_compressor_in_gain >> outputAmpR[j]->in_mod();
-
+        
         effCompressorsParams[j]._e_compressor_in_attack >> compressors[j]->in_attack();
         effCompressorsParams[j]._e_compressor_in_knee >> compressors[j]->in_knee();
         effCompressorsParams[j]._e_compressor_in_ratio >> compressors[j]->in_ratio();
         effCompressorsParams[j]._e_compressor_in_release >> compressors[j]->in_release();
         effCompressorsParams[j]._e_compressor_in_threshold >> compressors[j]->in_threshold();
         effCompressorsParams[j]._e_compressor_comp_meter.set(compressors[j]->meter_GR());
-      
+        
     }
 }
 
@@ -3179,11 +3187,11 @@ void ofApp::applyDynamicValuesToBitCrusherParameters(int k, int v)
 void ofApp::switchPresets()
 {
     
-// I had a problem switching too fast on raspberry pi so I make a time to check it cannot happen within 10 seconds of the last switchPresets(), the raspberry pi changes the LED colour in this process
+    // I had a problem switching too fast on raspberry pi so I make a time to check it cannot happen within 10 seconds of the last switchPresets(), the raspberry pi changes the LED colour in this process
 #ifdef HAS_ADC
-	if (ofGetElapsedTimeMillis() - presetSwitchTimer > 4000)
-	{
-
+    if (ofGetElapsedTimeMillis() - presetSwitchTimer > 4000)
+    {
+        
         
 #endif // HAS_ADC
         timeUpdateFromKey=false;
@@ -3198,74 +3206,74 @@ void ofApp::switchPresets()
         
         setupGraincloud(filePathsSet[presetIndex-1], unitID + "_preset_" + ofToString(presetIndex) + ".xml");
         
-		presetSwitchTimer = ofGetElapsedTimeMillis();
+        presetSwitchTimer = ofGetElapsedTimeMillis();
 #ifdef HAS_ADC
-
-	}
+        
+    }
 #endif // HAS_ADC
 }
 
 
 void ofApp::setupNarration() {
-// this is not modal, but the method for the first narration setup, load the file, setup the granualr for the narration and connect it to the audio engine.
-	ofLogVerbose() << "setup narration for system" << endl;
-
-	narrationIsPlaying = false;
-	if (hasNarration) {
-		setupNarrationGrain();
-
-		narration.load(narrationFilePath);
+    // this is not modal, but the method for the first narration setup, load the file, setup the granualr for the narration and connect it to the audio engine.
+    ofLogNotice() << "setup narration for system" << endl;
+    
+    narrationIsPlaying = false;
+    if (hasNarration) {
+        setupNarrationGrain();
+        
+        narration.load(narrationFilePath);
         ofSleepMillis(100);
-
-		if (narration.isLoaded()) {
-			ofLogVerbose() << "Loaded narration audio file from " + narrationFilePath << endl;
-			shouldTriggerNarrationPlay = true;
-
-			narration >> engine.audio_out(0);
-			narration >> engine.audio_out(1);
-		}
-		else {
-			ofLogVerbose() << "Error loading narration audio file" << endl;
-			shouldTriggerNarrationPlay = false;
-		}
+        
+        if (narration.isLoaded()) {
+            ofLogNotice() << "Loaded narration audio file from " + narrationFilePath << endl;
+            shouldTriggerNarrationPlay = true;
+            
+            narration >> engine.audio_out(0);
+            narration >> engine.audio_out(1);
+        }
+        else {
+            ofLogNotice() << "Error loading narration audio file" << endl;
+            shouldTriggerNarrationPlay = false;
+        }
 #ifdef HAS_ADC
         blueLed.setal_gpio("0");
         redLed.setal_gpio("1");
 #endif
-		goToMode(OP_MODE_WAIT_FOR_NARRATION);
-	}
-
+        goToMode(OP_MODE_WAIT_FOR_NARRATION);
+    }
+    
 }
 void ofApp::setupNarrationGrain()
 {
-// called from setupNarration, it sets up the granular and its settings form XML for the narration (if it has it)
-	ofLogVerbose() << "setup narration grain" << endl;
-	narrPanel.setup("Narration", filePathPrefix + unitID + "_narr.xml", 100, 100); // Seting up this GUI module and adding the parameters to it
+    // called from setupNarration, it sets up the granular and its settings form XML for the narration (if it has it)
+    ofLogNotice() << "setup narration grain" << endl;
+    narrPanel.setup("Narration", filePathPrefix + unitID + "_narr.xml", 100, 100); // Seting up this GUI module and adding the parameters to it
     narrPanel.add(narr_window_type_id.set("Window type", 0, 0, 9));
 #ifndef HAS_ADC
     narr_window_type_id.addListener(this, &ofApp::onNarrWindowTypeChanged);
     narrPanel.add(narr_window_type_name.set("Window name", "default"));
 #endif
-	narrPanel.add(narr_in_length.set("in length", 500, 10, 3000));
-	narrPanel.add(narr_in_density.set("in density", 0.9, 0.1, 1.0));
-	narrPanel.add(narr_in_distance_jitter.set("distance jitter", 0.0, 0.0, 1000.0));
-	narrPanel.add(narr_in_pitch_jitter.set("pitch jitter", 0.0, 0.0, 200.0));
-	narrPanel.add(narr_in_pitch.set("pitch ", 0.0, -10.0, 10.0));
-	narrPanel.add(narr_in_position_jitter.set("spread", 0.0, 0.0, 1.0));
-	narrPanel.add(narr_grainDirection.set("direction", 0.0, -1.0, 1.0));
+    narrPanel.add(narr_in_length.set("in length", 500, 10, 3000));
+    narrPanel.add(narr_in_density.set("in density", 0.9, 0.1, 1.0));
+    narrPanel.add(narr_in_distance_jitter.set("distance jitter", 0.0, 0.0, 1000.0));
+    narrPanel.add(narr_in_pitch_jitter.set("pitch jitter", 0.0, 0.0, 200.0));
+    narrPanel.add(narr_in_pitch.set("pitch ", 0.0, -10.0, 10.0));
+    narrPanel.add(narr_in_position_jitter.set("spread", 0.0, 0.0, 1.0));
+    narrPanel.add(narr_grainDirection.set("direction", 0.0, -1.0, 1.0));
     
     narrCompressorControls.setup();
     narrCompressorControls.setParameterGroupName("Narration Compressor");
     narrPanel.add(narrCompressorControls.getParamGroup());
     
-//    effDelaysParams[j].setup();
-//    ofLogVerbose()<< "adding delay to slot " + ofToString(j) << endl;
-//    effDelaysParams[j].setParameterGroupName("Delay slot " + ofToString(j+1));
-//    effectsPanels[j]->add(effDelaysParams[j].getParamGroup());
-//    narrPanel.add(narrOutCompressor.
-
-// load settings from the XML
-	narrPanel.loadFromFile(filePathPrefix + unitID + "_narr.xml");
+    //    effDelaysParams[j].setup();
+    //    ofLogNotice()<< "adding delay to slot " + ofToString(j) << endl;
+    //    effDelaysParams[j].setParameterGroupName("Delay slot " + ofToString(j+1));
+    //    effectsPanels[j]->add(effDelaysParams[j].getParamGroup());
+    //    narrPanel.add(narrOutCompressor.
+    
+    // load settings from the XML
+    narrPanel.loadFromFile(filePathPrefix + unitID + "_narr.xml");
     
     
     narrGrainVoices = narrCloud.getVoicesNum();
@@ -3273,62 +3281,62 @@ void ofApp::setupNarrationGrain()
     narrSampleData.setVerbose(true);
     narrSampleData.load(narrationFilePath);
     ofSleepMillis(100);
-
+    
     switch (narr_window_type_id) {
-    case 0:
-        narrCloud.setWindowType(pdsp::Rectangular);
-        ofLogVerbose() << "Narration using window type: Rectangular" << endl;
-        break;
-    case 1:
-        narrCloud.setWindowType(pdsp::Triangular);
-        ofLogVerbose() << "Narration using window type: Triangular" << endl;
-        break;
-    case 2:
-        narrCloud.setWindowType(pdsp::Hann);
-        ofLogVerbose() << "Narration using window type: Hann" << endl;
-        break;
-    case 3:
-        narrCloud.setWindowType(pdsp::Hamming);
-        ofLogVerbose() << "Narration using window type: Hamming" << endl;
-        break;
-    case 4:
-        narrCloud.setWindowType(pdsp::Blackman);
-        ofLogVerbose() << "Narration using window type: Blackman" << endl;
-        break;
-    case 5:
-        narrCloud.setWindowType(pdsp::BlackmanHarris);
-        ofLogVerbose() << "Narration using window type: BlackmanHarris" << endl;
-        break;
-    case 6:
-        narrCloud.setWindowType(pdsp::SineWindow);
-        ofLogVerbose() << "Narration using window type: SineWindow" << endl;
-        break;
-    case 7:
-        narrCloud.setWindowType(pdsp::Welch);
-        ofLogVerbose() << "Narration using window type: Welch" << endl;
-        break;
-    case 8:
-        narrCloud.setWindowType(pdsp::Gaussian);
-        ofLogVerbose() << "Narration using window type: Gaussian" << endl;
-        break;
-    case 9:
-        narrCloud.setWindowType(pdsp::Tukey);
-        ofLogVerbose() << "Narration using window type: Tukey" << endl;
-        break;
+        case 0:
+            narrCloud.setWindowType(pdsp::Rectangular);
+            ofLogNotice() << "Narration using window type: Rectangular" << endl;
+            break;
+        case 1:
+            narrCloud.setWindowType(pdsp::Triangular);
+            ofLogNotice() << "Narration using window type: Triangular" << endl;
+            break;
+        case 2:
+            narrCloud.setWindowType(pdsp::Hann);
+            ofLogNotice() << "Narration using window type: Hann" << endl;
+            break;
+        case 3:
+            narrCloud.setWindowType(pdsp::Hamming);
+            ofLogNotice() << "Narration using window type: Hamming" << endl;
+            break;
+        case 4:
+            narrCloud.setWindowType(pdsp::Blackman);
+            ofLogNotice() << "Narration using window type: Blackman" << endl;
+            break;
+        case 5:
+            narrCloud.setWindowType(pdsp::BlackmanHarris);
+            ofLogNotice() << "Narration using window type: BlackmanHarris" << endl;
+            break;
+        case 6:
+            narrCloud.setWindowType(pdsp::SineWindow);
+            ofLogNotice() << "Narration using window type: SineWindow" << endl;
+            break;
+        case 7:
+            narrCloud.setWindowType(pdsp::Welch);
+            ofLogNotice() << "Narration using window type: Welch" << endl;
+            break;
+        case 8:
+            narrCloud.setWindowType(pdsp::Gaussian);
+            ofLogNotice() << "Narration using window type: Gaussian" << endl;
+            break;
+        case 9:
+            narrCloud.setWindowType(pdsp::Tukey);
+            ofLogNotice() << "Narration using window type: Tukey" << endl;
+            break;
     }
     ofSleepMillis(100);
-
+    
     narrCloud.setSample(&narrSampleData); // give to the pdsp::GrainCloud the pointer to the sample
-
-// prepare narration granular with the settings from the parameters
-	0.00f >> narrPosX >> narrCloud.in_position();
-	narr_in_position_jitter >> narrCloud.in_position_jitter();
-	narr_in_length >> narrCloud.in_length();
-	narr_in_density >> narrCloud.in_density();
-	narr_in_distance_jitter >> narrCloud.in_distance_jitter();
-	narr_in_pitch_jitter >> narrCloud.in_pitch_jitter();
-	narr_in_pitch >> narrCloud.in_pitch();
-	narr_grainDirection >> narrCloud.in_direction();
+    
+    // prepare narration granular with the settings from the parameters
+    0.00f >> narrPosX >> narrCloud.in_position();
+    narr_in_position_jitter >> narrCloud.in_position_jitter();
+    narr_in_length >> narrCloud.in_length();
+    narr_in_density >> narrCloud.in_density();
+    narr_in_distance_jitter >> narrCloud.in_distance_jitter();
+    narr_in_pitch_jitter >> narrCloud.in_pitch_jitter();
+    narr_in_pitch >> narrCloud.in_pitch();
+    narr_grainDirection >> narrCloud.in_direction();
     narrCompressorControls._e_compressor_in_gain >> narrOutControlL.in_mod();
     narrCompressorControls._e_compressor_in_gain >> narrOutControlR.in_mod();
     narrCompressorControls._e_compressor_in_attack >> narrOutCompressor.in_attack();
@@ -3337,101 +3345,101 @@ void ofApp::setupNarrationGrain()
     narrCompressorControls._e_compressor_in_release >> narrOutCompressor.in_release();
     narrCompressorControls._e_compressor_in_threshold >> narrOutCompressor.in_threshold();
     narrCompressorControls._e_compressor_comp_meter.set(narrOutCompressor.meter_GR());
-
+    
 #ifndef HAS_ADC
-// setup the graphic view of the narration granualr if we are on a laptop
-	narrUiWidth = ofGetWidth() / 3;
-	narrUiHeigth = ofGetHeight() / 3;
-	narrUiX = (ofGetWidth() - narrUiWidth) / 2;
-	narrUiY = (ofGetHeight() - narrUiHeigth) / 2;
-	narrUiMaxX = narrUiX + narrUiWidth;
-	narrUiMaxY = narrUiY + narrUiHeigth;
-	narrDrawGrains = false;
-	narrWaveformGraphics.setWaveform(narrSampleData, 0, ofColor(0, 100, 100, 255), narrUiWidth, narrUiHeigth);
+    // setup the graphic view of the narration granualr if we are on a laptop
+    narrUiWidth = ofGetWidth() / 3;
+    narrUiHeigth = ofGetHeight() / 3;
+    narrUiX = (ofGetWidth() - narrUiWidth) / 2;
+    narrUiY = (ofGetHeight() - narrUiHeigth) / 2;
+    narrUiMaxX = narrUiX + narrUiWidth;
+    narrUiMaxY = narrUiY + narrUiHeigth;
+    narrDrawGrains = false;
+    narrWaveformGraphics.setWaveform(narrSampleData, 0, ofColor(0, 100, 100, 255), narrUiWidth, narrUiHeigth);
 #endif
     
-//connect the narration to the engine
-	narrAmpControl.channels(2);
-	narrAmpControl.enableSmoothing(50.0f);
-	narrAmpControl.set(0.0f);
+    //connect the narration to the engine
+    narrAmpControl.channels(2);
+    narrAmpControl.enableSmoothing(50.0f);
+    narrAmpControl.set(0.0f);
     ofSleepMillis(100);
-
+    
     narrCloud.ch(0) >> narrAmpControl.ch(0)  >> narrOutControlL.out_signal() >> narrOutCompressor.ch(0) >> engine.audio_out(0);
     narrCloud.ch(1) >> narrAmpControl.ch(1)  >> narrOutControlR.out_signal() >> narrOutCompressor.ch(1) >> engine.audio_out(1);
     
     ofSleepMillis(100);
-
+    
 }
 
 #ifndef HAS_ADC
 
 void ofApp::enableModeButtons(onScreenButton buttons[], int arraySize)
 {
-//enables buttons for any mode - laptop only
-	for (int i = 0; i < arraySize; i++)
-	{
-		buttons[i].enabled = true;
-		buttons[i].enableAllEvents();
-	}
+    //enables buttons for any mode - laptop only
+    for (int i = 0; i < arraySize; i++)
+    {
+        buttons[i].enabled = true;
+        buttons[i].enableAllEvents();
+    }
 }
 
 //--------------------------------------------------------------
 void ofApp::disableModeButtons(onScreenButton buttons[], int arraySize)
 {
-//disables buttons for any mode - laptop only
-	for (int i = 0; i < arraySize; i++)
-	{
-
-		buttons[i].disableAllEvents();
-		buttons[i].enabled = false;
-	}
+    //disables buttons for any mode - laptop only
+    for (int i = 0; i < arraySize; i++)
+    {
+        
+        buttons[i].disableAllEvents();
+        buttons[i].enabled = false;
+    }
 }
 
 void ofApp::drawModeButtons(onScreenButton buttons[], int arraySize)
 {
-// draw buttons for any mode- laptop only
-	ofPushStyle();
-	for (int i = 0; i < arraySize; i++)
-	{
-		buttons[i].draw();
-	}
-	ofPopStyle();
+    // draw buttons for any mode- laptop only
+    ofPushStyle();
+    for (int i = 0; i < arraySize; i++)
+    {
+        buttons[i].draw();
+    }
+    ofPopStyle();
 }
 
 void ofApp::setupAllButtons()
 {
-//creates buttons for modes one by one
-	createWaitForNarrModeButtons();
-	createPlayNarrationModeButtons();
-	createSwitchPresetsModeButtons();
-	createMultiGrainModeButtons();
-	createSingleGrainModeModeButtons();
-	createNarrGuiModeButtons();
-	createSimulationMultiModeButtons();
-	createSimulationSingleModeButtons();
-	createNarrationGlitchModeButtons();
+    //creates buttons for modes one by one
+    createWaitForNarrModeButtons();
+    createPlayNarrationModeButtons();
+    createSwitchPresetsModeButtons();
+    createMultiGrainModeButtons();
+    createSingleGrainModeModeButtons();
+    createNarrGuiModeButtons();
+    createSimulationMultiModeButtons();
+    createSimulationSingleModeButtons();
+    createNarrationGlitchModeButtons();
 }
 
 void ofApp::simulationGFXUpdateRoutine()
 {
-// gives values to the preview of the simulation
-	for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
-
-		barsFull[i].set(barWidth + 2, barLength * (1.0 - normalisedA2DValues[i]) + 2, barWidth + 2);
-
-	}
-
-	barsFull[0].setPosition(0, -((barLength * (1.0 - normalisedA2DValues[0])) / 2), 0);
-	barsFull[1].setPosition(0, ((barLength * (1.0 - normalisedA2DValues[1])) / 2), 0);
-	barsFull[2].setPosition(-((barLength * (1.0 - normalisedA2DValues[2])) / 2), 0, 0);
-	barsFull[3].setPosition(((barLength * (1.0 - normalisedA2DValues[3]) / 2)), 0, 0);
-	barsFull[4].setPosition(0, 0, -((barLength * (1.0 - normalisedA2DValues[4])) / 2));
-	barsFull[5].setPosition(0, 0, ((barLength * (1.0 - normalisedA2DValues[5])) / 2));
+    // gives values to the preview of the simulation
+    for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
+        
+        barsFull[i].set(barWidth + 2, barLength * (1.0 - normalisedA2DValues[i]) + 2, barWidth + 2);
+        
+    }
+    
+    barsFull[0].setPosition(0, -((barLength * (1.0 - normalisedA2DValues[0])) / 2), 0);
+    barsFull[1].setPosition(0, ((barLength * (1.0 - normalisedA2DValues[1])) / 2), 0);
+    barsFull[2].setPosition(-((barLength * (1.0 - normalisedA2DValues[2])) / 2), 0, 0);
+    barsFull[3].setPosition(((barLength * (1.0 - normalisedA2DValues[3]) / 2)), 0, 0);
+    barsFull[4].setPosition(0, 0, -((barLength * (1.0 - normalisedA2DValues[4])) / 2));
+    barsFull[5].setPosition(0, 0, ((barLength * (1.0 - normalisedA2DValues[5])) / 2));
 }
 
 void ofApp::controlOn(int x, int y) {
-// this method is run when we use the mouse to interact with the granular single, or multi on laptop only, it is called from the mousePressed() and mouseDragged() callbacks
-
+    // this method is run when we use the mouse to interact with the granular single, or multi on laptop only, it is called from the mousePressed() and mouseDragged() callbacks
+    
     for (int z = 0; z < numberOfSlots; z++) {
         if (x > uiX[z] && x<uiMaxX[z] && y>uiY[z] && y < uiMaxY[z]) {
             ofMap(x, uiX[z], uiMaxX[z], 0.0f, 1.0f, true) >> cloud[z]->in_position();
@@ -3452,27 +3460,27 @@ void ofApp::controlOn(int x, int y) {
 }
 void ofApp::controlOnNarr(int x, int y)
 {
-// this method is run when we use the mouse to interact with the narration granular on laptop only, it is called from the mousePressed() and mouseDragged() callbacks
-
-	if (x > narrUiX && x<narrUiMaxX && y>narrUiY && y < narrUiMaxY) {
-		cam.disableMouseInput();
-		ofMap(float(x), narrUiX, narrUiMaxX, 0.0f, 1.0f, true) >> narrPosX;
-		narrAmpControl.set(1.0f);
-		narrDrawGrains = true;
-		narrControlX = x;
-		narrControlY = y;
-	}
-	else {
-		cam.enableMouseInput();
-	}
+    // this method is run when we use the mouse to interact with the narration granular on laptop only, it is called from the mousePressed() and mouseDragged() callbacks
+    
+    if (x > narrUiX && x<narrUiMaxX && y>narrUiY && y < narrUiMaxY) {
+        cam.disableMouseInput();
+        ofMap(float(x), narrUiX, narrUiMaxX, 0.0f, 1.0f, true) >> narrPosX;
+        narrAmpControl.set(1.0f);
+        narrDrawGrains = true;
+        narrControlX = x;
+        narrControlY = y;
+    }
+    else {
+        cam.enableMouseInput();
+    }
 }
 #endif
 
 void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 {
-// this is the loader for files and parameters for the main granular system, single and multi
+    // this is the loader for files and parameters for the main granular system, single and multi
 #ifdef HAS_ADC
-	ofSleepMillis(100);
+    ofSleepMillis(100);
     if (presetIndex ==1) {
         blueLed.setal_gpio("1");
         redLed.setal_gpio("0");
@@ -3489,30 +3497,30 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
         blueLed.setal_gpio("1");
         redLed.setal_gpio("1");
     }
-
+    
 #endif // HAS_ADC
     positionFromTime=0;
     loadEffectPatchSettings();
-	//--------GRAINCLOUD-----------------------
-	for (int i = 0; i < numberOfSlots; i++) {
-
-		grainVoices[i] = cloud[i]->getVoicesNum();
-// if we have samples unload them
-		if (sampleData[i]->loaded())
-		{
-			ampControl[i]->set(0.0f);
-			sampleData[i]->unLoad();
-		}
-
-		sampleData[i]->setVerbose(true);
-		sampleData[i]->load(paths[i]);
+    //--------GRAINCLOUD-----------------------
+    for (int i = 0; i < numberOfSlots; i++) {
+        
+        grainVoices[i] = cloud[i]->getVoicesNum();
+        // if we have samples unload them
+        if (sampleData[i]->loaded())
+        {
+            ampControl[i]->set(0.0f);
+            sampleData[i]->unLoad();
+        }
+        
+        sampleData[i]->setVerbose(true);
+        sampleData[i]->load(paths[i]);
         ofSleepMillis(100);
-
+        
         cloud[i]->setSample(sampleData[i]); // give to the pdsp::GrainCloud the pointer to the sample
         
         ofSleepMillis(100);
-
-
+        
+        
         if (firstRun) {
             samplePanels[i]->setup("Slot " + ofToString(i + 1), filePathPrefix + presetPath); //we have a GUI panel for each granular
             //the parameters are split into groups to make it easier to see, each group has value, a min, a max, and connect to to connect it to the sensor
@@ -3522,7 +3530,7 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
             _windowTypeGroup_group[i].add(_window_type_name[i].set("Windowing "+ ofToString(i + 1), "default"));
 #endif
             _windowTypeGroup_group[i].setName("Window Type slot " + ofToString(i + 1));
-
+            
             samplePanels[i]->add(_windowTypeGroup_group[i]);
             
             _in_length_group[i].add(_in_length[i].set("in length " + ofToString(i + 1), 500, 10, 3000));
@@ -3592,8 +3600,8 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
         //load from the XML
         samplePanels[i]->loadFromFile(filePathPrefix + presetPath);
         //set the XML path manually so the native save and recal settings buttons work properly with our settings
-       // samplePanels[i]->setFileName(filePathPrefix + presetPath);
-
+        // samplePanels[i]->setFileName(filePathPrefix + presetPath);
+        
         ofLogNotice() <<" _window_type_id " + ofToString(i+1) + " from settings load form XML is " + ofToString(_window_type_id[i]) <<endl;
         
         switch (_window_type_id[i]) {
@@ -3638,98 +3646,98 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Tukey" << endl;
                 break;
         }
-
+        
 #ifndef HAS_ADC
         _window_type_name[i] = windowTypeNames[_window_type_id[i]];
 #endif
-
-
+        
+        
         // apply all base settings to the grainular objects
-			_posX[i] >> cloud[i]->in_position();
-			_spread[i] >> cloud[i]->in_position_jitter();
-			_in_length[i] >> cloud[i]->in_length();
-			_in_density[i] >> cloud[i]->in_density();
-			_in_distance_jitter[i] >> cloud[i]->in_distance_jitter();
-			_in_pitch_jitter[i] >> cloud[i]->in_pitch_jitter();
-			_grainDirection[i] >> cloud[i]->in_direction();
-			_in_pitch[i] >> cloud[i]->in_pitch();
-
-			if (firstRun) {
+        _posX[i] >> cloud[i]->in_position();
+        _spread[i] >> cloud[i]->in_position_jitter();
+        _in_length[i] >> cloud[i]->in_length();
+        _in_density[i] >> cloud[i]->in_density();
+        _in_distance_jitter[i] >> cloud[i]->in_distance_jitter();
+        _in_pitch_jitter[i] >> cloud[i]->in_pitch_jitter();
+        _grainDirection[i] >> cloud[i]->in_direction();
+        _in_pitch[i] >> cloud[i]->in_pitch();
+        
+        if (firstRun) {
             // we onyl need to setup the audio engine when we start
-				ampControl[i]->channels(2);
-				//ampControl[i]->enableSmoothing(50.0f);
-				ampControl[i]->set(0.0f);
-                
-                //outputAmp[i]->channels(2);
-
-                
-
-//				cloud[i]->ch(0) >> (*ampControl[i])[0]  >> engine.audio_out(0);
-//				cloud[i]->ch(1) >> (*ampControl[i])[1]  >> engine.audio_out(1);
+            ampControl[i]->channels(2);
+            //ampControl[i]->enableSmoothing(50.0f);
+            ampControl[i]->set(0.0f);
+            
+            //outputAmp[i]->channels(2);
+            
+            
+            
+            //				cloud[i]->ch(0) >> (*ampControl[i])[0]  >> engine.audio_out(0);
+            //				cloud[i]->ch(1) >> (*ampControl[i])[1]  >> engine.audio_out(1);
 #ifndef HAS_ADC
             // create the sizes and positions of the waveform displays and interaction areas of the granulars
-				//ui values-------------------------------
-				uiWidth[i] = 250;
-				uiHeigth[i] = 120;
-				uiX[i] = i * uiWidth[i] + 40 + i * 20;
-				uiY[i] = 75;
-				uiMaxX[i] = uiX[i] + uiWidth[i];
-				uiMaxY[i] = uiY[i] + uiHeigth[i];
+            //ui values-------------------------------
+            uiWidth[i] = 250;
+            uiHeigth[i] = 120;
+            uiX[i] = i * uiWidth[i] + 40 + i * 20;
+            uiY[i] = 75;
+            uiMaxX[i] = uiX[i] + uiWidth[i];
+            uiMaxY[i] = uiY[i] + uiHeigth[i];
 #endif
-
-			}
+            
+        }
 #ifndef HAS_ADC
         // setup the waveform preview and the position of the GUI modules
-			drawGrains[i] = false;
-			waveformGraphics[i]->setWaveform(*sampleData[i], 0, ofColor(0, 100, 100, 255), uiWidth[i], uiHeigth[i]);
-			samplePanels[i]->setPosition(uiX[i], uiMaxY[i] + 10);
-            effectsPanels[i]->setPosition(uiX[i], uiMaxY[i] + 10);
-
-
-#endif
-		
+        drawGrains[i] = false;
+        waveformGraphics[i]->setWaveform(*sampleData[i], 0, ofColor(0, 100, 100, 255), uiWidth[i], uiHeigth[i]);
+        samplePanels[i]->setPosition(uiX[i], uiMaxY[i] + 10);
+        effectsPanels[i]->setPosition(uiX[i], uiMaxY[i] + 10);
         
-	}
+        
+#endif
+        
+        
+    }
     
     //This will load up different effects to be chained to the output
     
     
     
     
-	ofLogNotice() << "finished patching\n";
+    ofLogNotice() << "finished patching\n";
 #ifndef HAS_ADC
     //this GUI is only for ocntrolling the simulator so it is onyl for the laptop version, there is no simulator on the raspberry pi
-	mainGui.setup("Main Controls", "mainGui.xml");
-	mainGui.add(compressionSimSpeed.set("Compression Speed", 1, 1, 180));
-	mainGui.add(compressionSimExtent.set("Compression Limit", 1024, 0, 1024));
-	mainGui.add(simulatedInput.set("Simulated input", 0, 0, 1024));
-
-//we can run each sensor on and off for a simulation run
-	for (int l = 0; l < NUMBER_OF_SENSORS; l++) {
-		mainGui.add(compressionSims[l].set("Compression simulation " + ofToString(l + 1), 0.0, 0.0, 1.0));
-		mainGui.add(sensorSimActive[l].set("Include sensor " + ofToString(l + 1), false));
-	}
+    mainGui.setup("Main Controls", "mainGui.xml");
+    mainGui.add(compressionSimSpeed.set("Compression Speed", 1, 1, 180));
+    mainGui.add(compressionSimExtent.set("Compression Limit", 1024, 0, 1024));
+    mainGui.add(simulatedInput.set("Simulated input", 0, 0, 1024));
+    
+    //we can run each sensor on and off for a simulation run
+    for (int l = 0; l < NUMBER_OF_SENSORS; l++) {
+        mainGui.add(compressionSims[l].set("Compression simulation " + ofToString(l + 1), 0.0, 0.0, 1.0));
+        mainGui.add(sensorSimActive[l].set("Include sensor " + ofToString(l + 1), false));
+    }
     
     //callback if the run simuation button is pressed
     runSimulation.addListener(this, &ofApp::runSimulationMethod);
-	mainGui.add(runSimulation.set("Run Simulation", false));
+    mainGui.add(runSimulation.set("Run Simulation", false));
     
     //callback if the curves selector is changed
     curveSelector.addListener(this, &ofApp::curveTypeChanged);
     mainGui.add(curveSelector.set("Curve type", 0, 0,3));
     
     
-	mainGui.add(camDistance.set("Cam distance", 1400.0, 0.0, 10000.0));
-	mainGui.setPosition(ofGetWidth() - (mainGui.getWidth() + 40), (ofGetHeight() - mainGui.getHeight()) - 20);
-
-	mainGui.loadFromFile("mainGui.xml");
-	ofLogNotice() << "Load routine complete" << endl;
+    mainGui.add(camDistance.set("Cam distance", 1400.0, 0.0, 10000.0));
+    mainGui.setPosition(ofGetWidth() - (mainGui.getWidth() + 40), (ofGetHeight() - mainGui.getHeight()) - 20);
+    
+    mainGui.loadFromFile("mainGui.xml");
+    ofLogNotice() << "Load routine complete" << endl;
 #else
     // waiting a bit on the raspberry pi as it was flipping out otherwsie
-	ofSleepMillis(200);
-   // redLed.setal_gpio(ofToString(presetIndex-1));
+    ofSleepMillis(200);
+    // redLed.setal_gpio(ofToString(presetIndex-1));
 #endif // HAS_ADC
-	
+    
 }
 #ifndef HAS_ADC
 void ofApp::onNarrWindowTypeChanged(int & windowType){
@@ -3824,7 +3832,7 @@ void ofApp::onWindowTypeChanged(int & windowType){
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Tukey" << endl;
                 break;
         }
-
+        
         _window_type_name[i] = windowTypeNames[_window_type_id[i]];
     }
 }
@@ -3834,27 +3842,27 @@ void ofApp::populateVectors()
 {
     std::vector<ChannelEffects> tempChannelEffects1;
     std::vector<ChannelEffects> tempChannelEffects2;
-
+    
     //just filling stuff with blanks based on sizes read from the XML
-	for (int vC = 0; vC < numberOfSlots; vC++)
-	{
-
+    for (int vC = 0; vC < numberOfSlots; vC++)
+    {
+        
 #ifndef HAS_ADC
-		ofxSampleBufferPlotter* tmp_waveformGraphics = new ofxSampleBufferPlotter();
-		waveformGraphics.push_back(tmp_waveformGraphics);
+        ofxSampleBufferPlotter* tmp_waveformGraphics = new ofxSampleBufferPlotter();
+        waveformGraphics.push_back(tmp_waveformGraphics);
 #endif
-
-		int					tmp_grainVoices;
-		grainVoices.push_back(tmp_grainVoices);
-
-		pdsp::SampleBuffer* tmp_sampleData = new pdsp::SampleBuffer();
-		sampleData.push_back(tmp_sampleData);
-
-		pdsp::GrainCloud* tmp_cloud = new pdsp::GrainCloud();
-		cloud.push_back(tmp_cloud);
-
-		pdsp::ParameterAmp* tmp_ampControl = new pdsp::ParameterAmp();
-		ampControl.push_back(tmp_ampControl);
+        
+        int					tmp_grainVoices;
+        grainVoices.push_back(tmp_grainVoices);
+        
+        pdsp::SampleBuffer* tmp_sampleData = new pdsp::SampleBuffer();
+        sampleData.push_back(tmp_sampleData);
+        
+        pdsp::GrainCloud* tmp_cloud = new pdsp::GrainCloud();
+        cloud.push_back(tmp_cloud);
+        
+        pdsp::ParameterAmp* tmp_ampControl = new pdsp::ParameterAmp();
+        ampControl.push_back(tmp_ampControl);
         
         pdsp::Amp* tmp_outputAmpL = new pdsp::Amp();
         outputAmpL.push_back(tmp_outputAmpL);
@@ -3862,36 +3870,36 @@ void ofApp::populateVectors()
         pdsp::Amp* tmp_outputAmpR = new pdsp::Amp();
         outputAmpR.push_back(tmp_outputAmpR);
         
-		pdsp::PatchNode* tmp_posX = new pdsp::PatchNode();
-		posX.push_back(tmp_posX);
-
-		pdsp::PatchNode* tmp_jitY = new pdsp::PatchNode();
-		jitY.push_back(tmp_jitY);
-
-
-		bool				tmp_drawGrains;
-		drawGrains.push_back(tmp_drawGrains);
-		int					tmp_uiWidth;
-		uiWidth.push_back(tmp_uiWidth);
-		int					tmp_uiHeigth;
-		uiHeigth.push_back(tmp_uiHeigth);
-		int					tmp_uiX;
-		uiX.push_back(tmp_uiX);
-		int					tmp_uiY;
-		uiY.push_back(tmp_uiY);
-		int					tmp_uiMaxX;
-		uiMaxX.push_back(tmp_uiMaxX);
-		int					tmp_uiMaxY;
-		uiMaxY.push_back(tmp_uiMaxY);
-		int					tmp_controlX;
-		controlX.push_back(tmp_controlX);
-		int					tmp_controlY;
-		controlY.push_back(tmp_controlY);
+        pdsp::PatchNode* tmp_posX = new pdsp::PatchNode();
+        posX.push_back(tmp_posX);
+        
+        pdsp::PatchNode* tmp_jitY = new pdsp::PatchNode();
+        jitY.push_back(tmp_jitY);
+        
+        
+        bool				tmp_drawGrains;
+        drawGrains.push_back(tmp_drawGrains);
+        int					tmp_uiWidth;
+        uiWidth.push_back(tmp_uiWidth);
+        int					tmp_uiHeigth;
+        uiHeigth.push_back(tmp_uiHeigth);
+        int					tmp_uiX;
+        uiX.push_back(tmp_uiX);
+        int					tmp_uiY;
+        uiY.push_back(tmp_uiY);
+        int					tmp_uiMaxX;
+        uiMaxX.push_back(tmp_uiMaxX);
+        int					tmp_uiMaxY;
+        uiMaxY.push_back(tmp_uiMaxY);
+        int					tmp_controlX;
+        controlX.push_back(tmp_controlX);
+        int					tmp_controlY;
+        controlY.push_back(tmp_controlY);
         
         auto tempPanel = make_shared<ofxPanel>();
         samplePanels.push_back(tempPanel);
         
-		
+        
         
         ofParameter<int>		tmp__window_type_id;
         _window_type_id.push_back(tmp__window_type_id);
@@ -3900,85 +3908,85 @@ void ofApp::populateVectors()
         ofParameter<string>        _temp_window_type_name;
         _window_type_name.push_back(_temp_window_type_name);
 #endif
-		ofParameter<float>		tmp__in_length;
-		_in_length.push_back(tmp__in_length);
-		ofParameter<float>		tmp__in_lengthMin;
-		_in_lengthMin.push_back(tmp__in_lengthMin);
-		ofParameter<float>		tmp__in_lengthMax;
-		_in_lengthMax.push_back(tmp__in_lengthMax);
-		ofParameter<int>		tmp_in_length_connect;
-		in_length_connect.push_back(tmp_in_length_connect);
-
-		ofParameter<float>		tmp__in_density;
-		_in_density.push_back(tmp__in_density);
-		ofParameter<float>		tmp__in_densityMin;
-		_in_densityMin.push_back(tmp__in_densityMin);
-		ofParameter<float>		tmp__in_densityMax;
-		_in_densityMax.push_back(tmp__in_densityMax);
-		ofParameter<int>		tmp_in_density_connect;
-		in_density_connect.push_back(tmp_in_density_connect);
-
-		ofParameter<float>		tmp__in_distance_jitter;
-		_in_distance_jitter.push_back(tmp__in_distance_jitter);
-		ofParameter<float>		tmp__in_distance_jitterMin;
-		_in_distance_jitterMin.push_back(tmp__in_distance_jitterMin);
-		ofParameter<float>		tmp__in_distance_jitterMax;
-		_in_distance_jitterMax.push_back(tmp__in_distance_jitterMax);
-		ofParameter<int>		tmp_in_distJit_connect;
-		in_distJit_connect.push_back(tmp_in_distJit_connect);
-
-		ofParameter<float>		tmp__in_pitch_jitter;
-		_in_pitch_jitter.push_back(tmp__in_pitch_jitter);
-		ofParameter<float>		tmp__in_pitch_jitterMin;
-		_in_pitch_jitterMin.push_back(tmp__in_pitch_jitterMin);
-		ofParameter<float>		tmp__in_pitch_jitterMax;
-		_in_pitch_jitterMax.push_back(tmp__in_pitch_jitterMax);
-		ofParameter<int>		tmp_in_pitchJit_connect;
-		in_pitchJit_connect.push_back(tmp_in_pitchJit_connect);
-
-		ofParameter<float>		tmp__in_pitch;
-		_in_pitch.push_back(tmp__in_pitch);
-		ofParameter<float>		tmp__in_pitchMin;
-		_in_pitchMin.push_back(tmp__in_pitchMin);
-		ofParameter<float>		tmp__in_pitchMax;
-		_in_pitchMax.push_back(tmp__in_pitchMax);
-		ofParameter<int>		tmp_in_pitch_connect;
-		in_pitch_connect.push_back(tmp_in_pitch_connect);
-
-		ofParameter<float>		tmp__spread;
-		_spread.push_back(tmp__spread);
-		ofParameter<float>		tmp__spreadMin;
-		_spreadMin.push_back(tmp__spreadMin);
-		ofParameter<float>		tmp__spreadMax;
-		_spreadMax.push_back(tmp__spreadMax);
-		ofParameter<int>		tmp__spread_connect;
-		_spread_connect.push_back(tmp__spread_connect);
-
-		ofParameter<float>		tmp__posX;
-		_posX.push_back(tmp__posX);
-		ofParameter<float>		tmp__posXMin;
-		_posXMin.push_back(tmp__posXMin);
-		ofParameter<float>		tmp__posXMax;
-		_posXMax.push_back(tmp__posXMax);
-		ofParameter<int>		tmp__posX_connect;
-		_posX_connect.push_back(tmp__posX_connect);
-
-		ofParameter<float>		tmp__volume;
-		_volume.push_back(tmp__volume);
-		ofParameter<float>		tmp__volumeMin;
-		_volumeMin.push_back(tmp__volumeMin);
-		ofParameter<float>		tmp__volumeMax;
-		_volumeMax.push_back(tmp__volumeMax);
-		ofParameter<int>		tmp__volume_connect;
-		_volume_connect.push_back(tmp__volume_connect);
-
-		ofParameter<float>		tmp__grainDirection;
-		_grainDirection.push_back(tmp__grainDirection);
-
-		int					tmp_baseSensorValues;
-		baseSensorValues.push_back(tmp_baseSensorValues);
-		int tmp_zeroValues;
-		zeroValues.push_back(tmp_zeroValues);
+        ofParameter<float>		tmp__in_length;
+        _in_length.push_back(tmp__in_length);
+        ofParameter<float>		tmp__in_lengthMin;
+        _in_lengthMin.push_back(tmp__in_lengthMin);
+        ofParameter<float>		tmp__in_lengthMax;
+        _in_lengthMax.push_back(tmp__in_lengthMax);
+        ofParameter<int>		tmp_in_length_connect;
+        in_length_connect.push_back(tmp_in_length_connect);
+        
+        ofParameter<float>		tmp__in_density;
+        _in_density.push_back(tmp__in_density);
+        ofParameter<float>		tmp__in_densityMin;
+        _in_densityMin.push_back(tmp__in_densityMin);
+        ofParameter<float>		tmp__in_densityMax;
+        _in_densityMax.push_back(tmp__in_densityMax);
+        ofParameter<int>		tmp_in_density_connect;
+        in_density_connect.push_back(tmp_in_density_connect);
+        
+        ofParameter<float>		tmp__in_distance_jitter;
+        _in_distance_jitter.push_back(tmp__in_distance_jitter);
+        ofParameter<float>		tmp__in_distance_jitterMin;
+        _in_distance_jitterMin.push_back(tmp__in_distance_jitterMin);
+        ofParameter<float>		tmp__in_distance_jitterMax;
+        _in_distance_jitterMax.push_back(tmp__in_distance_jitterMax);
+        ofParameter<int>		tmp_in_distJit_connect;
+        in_distJit_connect.push_back(tmp_in_distJit_connect);
+        
+        ofParameter<float>		tmp__in_pitch_jitter;
+        _in_pitch_jitter.push_back(tmp__in_pitch_jitter);
+        ofParameter<float>		tmp__in_pitch_jitterMin;
+        _in_pitch_jitterMin.push_back(tmp__in_pitch_jitterMin);
+        ofParameter<float>		tmp__in_pitch_jitterMax;
+        _in_pitch_jitterMax.push_back(tmp__in_pitch_jitterMax);
+        ofParameter<int>		tmp_in_pitchJit_connect;
+        in_pitchJit_connect.push_back(tmp_in_pitchJit_connect);
+        
+        ofParameter<float>		tmp__in_pitch;
+        _in_pitch.push_back(tmp__in_pitch);
+        ofParameter<float>		tmp__in_pitchMin;
+        _in_pitchMin.push_back(tmp__in_pitchMin);
+        ofParameter<float>		tmp__in_pitchMax;
+        _in_pitchMax.push_back(tmp__in_pitchMax);
+        ofParameter<int>		tmp_in_pitch_connect;
+        in_pitch_connect.push_back(tmp_in_pitch_connect);
+        
+        ofParameter<float>		tmp__spread;
+        _spread.push_back(tmp__spread);
+        ofParameter<float>		tmp__spreadMin;
+        _spreadMin.push_back(tmp__spreadMin);
+        ofParameter<float>		tmp__spreadMax;
+        _spreadMax.push_back(tmp__spreadMax);
+        ofParameter<int>		tmp__spread_connect;
+        _spread_connect.push_back(tmp__spread_connect);
+        
+        ofParameter<float>		tmp__posX;
+        _posX.push_back(tmp__posX);
+        ofParameter<float>		tmp__posXMin;
+        _posXMin.push_back(tmp__posXMin);
+        ofParameter<float>		tmp__posXMax;
+        _posXMax.push_back(tmp__posXMax);
+        ofParameter<int>		tmp__posX_connect;
+        _posX_connect.push_back(tmp__posX_connect);
+        
+        ofParameter<float>		tmp__volume;
+        _volume.push_back(tmp__volume);
+        ofParameter<float>		tmp__volumeMin;
+        _volumeMin.push_back(tmp__volumeMin);
+        ofParameter<float>		tmp__volumeMax;
+        _volumeMax.push_back(tmp__volumeMax);
+        ofParameter<int>		tmp__volume_connect;
+        _volume_connect.push_back(tmp__volume_connect);
+        
+        ofParameter<float>		tmp__grainDirection;
+        _grainDirection.push_back(tmp__grainDirection);
+        
+        int					tmp_baseSensorValues;
+        baseSensorValues.push_back(tmp_baseSensorValues);
+        int tmp_zeroValues;
+        zeroValues.push_back(tmp_zeroValues);
         
         for(int i = 0; i < NUMBER_OF_PRESETS; i++){
             string tempString;
@@ -3987,19 +3995,19 @@ void ofApp::populateVectors()
             string tempString1;
             fileNamesSet[i].push_back(tempString1);
         }
-
-//		string tempString;
-//		filePathsSet1.push_back(tempString);
-//		string tempString2;
-//		filePathsSet2.push_back(tempString2);
-//		string tempString3;
-//		fileNamesSet1.push_back(tempString3);
-//		string tempString4;
-//		fileNamesSet2.push_back(tempString4);
-		
-		ChannelEffects thisEffectSet1;
         
-		tempChannelEffects1.push_back(thisEffectSet1);
+        //		string tempString;
+        //		filePathsSet1.push_back(tempString);
+        //		string tempString2;
+        //		filePathsSet2.push_back(tempString2);
+        //		string tempString3;
+        //		fileNamesSet1.push_back(tempString3);
+        //		string tempString4;
+        //		fileNamesSet2.push_back(tempString4);
+        
+        ChannelEffects thisEffectSet1;
+        
+        tempChannelEffects1.push_back(thisEffectSet1);
         
         
         ChannelEffects thisEffectSet2;
@@ -4009,33 +4017,33 @@ void ofApp::populateVectors()
         
         ofParameterGroup	_windowTypeGroup_group_temp;
         _windowTypeGroup_group.push_back(_windowTypeGroup_group_temp);
-
-		ofParameterGroup	_in_length_group_temp;
-		_in_length_group.push_back(_in_length_group_temp);
-			
-		ofParameterGroup		_in_density_group_temp;
-		_in_density_group.push_back(_in_density_group_temp);
-
-		ofParameterGroup	_in_distance_jitter_group_temp;
-		_in_distance_jitter_group.push_back(_in_distance_jitter_group_temp);
-
-		ofParameterGroup		_in_pitch_jitter_group_temp;
-		_in_pitch_jitter_group.push_back(_in_pitch_jitter_group_temp);
-
-		ofParameterGroup	_in_pitch_group_temp;
-		_in_pitch_group.push_back(_in_pitch_group_temp);
-
-		ofParameterGroup		_spread_group_temp;
-		_spread_group.push_back(_spread_group_temp);
-
-		ofParameterGroup		_posX_group_temp;
-		_posX_group.push_back(_posX_group_temp);
-
-		ofParameterGroup	_volume_group_temp;
-		_volume_group.push_back(_volume_group_temp);
-
-		ofParameterGroup	_grainDirection_group_temp;
-		_grainDirection_group.push_back(_grainDirection_group_temp);
+        
+        ofParameterGroup	_in_length_group_temp;
+        _in_length_group.push_back(_in_length_group_temp);
+        
+        ofParameterGroup		_in_density_group_temp;
+        _in_density_group.push_back(_in_density_group_temp);
+        
+        ofParameterGroup	_in_distance_jitter_group_temp;
+        _in_distance_jitter_group.push_back(_in_distance_jitter_group_temp);
+        
+        ofParameterGroup		_in_pitch_jitter_group_temp;
+        _in_pitch_jitter_group.push_back(_in_pitch_jitter_group_temp);
+        
+        ofParameterGroup	_in_pitch_group_temp;
+        _in_pitch_group.push_back(_in_pitch_group_temp);
+        
+        ofParameterGroup		_spread_group_temp;
+        _spread_group.push_back(_spread_group_temp);
+        
+        ofParameterGroup		_posX_group_temp;
+        _posX_group.push_back(_posX_group_temp);
+        
+        ofParameterGroup	_volume_group_temp;
+        _volume_group.push_back(_volume_group_temp);
+        
+        ofParameterGroup	_grainDirection_group_temp;
+        _grainDirection_group.push_back(_grainDirection_group_temp);
         
         
         //------------bit crusher
@@ -4074,21 +4082,21 @@ void ofApp::populateVectors()
         
         auto effectPanel = make_shared<ofxPanel>();
         effectsPanels.push_back(effectPanel);
-//        ofxPanel effectPanel;
-//        effectsPanels.push_back(effectPanel);
-
-       
+        //        ofxPanel effectPanel;
+        //        effectsPanels.push_back(effectPanel);
+        
+        
+        
+    }
+    effectsPatching.push_back(tempChannelEffects1);
+    effectsPatching.push_back(tempChannelEffects2);
+    effectsPatching.push_back(tempChannelEffects1);
+    effectsPatching.push_back(tempChannelEffects2);
     
-	}
-    effectsPatching.push_back(tempChannelEffects1);
-    effectsPatching.push_back(tempChannelEffects2);
-    effectsPatching.push_back(tempChannelEffects1);
-    effectsPatching.push_back(tempChannelEffects2);
-
     
     populateEffectVectors();
     
-
+    
 }
 void ofApp::populateEffectVectors(){
     for(int i =0; i<numberOfSlots; i++){
@@ -4136,7 +4144,7 @@ void ofApp::populateEffectVectors(){
         
         //------------chorus
         pdsp::DimensionChorus* tmp_chorus = new pdsp::DimensionChorus();
-       
+        
         choruss.push_back(tmp_chorus);
         
         EFFChorusUnit tempeffChorus;
@@ -4169,7 +4177,7 @@ void ofApp::clearEffectVectors(){
     //------------decimator
     decimatorLs.clear();
     decimatorRs.clear();
-
+    
     //------------delay
     delayLs.clear();
     delayRs.clear();
@@ -4181,75 +4189,75 @@ void ofApp::clearEffectVectors(){
     
     //------------chorus
     choruss.clear();
-
+    
     //------------reverb
     reverbs.clear();
     reverbSends.clear();
     
     //------------compressor
     compressors.clear();
-
+    
 }
 #ifdef HAS_ADC
 void ofApp::calibrateOnStart() {
-// get the pressure in the balls when we start the unit, they can all be very different
-	recyclingMessage.clear();
-	recyclingMessage.setAddress("/" + ofToString(unitID) + "/zeroValues");
-
-	for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
-
-		data[i][0] = 1;
-		data[i][1] = 0b10000000 | (((a2dChannel[i] & 7) << 4));
-		data[i][2] = 0;
-		a2d.readWrite(data[i]);//sizeof(data) );
-		a2dVal[i] = 0;
-		a2dVal[i] = (data[i][1] << 8) & 0b1100000000;
-		a2dVal[i] |= (data[i][2] & 0xff);
-		zeroValues[i] = a2dVal[i];
-		ofLogNotice() << ofToString(unitID) + " zerValues for " + ofToString(i) + " = " + ofToString(zeroValues[i]) << endl;
-		if (oscDebug) {
-			recyclingMessage.addIntArg(zeroValues[i]);
-		}
-	}
-	if (oscDebug && firstRun) {
-		sender.sendMessage(recyclingMessage, false);
-	}
-
+    // get the pressure in the balls when we start the unit, they can all be very different
+    recyclingMessage.clear();
+    recyclingMessage.setAddress("/" + ofToString(unitID) + "/zeroValues");
+    
+    for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
+        
+        data[i][0] = 1;
+        data[i][1] = 0b10000000 | (((a2dChannel[i] & 7) << 4));
+        data[i][2] = 0;
+        a2d.readWrite(data[i]);//sizeof(data) );
+        a2dVal[i] = 0;
+        a2dVal[i] = (data[i][1] << 8) & 0b1100000000;
+        a2dVal[i] |= (data[i][2] & 0xff);
+        zeroValues[i] = a2dVal[i];
+        ofLogNotice() << ofToString(unitID) + " zerValues for " + ofToString(i) + " = " + ofToString(zeroValues[i]) << endl;
+        if (oscDebug) {
+            recyclingMessage.addIntArg(zeroValues[i]);
+        }
+    }
+    if (oscDebug && firstRun) {
+        sender.sendMessage(recyclingMessage, false);
+    }
+    
 }
 
 void ofApp::readADCValues()
 {
     //read the values from the ADC (SPI serial) they come as integers, the resolution is 10bit
-	for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
-
-		data[i][0] = 1;
-		data[i][1] = 0b10000000 | (((a2dChannel[i] & 7) << 4));
-		data[i][2] = 0;
-		a2d.readWrite(data[i]);//sizeof(data) );
-		a2dVal[i] = 0;
-		a2dVal[i] = (data[i][1] << 8) & 0b1100000000;
-		a2dVal[i] |= (data[i][2] & 0xff);
-
-		ofLogVerbose() << " a to d reading " + ofToString(i) + " = " + ofToString(a2dVal[i]) << endl;
-	}
+    for (int i = 0; i < NUMBER_OF_SENSORS; i++) {
+        
+        data[i][0] = 1;
+        data[i][1] = 0b10000000 | (((a2dChannel[i] & 7) << 4));
+        data[i][2] = 0;
+        a2d.readWrite(data[i]);//sizeof(data) );
+        a2dVal[i] = 0;
+        a2dVal[i] = (data[i][1] << 8) & 0b1100000000;
+        a2dVal[i] |= (data[i][2] & 0xff);
+        
+        ofLogVerbose() << " a to d reading " + ofToString(i) + " = " + ofToString(a2dVal[i]) << endl;
+    }
 }
 
 void ofApp::normaliseADCValues()
 {
     
-	if (oscDebug) {
-		recyclingMessage.clear();
-		recyclingMessage.setAddress("/" + ofToString(unitID) + "_normalisedADC");
-}
-
+    if (oscDebug) {
+        recyclingMessage.clear();
+        recyclingMessage.setAddress("/" + ofToString(unitID) + "_normalisedADC");
+    }
+    
     // get the raw readings fromt the sensors from the ADC and then map betwen the zero values and our maximum from the XML
-
-	for (int m = 0; m < NUMBER_OF_SENSORS; m++) {
-		normalisedA2DValues[m] = ofMap(a2dVal[m], zeroValues[m], maxSensorValue, 0.0, 1.0, true);
-		if (normalisedA2DValues[m] < normalisedA2DValuesMin)
-		{
-			normalisedA2DValues[m] = 0;
-		}
+    
+    for (int m = 0; m < NUMBER_OF_SENSORS; m++) {
+        normalisedA2DValues[m] = ofMap(a2dVal[m], zeroValues[m], maxSensorValue, 0.0, 1.0, true);
+        if (normalisedA2DValues[m] < normalisedA2DValuesMin)
+        {
+            normalisedA2DValues[m] = 0;
+        }
         else if(normalisedA2DValues[m] > normalisedA2DValuesMin){
             switch (curveSelector){
                 case 0:
@@ -4266,200 +4274,200 @@ void ofApp::normaliseADCValues()
                     break;
             }
         }
-		if (oscDebug) {
-			recyclingMessage.addFloatArg(normalisedA2DValues[m]);
-		}
-		ofLogVerbose() << "normalisedA2DValues " + ofToString(m + 1) + " = " + ofToString(normalisedA2DValues[m]) << endl;
-	}
-
-	if (oscDebug) {
-		sender.sendMessage(recyclingMessage, false);
-	}
+        if (oscDebug) {
+            recyclingMessage.addFloatArg(normalisedA2DValues[m]);
+        }
+        ofLogVerbose() << "normalisedA2DValues " + ofToString(m + 1) + " = " + ofToString(normalisedA2DValues[m]) << endl;
+    }
+    
+    if (oscDebug) {
+        sender.sendMessage(recyclingMessage, false);
+    }
 }
 
 void ofApp::checkForHits()
 {
-	// this method checks for gestural input, the performers squeeing the units hard and rapidly, they can use this to change presets kind of shitty way about it but it works
-		if (!isCheckingHitPeaks && !isCheckingHitTroughs)
-		{
-			ofLogVerbose() << "checking for any peaks" << endl;
-			for (int u = 0; u < NUMBER_OF_SENSORS; u++)
-			{
-				if (normalisedA2DValues[u] > hitThreshHold)
-				{
-
-					hitPeakChecker += 1;
-					oldValues[u] = normalisedA2DValues[u];
-					hadHitPeak[u] = true;
-				}
-			}
-			if (hitPeakChecker>1)
-			{
-				ofLogVerbose() << "found peaks, checking for trough" << endl;
-				isCheckingHitTroughs = true;
-				timeSinceLastHitTrough = ofGetElapsedTimeMillis();
-				hitPeakChecker = 0;
-
-			}
-			else
-			{
-				ofLogVerbose() << "No peaks found, exiting this bit" << endl;
-
-				hitPeakChecker = 0;
-				for (int z = 0; z < NUMBER_OF_SENSORS; z++)
-				{
-					oldValues[z] = 0;
-					hadHitPeak[z] = false;
-				}
-
-			}
-		}
-
-		if (ofGetElapsedTimeMillis() - timeSinceLastHitTrough < maxTroughDuration && isCheckingHitTroughs)
-		{
-			hitTroughChecker = 0;
-			ofLogVerbose() << "inside checking troughs" << endl;
-			for (int u = 0; u < NUMBER_OF_SENSORS; u++)
-			{
-				hadHitTrough[u] = false;
-				if (hadHitPeak[u])
-				{
-
-					if (normalisedA2DValues[u] < troughThreshold)
-					{
-						hitTroughChecker += 1;
-						hadHitTrough[u] = true;
-
-
-					}
-					if (hitTroughChecker > 1)
-					{
-						ofLogVerbose() << ofToString(hitTroughChecker) + " troughs found" << endl;
-						completedFullHits += 1;
-						if (completedFullHits > requiredHits - 1)
-						{
-							ofLogVerbose() << "Total hits reached target " + ofToString(completedFullHits) << endl;
-
-							timeSinceLastHitPeak = 0;
-							timeSinceLastHitTrough = 0;
-							hitTroughChecker = 0;
-							completedFullHits = 0;
-							for (int t = 0; t < NUMBER_OF_SENSORS; t++)
-							{
-								hadHitPeak[t] = false;
-								hadHitTrough[t] = false;
-							}
-							isCheckingHitTroughs = false;
-							isCheckingHitPeaks = false;
-							onHitRoutine();
-							goto finished;
-						}
-						hitTroughChecker = 0;
-						timeSinceLastHitPeak = ofGetElapsedTimeMillis();
-						isCheckingHitPeaks = true;
-						isCheckingHitTroughs = false;
-					}
-				}
-			}
-
-		}
-	finished:
-		if (ofGetElapsedTimeMillis() - timeSinceLastHitTrough > maxTroughDuration && isCheckingHitTroughs)
-		{
-			if (hitTroughChecker > 1)
-			{
-				ofLogVerbose() << ofToString(hitTroughChecker) + " troughs found" << endl;
-				completedFullHits += 1;
-				if (completedFullHits > requiredHits - 1)
-				{
-					ofLogVerbose() << "Total hits reached target " + ofToString(completedFullHits) << endl;
-					completedFullHits = 0;
-					onHitRoutine();
-				}
-				hitTroughChecker = 0;
-				timeSinceLastHitPeak = ofGetElapsedTimeMillis();
-				isCheckingHitPeaks = true;
-				isCheckingHitTroughs = false;
-			}
-
-			else {
-				isCheckingHitTroughs = false;
-				isCheckingHitPeaks = false;
-				timeSinceLastHitPeak = 0;
-				timeSinceLastHitTrough = 0;
-				hitTroughChecker = 0;
-				completedFullHits = 0;
-				for (int t = 0; t < NUMBER_OF_SENSORS; t++)
-				{
-					hadHitPeak[t] = false;
-					hadHitTrough[t] = false;
-				}
-				ofLogVerbose() << "Hit count aborted no suitable trough" << endl;
-
-			}
-		}
-
-		if (ofGetElapsedTimeMillis() - timeSinceLastHitPeak < maxPeakDuration && isCheckingHitPeaks)
-		{
-			ofLogVerbose() << "inside checking peaks" << endl;
-			hitPeakChecker = 0;
-			for (int u = 0; u < NUMBER_OF_SENSORS; u++)
-			{
-				hadHitPeak[u] = false;
-				if (hadHitTrough[u])
-				{
-
-					if (normalisedA2DValues[u] > hitThreshHold)
-					{
-						hitPeakChecker += 1;
-
-						oldValues[u] = normalisedA2DValues[u];
-						hadHitPeak[u] = true;
-						if (hitPeakChecker > 1)
-						{
-							isCheckingHitTroughs = true;
-							timeSinceLastHitTrough = false;
-							hitPeakChecker = 0;
-							ofLogVerbose() << "Enough peaks found going to check troughs" << endl;
-							timeSinceLastHitTrough = ofGetElapsedTimeMillis();
-
-						}
-					}
-				}
-			}
-		}
-		if (ofGetElapsedTimeMillis() - timeSinceLastHitPeak > maxPeakDuration && isCheckingHitPeaks)
-		{
-			if (hitPeakChecker > 1)
-			{
-				isCheckingHitTroughs = true;
-				timeSinceLastHitTrough = false;
-				hitPeakChecker = 0;
-				ofLogVerbose() << "Enough peaks found going to check troughs" << endl;
-				timeSinceLastHitTrough = ofGetElapsedTimeMillis();
-
-			}
-			else {
-				isCheckingHitPeaks = false;
-				isCheckingHitTroughs = false;
-				timeSinceLastHitPeak = 0;
-				timeSinceLastHitTrough = 0;
-				hitPeakChecker = 0;
-				for (int t = 0; t < NUMBER_OF_SENSORS; t++)
-				{
-					hadHitPeak[t] = false;
-					hadHitTrough[t] = false;
-				}
-				ofLogVerbose() << "Hit count aborted no suitable peaks" << endl;
-
-			}
-		}
+    // this method checks for gestural input, the performers squeeing the units hard and rapidly, they can use this to change presets kind of shitty way about it but it works
+    if (!isCheckingHitPeaks && !isCheckingHitTroughs)
+    {
+        ofLogNotice() << "checking for any peaks" << endl;
+        for (int u = 0; u < NUMBER_OF_SENSORS; u++)
+        {
+            if (normalisedA2DValues[u] > hitThreshHold)
+            {
+                
+                hitPeakChecker += 1;
+                oldValues[u] = normalisedA2DValues[u];
+                hadHitPeak[u] = true;
+            }
+        }
+        if (hitPeakChecker>1)
+        {
+            ofLogNotice() << "found peaks, checking for trough" << endl;
+            isCheckingHitTroughs = true;
+            timeSinceLastHitTrough = ofGetElapsedTimeMillis();
+            hitPeakChecker = 0;
+            
+        }
+        else
+        {
+            ofLogNotice() << "No peaks found, exiting this bit" << endl;
+            
+            hitPeakChecker = 0;
+            for (int z = 0; z < NUMBER_OF_SENSORS; z++)
+            {
+                oldValues[z] = 0;
+                hadHitPeak[z] = false;
+            }
+            
+        }
+    }
+    
+    if (ofGetElapsedTimeMillis() - timeSinceLastHitTrough < maxTroughDuration && isCheckingHitTroughs)
+    {
+        hitTroughChecker = 0;
+        ofLogNotice() << "inside checking troughs" << endl;
+        for (int u = 0; u < NUMBER_OF_SENSORS; u++)
+        {
+            hadHitTrough[u] = false;
+            if (hadHitPeak[u])
+            {
+                
+                if (normalisedA2DValues[u] < troughThreshold)
+                {
+                    hitTroughChecker += 1;
+                    hadHitTrough[u] = true;
+                    
+                    
+                }
+                if (hitTroughChecker > 1)
+                {
+                    ofLogNotice() << ofToString(hitTroughChecker) + " troughs found" << endl;
+                    completedFullHits += 1;
+                    if (completedFullHits > requiredHits - 1)
+                    {
+                        ofLogNotice() << "Total hits reached target " + ofToString(completedFullHits) << endl;
+                        
+                        timeSinceLastHitPeak = 0;
+                        timeSinceLastHitTrough = 0;
+                        hitTroughChecker = 0;
+                        completedFullHits = 0;
+                        for (int t = 0; t < NUMBER_OF_SENSORS; t++)
+                        {
+                            hadHitPeak[t] = false;
+                            hadHitTrough[t] = false;
+                        }
+                        isCheckingHitTroughs = false;
+                        isCheckingHitPeaks = false;
+                        onHitRoutine();
+                        goto finished;
+                    }
+                    hitTroughChecker = 0;
+                    timeSinceLastHitPeak = ofGetElapsedTimeMillis();
+                    isCheckingHitPeaks = true;
+                    isCheckingHitTroughs = false;
+                }
+            }
+        }
+        
+    }
+finished:
+    if (ofGetElapsedTimeMillis() - timeSinceLastHitTrough > maxTroughDuration && isCheckingHitTroughs)
+    {
+        if (hitTroughChecker > 1)
+        {
+            ofLogNotice() << ofToString(hitTroughChecker) + " troughs found" << endl;
+            completedFullHits += 1;
+            if (completedFullHits > requiredHits - 1)
+            {
+                ofLogNotice() << "Total hits reached target " + ofToString(completedFullHits) << endl;
+                completedFullHits = 0;
+                onHitRoutine();
+            }
+            hitTroughChecker = 0;
+            timeSinceLastHitPeak = ofGetElapsedTimeMillis();
+            isCheckingHitPeaks = true;
+            isCheckingHitTroughs = false;
+        }
+        
+        else {
+            isCheckingHitTroughs = false;
+            isCheckingHitPeaks = false;
+            timeSinceLastHitPeak = 0;
+            timeSinceLastHitTrough = 0;
+            hitTroughChecker = 0;
+            completedFullHits = 0;
+            for (int t = 0; t < NUMBER_OF_SENSORS; t++)
+            {
+                hadHitPeak[t] = false;
+                hadHitTrough[t] = false;
+            }
+            ofLogNotice() << "Hit count aborted no suitable trough" << endl;
+            
+        }
+    }
+    
+    if (ofGetElapsedTimeMillis() - timeSinceLastHitPeak < maxPeakDuration && isCheckingHitPeaks)
+    {
+        ofLogNotice() << "inside checking peaks" << endl;
+        hitPeakChecker = 0;
+        for (int u = 0; u < NUMBER_OF_SENSORS; u++)
+        {
+            hadHitPeak[u] = false;
+            if (hadHitTrough[u])
+            {
+                
+                if (normalisedA2DValues[u] > hitThreshHold)
+                {
+                    hitPeakChecker += 1;
+                    
+                    oldValues[u] = normalisedA2DValues[u];
+                    hadHitPeak[u] = true;
+                    if (hitPeakChecker > 1)
+                    {
+                        isCheckingHitTroughs = true;
+                        timeSinceLastHitTrough = false;
+                        hitPeakChecker = 0;
+                        ofLogNotice() << "Enough peaks found going to check troughs" << endl;
+                        timeSinceLastHitTrough = ofGetElapsedTimeMillis();
+                        
+                    }
+                }
+            }
+        }
+    }
+    if (ofGetElapsedTimeMillis() - timeSinceLastHitPeak > maxPeakDuration && isCheckingHitPeaks)
+    {
+        if (hitPeakChecker > 1)
+        {
+            isCheckingHitTroughs = true;
+            timeSinceLastHitTrough = false;
+            hitPeakChecker = 0;
+            ofLogNotice() << "Enough peaks found going to check troughs" << endl;
+            timeSinceLastHitTrough = ofGetElapsedTimeMillis();
+            
+        }
+        else {
+            isCheckingHitPeaks = false;
+            isCheckingHitTroughs = false;
+            timeSinceLastHitPeak = 0;
+            timeSinceLastHitTrough = 0;
+            hitPeakChecker = 0;
+            for (int t = 0; t < NUMBER_OF_SENSORS; t++)
+            {
+                hadHitPeak[t] = false;
+                hadHitTrough[t] = false;
+            }
+            ofLogNotice() << "Hit count aborted no suitable peaks" << endl;
+            
+        }
+    }
 }
 
 void ofApp::onHitRoutine()
 {
     // if they make enough hits in time then we run whatever is in here, for the moment it changes presets
-	switchPresets();
+    switchPresets();
 }
 #endif // HAS_ADC
 
@@ -4469,14 +4477,14 @@ void ofApp::runSimulationMethod(bool & run)
 {
     
     //callback from the run simulation button on the GUI -laptop only
-	if (operationMode != simulationOperationModeTranslate)
-	{
+    if (operationMode != simulationOperationModeTranslate)
+    {
         timeUpdateFromKey=false;
         drawGrains[0]=false;
-		goToMode(simulationOperationModeTranslate);
-	}
-	simulationRunning = runSimulation;
-
+        goToMode(simulationOperationModeTranslate);
+    }
+    simulationRunning = runSimulation;
+    
 }
 
 void ofApp::simulatedInputChanged(int & simulatedInput)
@@ -4494,164 +4502,164 @@ void ofApp::singleCompSimChanged(const void * guiSender, int & value)
 void ofApp::keyPressed(int key){
     // here is our key interaction, laptop only
 #ifndef HAS_ADC
-	if (key=='f')
-	{
-		ofToggleFullscreen();
-	}
-
-	switch (operationMode)
-	{
-	case OP_MODE_SETUP:
-		break;
-
-	case OP_MODE_WAIT_FOR_NARRATION:
-		if (key==' ')
-		{
-			if (narrationUsesSensor)
-			{
-				narration.play();
-				shouldTriggerNarrationPlay = false;
-				narrationIsPlaying = true;
-				ofLogVerbose() << "Triggered Narration play" << endl;
-				goToMode(OP_MODE_PLAY_NARRATION);
-			}
-
-		}
-		break;
-	case OP_MODE_PLAY_NARRATION:
-		if (key == 'g')
-		{
-			goToMode(OP_MODE_NARRATION_GLITCH);
-		}
-		if (key == ' ')
-		{
-			ofSendMessage(ofToString(BTN_MSG_A_PAUSE_NARRATION));
-		}
-		break;
-	case OP_MODE_SWITCH_PRESETS:
-		break;
-	case OP_MODE_MULTI_GRAIN_MODE:
-		if (key=='p')
-		{
-			goToMode(OP_MODE_SWITCH_PRESETS);
-		}
-		if (key == ' ')
-		{
-            timeUpdateFromKey=false;
-            drawGrains[0]=false;
-			ofSendMessage(ofToString(BTN_MSG_M_OP_MODE_SIMULATION));
-		}
-		switch (key) {
-		case '1':
-			loadRoutine(0);
-			break;
-		case '2':
-			loadRoutine(1);
-			break;
-		case '3':
-			loadRoutine(2);
-			break;
-		case '4':
-			loadRoutine(3);
-			break;
-		case '5':
-			loadRoutine(4);
-			break;
-		case '6':
-			loadRoutine(5);
-			break;
-		}
-        if(key == 'e'){
-            drawEffects=!drawEffects;
-        }
-        break;
-            
-	case OP_MODE_SINGLE_GRAIN_MODE:
-		if (key == 'p')
-		{
-			goToMode(OP_MODE_SWITCH_PRESETS);
-		}
-		if (key == ' ')
-		{
-            timeUpdateFromKey=false;
-            drawGrains[0]=false;
-			ofSendMessage(ofToString(BTN_MSG_M_OP_MODE_SIMULATION));
-		}
-        if(key=='R'){
-            positionFromTime = 0;
-        }
-		switch (key) {
-		case '1':
-			loadRoutine(0);
-			break;
-        case'r':
-            timeUpdateFromKey=!timeUpdateFromKey;
-            drawGrains[0] = timeUpdateFromKey;
+    if (key=='f')
+    {
+        ofToggleFullscreen();
+    }
+    
+    switch (operationMode)
+    {
+        case OP_MODE_SETUP:
             break;
-        }
             
-        if(key == 'e'){
-            drawEffects=!drawEffects;
-        }
-		
-            
-	case OP_MODE_NARRATION_GUI:
-		break;
-	case OP_MODE_SIMULATION_MULTI:
-		if (key == ' ')
-		{
-			ofSendMessage(ofToString(BTN_MSG_A_PAUSE_SIMULATION));
-		}
+        case OP_MODE_WAIT_FOR_NARRATION:
+            if (key==' ')
+            {
+                if (narrationUsesSensor)
+                {
+                    narration.play();
+                    shouldTriggerNarrationPlay = false;
+                    narrationIsPlaying = true;
+                    ofLogNotice() << "Triggered Narration play" << endl;
+                    goToMode(OP_MODE_PLAY_NARRATION);
+                }
+                
+            }
+            break;
+        case OP_MODE_PLAY_NARRATION:
+            if (key == 'g')
+            {
+                goToMode(OP_MODE_NARRATION_GLITCH);
+            }
+            if (key == ' ')
+            {
+                ofSendMessage(ofToString(BTN_MSG_A_PAUSE_NARRATION));
+            }
+            break;
+        case OP_MODE_SWITCH_PRESETS:
+            break;
+        case OP_MODE_MULTI_GRAIN_MODE:
+            if (key=='p')
+            {
+                goToMode(OP_MODE_SWITCH_PRESETS);
+            }
+            if (key == ' ')
+            {
+                timeUpdateFromKey=false;
+                drawGrains[0]=false;
+                ofSendMessage(ofToString(BTN_MSG_M_OP_MODE_SIMULATION));
+            }
+            switch (key) {
+                case '1':
+                    loadRoutine(0);
+                    break;
+                case '2':
+                    loadRoutine(1);
+                    break;
+                case '3':
+                    loadRoutine(2);
+                    break;
+                case '4':
+                    loadRoutine(3);
+                    break;
+                case '5':
+                    loadRoutine(4);
+                    break;
+                case '6':
+                    loadRoutine(5);
+                    break;
+            }
             if(key == 'e'){
                 drawEffects=!drawEffects;
             }
-		break;
-	case OP_MODE_SIMULATION_SINGLE:
-		if (key == ' ')
-		{
-			ofSendMessage(ofToString(BTN_MSG_A_PAUSE_SIMULATION));
-		}
+            break;
+            
+        case OP_MODE_SINGLE_GRAIN_MODE:
+            if (key == 'p')
+            {
+                goToMode(OP_MODE_SWITCH_PRESETS);
+            }
+            if (key == ' ')
+            {
+                timeUpdateFromKey=false;
+                drawGrains[0]=false;
+                ofSendMessage(ofToString(BTN_MSG_M_OP_MODE_SIMULATION));
+            }
+            if(key=='R'){
+                positionFromTime = 0;
+            }
+            switch (key) {
+                case '1':
+                    loadRoutine(0);
+                    break;
+                case'r':
+                    timeUpdateFromKey=!timeUpdateFromKey;
+                    drawGrains[0] = timeUpdateFromKey;
+                    break;
+            }
+            
             if(key == 'e'){
                 drawEffects=!drawEffects;
             }
-		break;
-	case OP_MODE_NARRATION_GLITCH:
-		if (key == 'g')
-		{
-			goToMode(OP_MODE_PLAY_NARRATION);
-
-		}
-		break;
-	}
+            
+            
+        case OP_MODE_NARRATION_GUI:
+            break;
+        case OP_MODE_SIMULATION_MULTI:
+            if (key == ' ')
+            {
+                ofSendMessage(ofToString(BTN_MSG_A_PAUSE_SIMULATION));
+            }
+            if(key == 'e'){
+                drawEffects=!drawEffects;
+            }
+            break;
+        case OP_MODE_SIMULATION_SINGLE:
+            if (key == ' ')
+            {
+                ofSendMessage(ofToString(BTN_MSG_A_PAUSE_SIMULATION));
+            }
+            if(key == 'e'){
+                drawEffects=!drawEffects;
+            }
+            break;
+        case OP_MODE_NARRATION_GLITCH:
+            if (key == 'g')
+            {
+                goToMode(OP_MODE_PLAY_NARRATION);
+                
+            }
+            break;
+    }
 #endif
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
 #ifndef HAS_ADC
-	switch (operationMode)
-	{
-	case OP_MODE_SETUP:
-		break;
-	case OP_MODE_WAIT_FOR_NARRATION:
-		break;
-	case OP_MODE_PLAY_NARRATION:
-		break;
-	case OP_MODE_SWITCH_PRESETS:
-		break;
-	case OP_MODE_MULTI_GRAIN_MODE:
-		break;
-	case OP_MODE_SINGLE_GRAIN_MODE:
-        break;
-	case OP_MODE_NARRATION_GUI:
-		break;
-	case OP_MODE_SIMULATION_MULTI:
-		break;
-	case OP_MODE_SIMULATION_SINGLE:
-		break;
-	case OP_MODE_NARRATION_GLITCH:
-		break;
-	}
+    switch (operationMode)
+    {
+        case OP_MODE_SETUP:
+            break;
+        case OP_MODE_WAIT_FOR_NARRATION:
+            break;
+        case OP_MODE_PLAY_NARRATION:
+            break;
+        case OP_MODE_SWITCH_PRESETS:
+            break;
+        case OP_MODE_MULTI_GRAIN_MODE:
+            break;
+        case OP_MODE_SINGLE_GRAIN_MODE:
+            break;
+        case OP_MODE_NARRATION_GUI:
+            break;
+        case OP_MODE_SIMULATION_MULTI:
+            break;
+        case OP_MODE_SIMULATION_SINGLE:
+            break;
+        case OP_MODE_NARRATION_GLITCH:
+            break;
+    }
 #endif
 }
 
@@ -4659,31 +4667,31 @@ void ofApp::keyReleased(int key){
 void ofApp::mouseMoved(int x, int y ){
     //if we move the mouse (no button pushed
 #ifndef HAS_ADC
-	switch (operationMode)
-	{
-	case OP_MODE_SETUP:
-		break;
-	case OP_MODE_WAIT_FOR_NARRATION:
-		break;
-	case OP_MODE_PLAY_NARRATION:
-		break;
-	case OP_MODE_SWITCH_PRESETS:
-		break;
-	case OP_MODE_MULTI_GRAIN_MODE:
-		break;
-	case OP_MODE_SINGLE_GRAIN_MODE:
-		break;
-	case OP_MODE_NARRATION_GUI:
-		break;
-	case OP_MODE_SIMULATION_MULTI:
-		break;
-	case OP_MODE_SIMULATION_SINGLE:
-		break;
-	case OP_MODE_NARRATION_GLITCH:
-		narrationGlitchPlayheadPos = ofMap(x, 0, ofGetWidth(), 0.0, 1.0);
-		
-		break;
-	}
+    switch (operationMode)
+    {
+        case OP_MODE_SETUP:
+            break;
+        case OP_MODE_WAIT_FOR_NARRATION:
+            break;
+        case OP_MODE_PLAY_NARRATION:
+            break;
+        case OP_MODE_SWITCH_PRESETS:
+            break;
+        case OP_MODE_MULTI_GRAIN_MODE:
+            break;
+        case OP_MODE_SINGLE_GRAIN_MODE:
+            break;
+        case OP_MODE_NARRATION_GUI:
+            break;
+        case OP_MODE_SIMULATION_MULTI:
+            break;
+        case OP_MODE_SIMULATION_SINGLE:
+            break;
+        case OP_MODE_NARRATION_GLITCH:
+            narrationGlitchPlayheadPos = ofMap(x, 0, ofGetWidth(), 0.0, 1.0);
+            
+            break;
+    }
 #endif
 }
 
@@ -4691,33 +4699,33 @@ void ofApp::mouseMoved(int x, int y ){
 void ofApp::mouseDragged(int x, int y, int button){
     //if we drag the mouse- we use this for previewing the granulars
 #ifndef HAS_ADC
-	switch (operationMode)
-	{
-	case OP_MODE_SETUP:
-		break;
-	case OP_MODE_WAIT_FOR_NARRATION:
-		break;
-	case OP_MODE_PLAY_NARRATION:
-		break;
-	case OP_MODE_SWITCH_PRESETS:
-		break;
-	case OP_MODE_MULTI_GRAIN_MODE:
-		controlOn(x, y);
-		break;
-	case OP_MODE_SINGLE_GRAIN_MODE:
-		controlOn(x, y);
-		break;
-	case OP_MODE_NARRATION_GUI:
-		controlOnNarr(x, y);
-		break;
-	case OP_MODE_SIMULATION_MULTI:
-		break;
-	case OP_MODE_SIMULATION_SINGLE:
-		break;
-	case OP_MODE_NARRATION_GLITCH:
-		narrationGlitchPlayheadPos = ofMap(x, 0, ofGetWidth(), 0.0, 1.0);
-		break;
-	}
+    switch (operationMode)
+    {
+        case OP_MODE_SETUP:
+            break;
+        case OP_MODE_WAIT_FOR_NARRATION:
+            break;
+        case OP_MODE_PLAY_NARRATION:
+            break;
+        case OP_MODE_SWITCH_PRESETS:
+            break;
+        case OP_MODE_MULTI_GRAIN_MODE:
+            controlOn(x, y);
+            break;
+        case OP_MODE_SINGLE_GRAIN_MODE:
+            controlOn(x, y);
+            break;
+        case OP_MODE_NARRATION_GUI:
+            controlOnNarr(x, y);
+            break;
+        case OP_MODE_SIMULATION_MULTI:
+            break;
+        case OP_MODE_SIMULATION_SINGLE:
+            break;
+        case OP_MODE_NARRATION_GLITCH:
+            narrationGlitchPlayheadPos = ofMap(x, 0, ofGetWidth(), 0.0, 1.0);
+            break;
+    }
 #endif
 }
 
@@ -4725,33 +4733,33 @@ void ofApp::mouseDragged(int x, int y, int button){
 void ofApp::mousePressed(int x, int y, int button){
     //if we click the mouse- we use this for previewing the granulars
 #ifndef HAS_ADC
-	switch (operationMode)
-	{
-	case OP_MODE_SETUP:
-		break;
-	case OP_MODE_WAIT_FOR_NARRATION:
-		break;
-	case OP_MODE_PLAY_NARRATION:
-		break;
-	case OP_MODE_SWITCH_PRESETS:
-		break;
-	case OP_MODE_MULTI_GRAIN_MODE:
-		controlOn(x, y);
-		break;
-	case OP_MODE_SINGLE_GRAIN_MODE:
-		controlOn(x, y);
-		break;
-	case OP_MODE_NARRATION_GUI:
-		controlOnNarr(x, y);
-		break;
-	case OP_MODE_SIMULATION_MULTI:
-		break;
-	case OP_MODE_SIMULATION_SINGLE:
-		break;
-	case OP_MODE_NARRATION_GLITCH:
-		narrationGlitchPlayheadPos = ofMap(x, 0, ofGetWidth(), 0.0, 0.1);
-		break;
-	}
+    switch (operationMode)
+    {
+        case OP_MODE_SETUP:
+            break;
+        case OP_MODE_WAIT_FOR_NARRATION:
+            break;
+        case OP_MODE_PLAY_NARRATION:
+            break;
+        case OP_MODE_SWITCH_PRESETS:
+            break;
+        case OP_MODE_MULTI_GRAIN_MODE:
+            controlOn(x, y);
+            break;
+        case OP_MODE_SINGLE_GRAIN_MODE:
+            controlOn(x, y);
+            break;
+        case OP_MODE_NARRATION_GUI:
+            controlOnNarr(x, y);
+            break;
+        case OP_MODE_SIMULATION_MULTI:
+            break;
+        case OP_MODE_SIMULATION_SINGLE:
+            break;
+        case OP_MODE_NARRATION_GLITCH:
+            narrationGlitchPlayheadPos = ofMap(x, 0, ofGetWidth(), 0.0, 0.1);
+            break;
+    }
 #endif
 }
 
@@ -4759,194 +4767,194 @@ void ofApp::mousePressed(int x, int y, int button){
 void ofApp::mouseReleased(int x, int y, int button){
     //when we let go of the mouse reset out granular stuff
 #ifndef HAS_ADC
-	switch (operationMode)
-	{
-	case OP_MODE_SETUP:
-		break;
-	case OP_MODE_WAIT_FOR_NARRATION:
-		break;
-	case OP_MODE_PLAY_NARRATION:
-		break;
-	case OP_MODE_SWITCH_PRESETS:
-		break;
-	case OP_MODE_MULTI_GRAIN_MODE:
-		resetValuesAfterChanges();
-		break;
-	case OP_MODE_SINGLE_GRAIN_MODE:
-		resetValuesAfterChanges();
-		break;
-	case OP_MODE_NARRATION_GUI:
-		narrAmpControl.set(0.0f);
-		narrDrawGrains = false;
-		break;
-	case OP_MODE_SIMULATION_MULTI:
-		break;
-	case OP_MODE_SIMULATION_SINGLE:
-		break;
-	case OP_MODE_NARRATION_GLITCH:
-		break;
-	}
+    switch (operationMode)
+    {
+        case OP_MODE_SETUP:
+            break;
+        case OP_MODE_WAIT_FOR_NARRATION:
+            break;
+        case OP_MODE_PLAY_NARRATION:
+            break;
+        case OP_MODE_SWITCH_PRESETS:
+            break;
+        case OP_MODE_MULTI_GRAIN_MODE:
+            resetValuesAfterChanges();
+            break;
+        case OP_MODE_SINGLE_GRAIN_MODE:
+            resetValuesAfterChanges();
+            break;
+        case OP_MODE_NARRATION_GUI:
+            narrAmpControl.set(0.0f);
+            narrDrawGrains = false;
+            break;
+        case OP_MODE_SIMULATION_MULTI:
+            break;
+        case OP_MODE_SIMULATION_SINGLE:
+            break;
+        case OP_MODE_NARRATION_GLITCH:
+            break;
+    }
 #endif
 }
 
 void ofApp::resetValuesAfterChanges()
 {
     //resets all the granualars parameters as the should be, volume is at 0 and playhead position at 0
-	for (int i = 0; i < numberOfSlots; i++) {
-		ampControl[i]->set(0.0f);
-		0.0 >> cloud[i]->in_position();
-		_in_length[i] >> cloud[i]->in_length();
-		_in_density[i] >> cloud[i]->in_density();
-		_in_distance_jitter[i] >> cloud[i]->in_distance_jitter();
-		_in_pitch_jitter[i] >> cloud[i]->in_pitch_jitter();
-		_grainDirection[i] >> cloud[i]->in_direction();
-		_in_pitch[i] >> cloud[i]->in_pitch();
-		_spread[i] >> cloud[i]->in_position_jitter();
-		drawGrains[i] = false;
-	}
-
+    for (int i = 0; i < numberOfSlots; i++) {
+        ampControl[i]->set(0.0f);
+        0.0 >> cloud[i]->in_position();
+        _in_length[i] >> cloud[i]->in_length();
+        _in_density[i] >> cloud[i]->in_density();
+        _in_distance_jitter[i] >> cloud[i]->in_distance_jitter();
+        _in_pitch_jitter[i] >> cloud[i]->in_pitch_jitter();
+        _grainDirection[i] >> cloud[i]->in_direction();
+        _in_pitch[i] >> cloud[i]->in_pitch();
+        _spread[i] >> cloud[i]->in_position_jitter();
+        drawGrains[i] = false;
+    }
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseEntered(int x, int y){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::mouseExited(int x, int y){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::gotMessage(ofMessage msg){
     // crappy low budget events system, openframeworks has this built in, I can call ofSendMessage() from anywhere and it will be received with this callback. I use my button message and button action definitions as messages and they arrive here and appropriate action is taken.
-	switch (ofToInt(msg.message))
-	{
-    case BTN_MSG_A_EFFECTS_OR_GRANULAR:
+    switch (ofToInt(msg.message))
+    {
+        case BTN_MSG_A_EFFECTS_OR_GRANULAR:
             drawEffects=!drawEffects;
-        break;
+            break;
             
-	case BTN_MSG_A_SKIP_NARRATION:
-		goToMode(grainOperationModeTranslate);
-		break;
-
-
-	case BTN_MSG_A_RESTART_NARRATION:
-		narration.stop();
-		narration.setPosition(0.0);
-		narration.play();
-		narrationIsPlaying = true;
-		break;
-		
-	case BTN_MSG_A_PAUSE_NARRATION:
-		if (narration.getIsPaused())
-		{
-			narration.pause(false);
-
-		}
-		else if (!narration.getIsPaused())
-		{
-			narration.pause(true);
-
-		}
-		break;
-
-	case BTN_MSG_M_OP_MODE_NARRATION_GLITCH:
-		goToMode(OP_MODE_NARRATION_GLITCH);
-		break;
-
+        case BTN_MSG_A_SKIP_NARRATION:
+            goToMode(grainOperationModeTranslate);
+            break;
+            
+            
+        case BTN_MSG_A_RESTART_NARRATION:
+            narration.stop();
+            narration.setPosition(0.0);
+            narration.play();
+            narrationIsPlaying = true;
+            break;
+            
+        case BTN_MSG_A_PAUSE_NARRATION:
+            if (narration.getIsPaused())
+            {
+                narration.pause(false);
+                
+            }
+            else if (!narration.getIsPaused())
+            {
+                narration.pause(true);
+                
+            }
+            break;
+            
+        case BTN_MSG_M_OP_MODE_NARRATION_GLITCH:
+            goToMode(OP_MODE_NARRATION_GLITCH);
+            break;
+            
 #ifndef HAS_ADC
-    case BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY:
+        case BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY:
             simulationNotCurve=!simulationNotCurve;
-        break;
+            break;
             
-	case BTN_MSG_A_PAUSE_SIMULATION:
-		simulationRunning = !simulationRunning;
-		runSimulation = simulationRunning;
-		break;
-	case BTN_MSG_M_OP_MODE_SIMULATION:
-		if (operationMode != simulationOperationModeTranslate)
-		{
-			goToMode(simulationOperationModeTranslate);
-		}
-		simulationRunning = true;
-		break;
-	case BTN_MSG_M_OP_MODE_NARRATION_GUI:
-		goToMode(OP_MODE_NARRATION_GUI);
-		break;
-
+        case BTN_MSG_A_PAUSE_SIMULATION:
+            simulationRunning = !simulationRunning;
+            runSimulation = simulationRunning;
+            break;
+        case BTN_MSG_M_OP_MODE_SIMULATION:
+            if (operationMode != simulationOperationModeTranslate)
+            {
+                goToMode(simulationOperationModeTranslate);
+            }
+            simulationRunning = true;
+            break;
+        case BTN_MSG_M_OP_MODE_NARRATION_GUI:
+            goToMode(OP_MODE_NARRATION_GUI);
+            break;
+            
 #endif // !HAS_ADC
-
-
-	case BTN_MSG_M_OP_MODE_PLAY_NARRATION:
-		goToMode(OP_MODE_PLAY_NARRATION);
-		break;
-
-
-	case BTN_MSG_M_OP_MODE_SWITCH_PRESETS:
-		goToMode(OP_MODE_SWITCH_PRESETS);
-		break;
-
-	case BTN_MSG_M_OP_MODE_GRAIN_MODE:
-		goToMode(grainOperationModeTranslate);
-		break;
-
-	case BTN_MSG_A_SAVE_GRANULAR:
-		
-			for (int i = 0; i<numberOfSlots; i++) {
-				samplePanels[i]->saveToFile(filePathPrefix + unitID + "_preset_"+ ofToString(presetIndex) + ".xml");
+            
+            
+        case BTN_MSG_M_OP_MODE_PLAY_NARRATION:
+            goToMode(OP_MODE_PLAY_NARRATION);
+            break;
+            
+            
+        case BTN_MSG_M_OP_MODE_SWITCH_PRESETS:
+            goToMode(OP_MODE_SWITCH_PRESETS);
+            break;
+            
+        case BTN_MSG_M_OP_MODE_GRAIN_MODE:
+            goToMode(grainOperationModeTranslate);
+            break;
+            
+        case BTN_MSG_A_SAVE_GRANULAR:
+            
+            for (int i = 0; i<numberOfSlots; i++) {
+                samplePanels[i]->saveToFile(filePathPrefix + unitID + "_preset_"+ ofToString(presetIndex) + ".xml");
                 effectsPanels[i]->saveToFile(filePathPrefix + unitID + "_effectParameterSettings_preset_"+ ofToString(presetIndex) + ".xml");
-
-			}
+                
+            }
             
             drawGrains[0] = timeUpdateFromKey;
-		
-	
-		break;
-
-	case BTN_MSG_A_SAVE_NARRATION:
-		narrPanel.saveToFile(filePathPrefix + unitID + "_narr.xml");
-		break;
-	}
-
+            
+            
+            break;
+            
+        case BTN_MSG_A_SAVE_NARRATION:
+            narrPanel.saveToFile(filePathPrefix + unitID + "_narr.xml");
+            break;
+    }
+    
 }
 
 void ofApp::loadRoutine(int target) {
 #ifndef HAS_ADC
     // in the laptop mode you can load other audio files to preview
-	ampControl[target]->set(0.0f);
-	drawGrains[target] = false;
-
-
-	//Open the Open File Dialog
-	ofFileDialogResult openFileResult = ofSystemLoadDialog("select an audio sample");
-
-	//Check if the user opened a file
-	if (openFileResult.bSuccess) {
-
-		string path = openFileResult.getPath();
-
-		sampleData[target]->load(path);
-		waveformGraphics[target]->setWaveform(*sampleData[target], 0, ofColor(0, 100, 100, 255), uiWidth[target], uiHeigth[target]);
+    ampControl[target]->set(0.0f);
+    drawGrains[target] = false;
+    
+    
+    //Open the Open File Dialog
+    ofFileDialogResult openFileResult = ofSystemLoadDialog("select an audio sample");
+    
+    //Check if the user opened a file
+    if (openFileResult.bSuccess) {
+        
+        string path = openFileResult.getPath();
+        
+        sampleData[target]->load(path);
+        waveformGraphics[target]->setWaveform(*sampleData[target], 0, ofColor(0, 100, 100, 255), uiWidth[target], uiHeigth[target]);
         fileNamesSet[presetIndex][target] = openFileResult.getName();
-
-		ofLogVerbose("file loaded");
-
-	}
-	else {
-		ofLogVerbose("User hit cancel");
-	}
+        
+        ofLogNotice("file loaded");
+        
+    }
+    else {
+        ofLogNotice("User hit cancel");
+    }
 #endif
 }
 
 //--------------------------------------------------------------
 void ofApp::dragEvent(ofDragInfo dragInfo){ 
-
+    
 }
 
 
@@ -4955,79 +4963,79 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 void ofApp::deviceOnlyUpdateRoutine()
 {
-// just for the raspbery pi, we get the button state
-	button.getval_gpio(state_button);
-// check if the button is doing something interesting
-	buttonStateMachine();
-// if it si first launch run the calibration
-	if (firstRun) {
-		calibrateOnStart();
-		firstRun = false;
-	}
-//read the values from the ADC all the time
-	readADCValues();
-//normalise those vaules
-	normaliseADCValues();
-// this checks for the gestural input (lots of squeazing rapidly
+    // just for the raspbery pi, we get the button state
+    button.getval_gpio(state_button);
+    // check if the button is doing something interesting
+    buttonStateMachine();
+    // if it si first launch run the calibration
+    if (firstRun) {
+        calibrateOnStart();
+        firstRun = false;
+    }
+    //read the values from the ADC all the time
+    readADCValues();
+    //normalise those vaules
+    normaliseADCValues();
+    // this checks for the gestural input (lots of squeazing rapidly
     if(useHitGesture){
         checkForHits();
     }
-	
-
+    
+    
 }
 
 void ofApp::buttonStateMachine() {
     //crappy state machine for getting more interaction out of a single button, we have click, double click, triple click and medium press 3 seconds and long press 6 seconds, works ok
-	if (ofGetElapsedTimeMillis() > 5000)
-	{
-		if (clicks == 3 && ofGetElapsedTimeMillis() - click3Time > buttonPressTimeOut && waitingForClick)
-		{
-			clicks = 0;
-			click1Time = 0;
-			click2Time = 0;
-			click3Time = 0;
-			relayOut.setal_gpio("1");
-			ofSleepMillis(400);
-			relayOut.setal_gpio("0");
-
-			if (oscDebug) {
-				ofxOscMessage m;
-				m.setAddress("/" + ofToString(unitID) + "/button");
-				m.addIntArg(3);
-				sender.sendMessage(m, false);
-			}
-			ofLogVerbose() << "triple click" << endl;
-
-			if (oscDebug) {
-				ofxOscMessage m;
-				m.setAddress("/" + ofToString(unitID) + "/speaker");
-				m.addIntArg(1);
-				sender.sendMessage(m, false);
-			}
-			ofLogVerbose() << "Speaker Sync" << endl;
-
-		}
-
-		else if (clicks == 2 && ofGetElapsedTimeMillis() - click2Time > buttonPressTimeOut && waitingForClick)
-		{
-			clicks = 0;
-			click1Time = 0;
-			click2Time = 0;
-			ofLogVerbose() << "double click" << endl;
-
-			if (oscDebug) {
-				ofxOscMessage m;
-				m.setAddress("/" + ofToString(unitID) + "/button");
-				m.addIntArg(2);
-				sender.sendMessage(m, false);
-			}
+    if (ofGetElapsedTimeMillis() > 5000)
+    {
+        if (clicks == 3 && ofGetElapsedTimeMillis() - click3Time > buttonPressTimeOut && waitingForClick)
+        {
+            clicks = 0;
+            click1Time = 0;
+            click2Time = 0;
+            click3Time = 0;
+            relayOut.setal_gpio("1");
+            ofSleepMillis(400);
+            relayOut.setal_gpio("0");
+            
+            if (oscDebug) {
+                ofxOscMessage m;
+                m.setAddress("/" + ofToString(unitID) + "/button");
+                m.addIntArg(3);
+                sender.sendMessage(m, false);
+            }
+            ofLogNotice() << "triple click" << endl;
+            
+            if (oscDebug) {
+                ofxOscMessage m;
+                m.setAddress("/" + ofToString(unitID) + "/speaker");
+                m.addIntArg(1);
+                sender.sendMessage(m, false);
+            }
+            ofLogNotice() << "Speaker Sync" << endl;
+            
+        }
+        
+        else if (clicks == 2 && ofGetElapsedTimeMillis() - click2Time > buttonPressTimeOut && waitingForClick)
+        {
+            clicks = 0;
+            click1Time = 0;
+            click2Time = 0;
+            ofLogNotice() << "double click" << endl;
+            
+            if (oscDebug) {
+                ofxOscMessage m;
+                m.setAddress("/" + ofToString(unitID) + "/button");
+                m.addIntArg(2);
+                sender.sendMessage(m, false);
+            }
             if(!hasNarration){
                 goToMode(OP_MODE_SWITCH_PRESETS);
             }
             if(hasNarration){
                 narration.stop();
                 narrationIsPlaying = false;
-                ofLogVerbose() << "Narration is over setting up granulars" << endl;
+                ofLogNotice() << "Narration is over setting up granulars" << endl;
                 narrAmpControl.set(0.0f);
                 hasNarration = false;
 #ifndef HAS_ADC
@@ -5055,81 +5063,81 @@ void ofApp::buttonStateMachine() {
                 
 #endif
             }
-
-		}
-
-		if (clicks == 1 && ofGetElapsedTimeMillis() - click1Time > buttonPressTimeOut && waitingForClick)
-		{
-			clicks = 0;
-			click1Time = 0;
-			ofLogVerbose() << "single click" << endl;
-			if (oscDebug) {
-				ofxOscMessage m;
-				m.setAddress("/" + ofToString(unitID) + "/button");
-				m.addIntArg(1);
-				sender.sendMessage(m, false);
-			}
-
-		}
-
-		if (ofToInt(state_button) == 0 && clicks == 0 && waitingForClick)
-		{
-			clicks = 1;
-			click1Time = ofGetElapsedTimeMillis();
-		}
-		else if (ofToInt(state_button) == 0 && clicks == 1 && ofGetElapsedTimeMillis() - click1Time < buttonPressTimeOut && waitingForClick)
-		{
-			clicks = 2;
-			click2Time = ofGetElapsedTimeMillis();
-		}
-		else if (ofToInt(state_button) == 0 && clicks == 2 && ofGetElapsedTimeMillis() - click2Time < buttonPressTimeOut && waitingForClick)
-		{
-			clicks = 3;
-			click3Time = ofGetElapsedTimeMillis();
-		}
-
-		if (ofToInt(state_button) == 0)
-		{
-			waitingForClick = false;
-		}
-		if (ofToInt(state_button) == 1)
-		{
-			waitingForClick = true;
-			if (clicks == 1)
-			{
-				clik1ReleaseTime = ofGetElapsedTimeMillis();
-				if (clik1ReleaseTime - click1Time > 6000)
-				{
-					ofLogVerbose() << "6 second click" << endl;
-					click1Time = 0;
-					clicks = 0;
-					clik1ReleaseTime = 0;
-					if (oscDebug) {
-						ofxOscMessage m;
-						m.setAddress("/" + ofToString(unitID) + "/button");
-						m.addIntArg(6000);
-						sender.sendMessage(m, false);
-					}
-					if (shutdownPress) {
-						OF_EXIT_APP(0);
-					}
-				}
-
-				if (clik1ReleaseTime - click1Time > 3000)
-				{
-					ofLogVerbose() << "3 second click" << endl;
-					click1Time = 0;
-					clicks = 0;
-					clik1ReleaseTime = 0;
-					if (oscDebug) {
-						ofxOscMessage m;
-						m.setAddress("/" + ofToString(unitID) + "/button");
-						m.addIntArg(3000);
-						sender.sendMessage(m, false);
-					}
-				}
-			}
-		}
-	}
+            
+        }
+        
+        if (clicks == 1 && ofGetElapsedTimeMillis() - click1Time > buttonPressTimeOut && waitingForClick)
+        {
+            clicks = 0;
+            click1Time = 0;
+            ofLogNotice() << "single click" << endl;
+            if (oscDebug) {
+                ofxOscMessage m;
+                m.setAddress("/" + ofToString(unitID) + "/button");
+                m.addIntArg(1);
+                sender.sendMessage(m, false);
+            }
+            
+        }
+        
+        if (ofToInt(state_button) == 0 && clicks == 0 && waitingForClick)
+        {
+            clicks = 1;
+            click1Time = ofGetElapsedTimeMillis();
+        }
+        else if (ofToInt(state_button) == 0 && clicks == 1 && ofGetElapsedTimeMillis() - click1Time < buttonPressTimeOut && waitingForClick)
+        {
+            clicks = 2;
+            click2Time = ofGetElapsedTimeMillis();
+        }
+        else if (ofToInt(state_button) == 0 && clicks == 2 && ofGetElapsedTimeMillis() - click2Time < buttonPressTimeOut && waitingForClick)
+        {
+            clicks = 3;
+            click3Time = ofGetElapsedTimeMillis();
+        }
+        
+        if (ofToInt(state_button) == 0)
+        {
+            waitingForClick = false;
+        }
+        if (ofToInt(state_button) == 1)
+        {
+            waitingForClick = true;
+            if (clicks == 1)
+            {
+                clik1ReleaseTime = ofGetElapsedTimeMillis();
+                if (clik1ReleaseTime - click1Time > 6000)
+                {
+                    ofLogNotice() << "6 second click" << endl;
+                    click1Time = 0;
+                    clicks = 0;
+                    clik1ReleaseTime = 0;
+                    if (oscDebug) {
+                        ofxOscMessage m;
+                        m.setAddress("/" + ofToString(unitID) + "/button");
+                        m.addIntArg(6000);
+                        sender.sendMessage(m, false);
+                    }
+                    if (shutdownPress) {
+                        OF_EXIT_APP(0);
+                    }
+                }
+                
+                if (clik1ReleaseTime - click1Time > 3000)
+                {
+                    ofLogNotice() << "3 second click" << endl;
+                    click1Time = 0;
+                    clicks = 0;
+                    clik1ReleaseTime = 0;
+                    if (oscDebug) {
+                        ofxOscMessage m;
+                        m.setAddress("/" + ofToString(unitID) + "/button");
+                        m.addIntArg(3000);
+                        sender.sendMessage(m, false);
+                    }
+                }
+            }
+        }
+    }
 }
 #endif

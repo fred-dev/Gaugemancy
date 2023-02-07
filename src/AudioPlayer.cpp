@@ -9,17 +9,12 @@ int AudioPlayer::number = 0;
 void AudioPlayer::patch (){
    
     addModuleOutput("0", fader0 );
-    
-                 pitchControl >> sampler0.in_pitch();
+    pitchControl >> sampler0.in_pitch();
     
     sampleTrig >> sampler0 >> amp0;
     envGate    >> env      >> amp0.in_mod();
-
-     
-                sampler0 >> amp0 >> fader0;
-    
+    sampler0 >> amp0 >> fader0;
     faderControl >> dBtoLin  >> fader0.in_mod();
-    
     sampler0.addSample( &sample, 0 );
 
     smoothControl >> env.in_attack();
@@ -112,7 +107,7 @@ void AudioPlayer::loadButtonCall( bool & value ) {
     if(value){
 
         float fvalue = faderControl.get();
-        faderControl.setv(0.0f);
+        faderControl.set(0.0f);
         
         //Open the Open File Dialog
         ofFileDialogResult openFileResult= ofSystemLoadDialog("select an audio sample"); 
@@ -137,7 +132,7 @@ void AudioPlayer::loadButtonCall( bool & value ) {
        
         loadButton = false;
         
-        faderControl.setv(fvalue);
+        faderControl.set(fvalue);
         
         bool dummy = true;
         onStop( dummy );
@@ -188,7 +183,7 @@ void AudioPlayer::setVolume(float vol)
 {
 	if (loaded)
 	{
-		faderControl.setv(vol);
+		faderControl.set(vol);
 	}
 }
 
