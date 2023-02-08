@@ -16,12 +16,12 @@
 
 
 // stupid code to set the HAS_ADC define only if not on windows or mac
-//#ifndef TARGET_OSX
-//#ifndef TARGET_WIN32
-//#define HAS_ADC
-//#else
-//#endif
-//#endif
+#ifndef TARGET_OSX
+#ifndef TARGET_WIN32
+#define HAS_ADC
+#else
+#endif
+#endif
 
 // we only need this for windows and mac
 #ifndef HAS_ADC
@@ -635,8 +635,10 @@ class ofApp : public ofBaseApp{
 		int a2dChannel[6];
 		unsigned char data[8][6];
 
-		GPIO blueLed, redLed, relayOut;
-		GPIO button;
+		GPIO* blueLed;
+		GPIO* redLed;
+		GPIO* relayOut;
+		GPIO* button;
 		string state_button;
 #else
 		int a2dVal[6];;

@@ -21,16 +21,11 @@ void ofApp::setup(){
     
     // read settings from XML, user, all user settings and
     setupParamsFromXML();
-    ofSleepMillis(20);
-    
     
     // based on the XML settings populate the vectors with blanks
     populateVectors();
-    ofSleepMillis(20);
     
     populateEffectVectors();
-    ofSleepMillis(20);
-    
     
     // read the audio file paths from the XML so we know what to load
     setupFilePaths();
@@ -51,6 +46,10 @@ void ofApp::setup(){
     
     
 #ifdef HAS_ADC
+
+    //setup the pin to accept input from the button- raspberry pi only
+    setupButton();
+
     //setup the SPI ADC - raspberry pi only
     setupADC();
     
@@ -66,24 +65,23 @@ void ofApp::setup(){
     //Turn on the speaker via the relay- raspberry pi only
     syncSpeaker();
     
-    //setup the pin to accept input from the button- raspberry pi only
-    setupButton();
+    
     
     if (presetIndex ==1) {
-        blueLed.setal_gpio("1");
-        redLed.setal_gpio("0");
+        blueLed->setval_gpio("1");
+        redLed->setval_gpio("0");
     }
     if (presetIndex == 2) {
-        blueLed.setal_gpio("1");
-        redLed.setal_gpio("1");
+        blueLed->setval_gpio("1");
+        redLed->setval_gpio("1");
     }
     if (presetIndex ==3) {
-        blueLed.setal_gpio("1");
-        redLed.setal_gpio("0");
+        blueLed->setval_gpio("1");
+        redLed->setval_gpio("0");
     }
     if (presetIndex ==4) {
-        blueLed.setal_gpio("1");
-        redLed.setal_gpio("1");
+        blueLed->setval_gpio("1");
+        redLed->setval_gpio("1");
     }
 #else
     
@@ -1114,7 +1112,6 @@ void ofApp::loadEffectPatchSettings()
             ofLogNotice() << "Patching chain with effects" << endl;
         }
         
-        ofSleepMillis(300);
     }
 }
 
@@ -1133,11 +1130,11 @@ void ofApp::exit() {
     
 #ifdef HAS_ADC
     // on exit we turn our lights, off, turn off the speaker and if it is set on the XML sutdown the raspberry pi
-    blueLed.setal_gpio("0");
-    redLed.setal_gpio("0");
-    relayOut.setal_gpio("1");
+    blueLed->setval_gpio("0");
+    redLed->setval_gpio("0");
+    relayOut->setval_gpio("1");
     ofSleepMillis(400);
-    relayOut.setal_gpio("0");
+    relayOut->setval_gpio("0");
     ofLogNotice() << "relay setup" << endl;
     
     if (doShutdown) {
@@ -1350,20 +1347,20 @@ void ofApp::updatePlayNarrMode()
 #ifdef HAS_ADC
         narration.disconnectAll();
         if (presetIndex ==1) {
-            blueLed.setal_gpio("1");
-            redLed.setal_gpio("0");
+            blueLed->setval_gpio("1");
+            redLed->setval_gpio("0");
         }
         if (presetIndex == 2) {
-            blueLed.setal_gpio("1");
-            redLed.setal_gpio("1");
+            blueLed->setval_gpio("1");
+            redLed->setval_gpio("1");
         }
         if (presetIndex ==3) {
-            blueLed.setal_gpio("1");
-            redLed.setal_gpio("0");
+            blueLed->setval_gpio("1");
+            redLed->setval_gpio("0");
         }
         if (presetIndex ==4) {
-            blueLed.setal_gpio("1");
-            redLed.setal_gpio("1");
+            blueLed->setval_gpio("1");
+            redLed->setval_gpio("1");
         }
         goToMode(grainOperationModeTranslate);
         
@@ -2465,7 +2462,6 @@ void ofApp::setupParamsFromXML()
         ofLogNotice() << "Username settings loaded" << endl;
     }
     
-    ofSleepMillis(50);
     unitID = usernameXML.getValue("NAMES:USERNAME", "NO_UNIT_ID");
     ofLogNotice() << "UNIT_ID = " + ofToString(unitID) << endl;
     filePathPrefix = filePathPrefix + unitID + "/";
@@ -2702,7 +2698,6 @@ void ofApp::setupFilePaths()
     // reads the file paths of the audio files we need for te preset
     if (fileSettingsXML.loadFile(filePathPrefix + unitID + "_fileSettings.xml")) {
         ofLogNotice() << "File settings loaded" << endl;
-        ofSleepMillis(50);
         for (int i = 0; i < numberOfSlots; i++) {
             ofLogNotice() << "Getting audio file paths from " + unitID +  "_fileSettings: Slot " + ofToString(i + 1)<< endl;
             
@@ -2756,14 +2751,12 @@ void ofApp::setupADC()
 void ofApp::setupButton()
 
 {
-    
-    //    gpio17.setup("17");
-    //                gpio17.export_gpio();
-    //                            gpio17.setdir_gpio("in");
     //setup the soft button for interaction - raspberry pi only
-    button.setup("19", "in", "high");
-    button.export_gpio();
-    //button.setdir_gpio("in");
+    button->setup("19");
+    button->export_gpio();
+    ofSleepMillis(100);
+    button->setdir_gpio("in");
+   
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2777,13 +2770,14 @@ void ofApp::setupButton()
 void ofApp::initLedBlue()
 {
     //setup the blue LED pin for feedback - raspberry pi only
-    blueLed.setup("5");
-    blueLed.export_gpio();
-    blueLed.setdir_gpio("out");
-    ofSleepMillis(200);
-    blueLed.setal_gpio("1");
+    blueLed->setup("5");
+    blueLed->export_gpio();
+    ofSleepMillis(100);
+    blueLed->setdir_gpio("out");
+    
+    blueLed->setval_gpio("1");
     ofSleepMillis(500);
-    blueLed.setal_gpio("0");
+    blueLed->setval_gpio("0");
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2797,13 +2791,14 @@ void ofApp::initLedBlue()
 void ofApp::initLedRed()
 {
     //setup the red LED pin for feedback - raspberry pi only
-    redLed.setup("6");
-    redLed.export_gpio();
-    redLed.setdir_gpio("out");
+    redLed->setup("6");
+    redLed->export_gpio();
+    ofSleepMillis(100);
+    redLed->setdir_gpio("out");
+ 
+    redLed->setval_gpio("1");
     ofSleepMillis(200);
-    redLed.setal_gpio("1");
-    ofSleepMillis(200);
-    redLed.setal_gpio("0");
+    redLed->setval_gpio("0");
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2819,10 +2814,11 @@ void ofApp::setupSpeakerControl()
 {
     //setup the relay to turn the speaker on and off - raspberry pi only
     ofLogNotice() << "setup speaker control" << endl;
-    relayOut.setup("13");
-    relayOut.export_gpio();
-    relayOut.setdir_gpio("out");
-    ofSleepMillis(200);
+    relayOut->setup("13");
+    relayOut->export_gpio();
+    ofSleepMillis(100);
+    relayOut->setdir_gpio("out");
+    
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2836,9 +2832,9 @@ void ofApp::setupSpeakerControl()
 void ofApp::syncSpeaker()
 {
     //Turn on the speaker - raspberry pi only
-    relayOut.setal_gpio("1");
+    relayOut->setval_gpio("1");
     ofSleepMillis(400);
-    relayOut.setal_gpio("0");
+    relayOut->setval_gpio("0");
     
 }
 
@@ -3223,7 +3219,6 @@ void ofApp::setupNarration() {
         setupNarrationGrain();
         
         narration.load(narrationFilePath);
-        ofSleepMillis(100);
         
         if (narration.isLoaded()) {
             ofLogNotice() << "Loaded narration audio file from " + narrationFilePath << endl;
@@ -3237,8 +3232,8 @@ void ofApp::setupNarration() {
             shouldTriggerNarrationPlay = false;
         }
 #ifdef HAS_ADC
-        blueLed.setal_gpio("0");
-        redLed.setal_gpio("1");
+        blueLed->setval_gpio("0");
+        redLed->setval_gpio("1");
 #endif
         goToMode(OP_MODE_WAIT_FOR_NARRATION);
     }
@@ -3280,7 +3275,6 @@ void ofApp::setupNarrationGrain()
     // sampleData is an instance of pdsp::SampleBuffer
     narrSampleData.setVerbose(true);
     narrSampleData.load(narrationFilePath);
-    ofSleepMillis(100);
     
     switch (narr_window_type_id) {
         case 0:
@@ -3324,7 +3318,6 @@ void ofApp::setupNarrationGrain()
             ofLogNotice() << "Narration using window type: Tukey" << endl;
             break;
     }
-    ofSleepMillis(100);
     
     narrCloud.setSample(&narrSampleData); // give to the pdsp::GrainCloud the pointer to the sample
     
@@ -3362,13 +3355,10 @@ void ofApp::setupNarrationGrain()
     narrAmpControl.channels(2);
     narrAmpControl.enableSmoothing(50.0f);
     narrAmpControl.set(0.0f);
-    ofSleepMillis(100);
     
     narrCloud.ch(0) >> narrAmpControl.ch(0)  >> narrOutControlL.out_signal() >> narrOutCompressor.ch(0) >> engine.audio_out(0);
     narrCloud.ch(1) >> narrAmpControl.ch(1)  >> narrOutControlR.out_signal() >> narrOutCompressor.ch(1) >> engine.audio_out(1);
-    
-    ofSleepMillis(100);
-    
+        
 }
 
 #ifndef HAS_ADC
@@ -3449,7 +3439,7 @@ void ofApp::controlOn(int x, int y) {
             drawGrains[z] = true;
             controlX[z] = x;
             controlY[z] = ofMap(_volume[z], 0, 1, uiMaxY[z], uiY[z]);
-            //	controlY[z] = (uiY[z] - _volume[z] * uiMaxY[z] )+ uiMaxY[z];
+            //    controlY[z] = (uiY[z] - _volume[z] * uiMaxY[z] )+ uiMaxY[z];
             cam.disableMouseInput();
         }
         else {
@@ -3480,22 +3470,21 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 {
     // this is the loader for files and parameters for the main granular system, single and multi
 #ifdef HAS_ADC
-    ofSleepMillis(100);
     if (presetIndex ==1) {
-        blueLed.setal_gpio("1");
-        redLed.setal_gpio("0");
+        blueLed->setval_gpio("1");
+        redLed->setval_gpio("0");
     }
     if (presetIndex == 2) {
-        blueLed.setal_gpio("1");
-        redLed.setal_gpio("1");
+        blueLed->setval_gpio("1");
+        redLed->setval_gpio("1");
     }
     if (presetIndex ==3) {
-        blueLed.setal_gpio("1");
-        redLed.setal_gpio("0");
+        blueLed->setval_gpio("1");
+        redLed->setval_gpio("0");
     }
     if (presetIndex ==4) {
-        blueLed.setal_gpio("1");
-        redLed.setal_gpio("1");
+        blueLed->setval_gpio("0");
+        redLed->setval_gpio("1");
     }
     
 #endif // HAS_ADC
@@ -3514,11 +3503,8 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
         
         sampleData[i]->setVerbose(true);
         sampleData[i]->load(paths[i]);
-        ofSleepMillis(100);
         
         cloud[i]->setSample(sampleData[i]); // give to the pdsp::GrainCloud the pointer to the sample
-        
-        ofSleepMillis(100);
         
         
         if (firstRun) {
@@ -3672,8 +3658,8 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
             
             
             
-            //				cloud[i]->ch(0) >> (*ampControl[i])[0]  >> engine.audio_out(0);
-            //				cloud[i]->ch(1) >> (*ampControl[i])[1]  >> engine.audio_out(1);
+            //                cloud[i]->ch(0) >> (*ampControl[i])[0]  >> engine.audio_out(0);
+            //                cloud[i]->ch(1) >> (*ampControl[i])[1]  >> engine.audio_out(1);
 #ifndef HAS_ADC
             // create the sizes and positions of the waveform displays and interaction areas of the granulars
             //ui values-------------------------------
@@ -3732,11 +3718,8 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
     
     mainGui.loadFromFile("mainGui.xml");
     ofLogNotice() << "Load routine complete" << endl;
-#else
-    // waiting a bit on the raspberry pi as it was flipping out otherwsie
-    ofSleepMillis(200);
-    // redLed.setal_gpio(ofToString(presetIndex-1));
-#endif // HAS_ADC
+
+#endif
     
 }
 #ifndef HAS_ADC
@@ -3852,7 +3835,7 @@ void ofApp::populateVectors()
         waveformGraphics.push_back(tmp_waveformGraphics);
 #endif
         
-        int					tmp_grainVoices;
+        int                    tmp_grainVoices;
         grainVoices.push_back(tmp_grainVoices);
         
         pdsp::SampleBuffer* tmp_sampleData = new pdsp::SampleBuffer();
@@ -3877,23 +3860,23 @@ void ofApp::populateVectors()
         jitY.push_back(tmp_jitY);
         
         
-        bool				tmp_drawGrains;
+        bool                tmp_drawGrains;
         drawGrains.push_back(tmp_drawGrains);
-        int					tmp_uiWidth;
+        int                    tmp_uiWidth;
         uiWidth.push_back(tmp_uiWidth);
-        int					tmp_uiHeigth;
+        int                    tmp_uiHeigth;
         uiHeigth.push_back(tmp_uiHeigth);
-        int					tmp_uiX;
+        int                    tmp_uiX;
         uiX.push_back(tmp_uiX);
-        int					tmp_uiY;
+        int                    tmp_uiY;
         uiY.push_back(tmp_uiY);
-        int					tmp_uiMaxX;
+        int                    tmp_uiMaxX;
         uiMaxX.push_back(tmp_uiMaxX);
-        int					tmp_uiMaxY;
+        int                    tmp_uiMaxY;
         uiMaxY.push_back(tmp_uiMaxY);
-        int					tmp_controlX;
+        int                    tmp_controlX;
         controlX.push_back(tmp_controlX);
-        int					tmp_controlY;
+        int                    tmp_controlY;
         controlY.push_back(tmp_controlY);
         
         auto tempPanel = make_shared<ofxPanel>();
@@ -3901,89 +3884,89 @@ void ofApp::populateVectors()
         
         
         
-        ofParameter<int>		tmp__window_type_id;
+        ofParameter<int>        tmp__window_type_id;
         _window_type_id.push_back(tmp__window_type_id);
         
 #ifndef HAS_ADC
         ofParameter<string>        _temp_window_type_name;
         _window_type_name.push_back(_temp_window_type_name);
 #endif
-        ofParameter<float>		tmp__in_length;
+        ofParameter<float>        tmp__in_length;
         _in_length.push_back(tmp__in_length);
-        ofParameter<float>		tmp__in_lengthMin;
+        ofParameter<float>        tmp__in_lengthMin;
         _in_lengthMin.push_back(tmp__in_lengthMin);
-        ofParameter<float>		tmp__in_lengthMax;
+        ofParameter<float>        tmp__in_lengthMax;
         _in_lengthMax.push_back(tmp__in_lengthMax);
-        ofParameter<int>		tmp_in_length_connect;
+        ofParameter<int>        tmp_in_length_connect;
         in_length_connect.push_back(tmp_in_length_connect);
         
-        ofParameter<float>		tmp__in_density;
+        ofParameter<float>        tmp__in_density;
         _in_density.push_back(tmp__in_density);
-        ofParameter<float>		tmp__in_densityMin;
+        ofParameter<float>        tmp__in_densityMin;
         _in_densityMin.push_back(tmp__in_densityMin);
-        ofParameter<float>		tmp__in_densityMax;
+        ofParameter<float>        tmp__in_densityMax;
         _in_densityMax.push_back(tmp__in_densityMax);
-        ofParameter<int>		tmp_in_density_connect;
+        ofParameter<int>        tmp_in_density_connect;
         in_density_connect.push_back(tmp_in_density_connect);
         
-        ofParameter<float>		tmp__in_distance_jitter;
+        ofParameter<float>        tmp__in_distance_jitter;
         _in_distance_jitter.push_back(tmp__in_distance_jitter);
-        ofParameter<float>		tmp__in_distance_jitterMin;
+        ofParameter<float>        tmp__in_distance_jitterMin;
         _in_distance_jitterMin.push_back(tmp__in_distance_jitterMin);
-        ofParameter<float>		tmp__in_distance_jitterMax;
+        ofParameter<float>        tmp__in_distance_jitterMax;
         _in_distance_jitterMax.push_back(tmp__in_distance_jitterMax);
-        ofParameter<int>		tmp_in_distJit_connect;
+        ofParameter<int>        tmp_in_distJit_connect;
         in_distJit_connect.push_back(tmp_in_distJit_connect);
         
-        ofParameter<float>		tmp__in_pitch_jitter;
+        ofParameter<float>        tmp__in_pitch_jitter;
         _in_pitch_jitter.push_back(tmp__in_pitch_jitter);
-        ofParameter<float>		tmp__in_pitch_jitterMin;
+        ofParameter<float>        tmp__in_pitch_jitterMin;
         _in_pitch_jitterMin.push_back(tmp__in_pitch_jitterMin);
-        ofParameter<float>		tmp__in_pitch_jitterMax;
+        ofParameter<float>        tmp__in_pitch_jitterMax;
         _in_pitch_jitterMax.push_back(tmp__in_pitch_jitterMax);
-        ofParameter<int>		tmp_in_pitchJit_connect;
+        ofParameter<int>        tmp_in_pitchJit_connect;
         in_pitchJit_connect.push_back(tmp_in_pitchJit_connect);
         
-        ofParameter<float>		tmp__in_pitch;
+        ofParameter<float>        tmp__in_pitch;
         _in_pitch.push_back(tmp__in_pitch);
-        ofParameter<float>		tmp__in_pitchMin;
+        ofParameter<float>        tmp__in_pitchMin;
         _in_pitchMin.push_back(tmp__in_pitchMin);
-        ofParameter<float>		tmp__in_pitchMax;
+        ofParameter<float>        tmp__in_pitchMax;
         _in_pitchMax.push_back(tmp__in_pitchMax);
-        ofParameter<int>		tmp_in_pitch_connect;
+        ofParameter<int>        tmp_in_pitch_connect;
         in_pitch_connect.push_back(tmp_in_pitch_connect);
         
-        ofParameter<float>		tmp__spread;
+        ofParameter<float>        tmp__spread;
         _spread.push_back(tmp__spread);
-        ofParameter<float>		tmp__spreadMin;
+        ofParameter<float>        tmp__spreadMin;
         _spreadMin.push_back(tmp__spreadMin);
-        ofParameter<float>		tmp__spreadMax;
+        ofParameter<float>        tmp__spreadMax;
         _spreadMax.push_back(tmp__spreadMax);
-        ofParameter<int>		tmp__spread_connect;
+        ofParameter<int>        tmp__spread_connect;
         _spread_connect.push_back(tmp__spread_connect);
         
-        ofParameter<float>		tmp__posX;
+        ofParameter<float>        tmp__posX;
         _posX.push_back(tmp__posX);
-        ofParameter<float>		tmp__posXMin;
+        ofParameter<float>        tmp__posXMin;
         _posXMin.push_back(tmp__posXMin);
-        ofParameter<float>		tmp__posXMax;
+        ofParameter<float>        tmp__posXMax;
         _posXMax.push_back(tmp__posXMax);
-        ofParameter<int>		tmp__posX_connect;
+        ofParameter<int>        tmp__posX_connect;
         _posX_connect.push_back(tmp__posX_connect);
         
-        ofParameter<float>		tmp__volume;
+        ofParameter<float>        tmp__volume;
         _volume.push_back(tmp__volume);
-        ofParameter<float>		tmp__volumeMin;
+        ofParameter<float>        tmp__volumeMin;
         _volumeMin.push_back(tmp__volumeMin);
-        ofParameter<float>		tmp__volumeMax;
+        ofParameter<float>        tmp__volumeMax;
         _volumeMax.push_back(tmp__volumeMax);
-        ofParameter<int>		tmp__volume_connect;
+        ofParameter<int>        tmp__volume_connect;
         _volume_connect.push_back(tmp__volume_connect);
         
-        ofParameter<float>		tmp__grainDirection;
+        ofParameter<float>        tmp__grainDirection;
         _grainDirection.push_back(tmp__grainDirection);
         
-        int					tmp_baseSensorValues;
+        int                    tmp_baseSensorValues;
         baseSensorValues.push_back(tmp_baseSensorValues);
         int tmp_zeroValues;
         zeroValues.push_back(tmp_zeroValues);
@@ -3996,14 +3979,14 @@ void ofApp::populateVectors()
             fileNamesSet[i].push_back(tempString1);
         }
         
-        //		string tempString;
-        //		filePathsSet1.push_back(tempString);
-        //		string tempString2;
-        //		filePathsSet2.push_back(tempString2);
-        //		string tempString3;
-        //		fileNamesSet1.push_back(tempString3);
-        //		string tempString4;
-        //		fileNamesSet2.push_back(tempString4);
+        //        string tempString;
+        //        filePathsSet1.push_back(tempString);
+        //        string tempString2;
+        //        filePathsSet2.push_back(tempString2);
+        //        string tempString3;
+        //        fileNamesSet1.push_back(tempString3);
+        //        string tempString4;
+        //        fileNamesSet2.push_back(tempString4);
         
         ChannelEffects thisEffectSet1;
         
@@ -4015,34 +3998,34 @@ void ofApp::populateVectors()
         tempChannelEffects2.push_back(thisEffectSet2);
         
         
-        ofParameterGroup	_windowTypeGroup_group_temp;
+        ofParameterGroup    _windowTypeGroup_group_temp;
         _windowTypeGroup_group.push_back(_windowTypeGroup_group_temp);
         
-        ofParameterGroup	_in_length_group_temp;
+        ofParameterGroup    _in_length_group_temp;
         _in_length_group.push_back(_in_length_group_temp);
         
-        ofParameterGroup		_in_density_group_temp;
+        ofParameterGroup        _in_density_group_temp;
         _in_density_group.push_back(_in_density_group_temp);
         
-        ofParameterGroup	_in_distance_jitter_group_temp;
+        ofParameterGroup    _in_distance_jitter_group_temp;
         _in_distance_jitter_group.push_back(_in_distance_jitter_group_temp);
         
-        ofParameterGroup		_in_pitch_jitter_group_temp;
+        ofParameterGroup        _in_pitch_jitter_group_temp;
         _in_pitch_jitter_group.push_back(_in_pitch_jitter_group_temp);
         
-        ofParameterGroup	_in_pitch_group_temp;
+        ofParameterGroup    _in_pitch_group_temp;
         _in_pitch_group.push_back(_in_pitch_group_temp);
         
-        ofParameterGroup		_spread_group_temp;
+        ofParameterGroup        _spread_group_temp;
         _spread_group.push_back(_spread_group_temp);
         
-        ofParameterGroup		_posX_group_temp;
+        ofParameterGroup        _posX_group_temp;
         _posX_group.push_back(_posX_group_temp);
         
-        ofParameterGroup	_volume_group_temp;
+        ofParameterGroup    _volume_group_temp;
         _volume_group.push_back(_volume_group_temp);
         
-        ofParameterGroup	_grainDirection_group_temp;
+        ofParameterGroup    _grainDirection_group_temp;
         _grainDirection_group.push_back(_grainDirection_group_temp);
         
         
@@ -4953,7 +4936,7 @@ void ofApp::loadRoutine(int target) {
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
+void ofApp::dragEvent(ofDragInfo dragInfo){
     
 }
 
@@ -4964,7 +4947,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 void ofApp::deviceOnlyUpdateRoutine()
 {
     // just for the raspbery pi, we get the button state
-    button.getval_gpio(state_button);
+    button->getval_gpio(state_button);
     // check if the button is doing something interesting
     buttonStateMachine();
     // if it si first launch run the calibration
@@ -4994,9 +4977,9 @@ void ofApp::buttonStateMachine() {
             click1Time = 0;
             click2Time = 0;
             click3Time = 0;
-            relayOut.setal_gpio("1");
+            relayOut->setval_gpio("1");
             ofSleepMillis(400);
-            relayOut.setal_gpio("0");
+            relayOut->setval_gpio("0");
             
             if (oscDebug) {
                 ofxOscMessage m;
@@ -5043,20 +5026,20 @@ void ofApp::buttonStateMachine() {
 #endif
 #ifdef HAS_ADC
                 if (presetIndex ==1) {
-                    blueLed.setal_gpio("1");
-                    redLed.setal_gpio("0");
+                    blueLed->setval_gpio("1");
+                    redLed->setval_gpio("0");
                 }
                 if (presetIndex == 2) {
-                    blueLed.setal_gpio("1");
-                    redLed.setal_gpio("1");
+                    blueLed->setval_gpio("1");
+                    redLed->setval_gpio("1");
                 }
                 if (presetIndex ==3) {
-                    blueLed.setal_gpio("1");
-                    redLed.setal_gpio("0");
+                    blueLed->setval_gpio("1");
+                    redLed->setval_gpio("0");
                 }
                 if (presetIndex ==4) {
-                    blueLed.setal_gpio("1");
-                    redLed.setal_gpio("1");
+                    blueLed->setval_gpio("1");
+                    redLed->setval_gpio("1");
                 }
                 narration.disconnectAll();
                 goToMode(grainOperationModeTranslate);
@@ -5119,6 +5102,8 @@ void ofApp::buttonStateMachine() {
                         sender.sendMessage(m, false);
                     }
                     if (shutdownPress) {
+                        string cmd = "pm2 stop all";           // create the command
+                        ofSystem(cmd.c_str());
                         OF_EXIT_APP(0);
                     }
                 }
