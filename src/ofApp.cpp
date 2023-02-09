@@ -1141,11 +1141,6 @@ void ofApp::exit() {
     relayOut.setval_gpio("0");
     ofLogNotice() << "Speaker turned off" << endl;
     
-    string cmd = "pm2 stop all";           // create the command
-    ofLogNotice() << "PM2 sent signal to stop all" << endl;
-
-    ofSystem(cmd.c_str());
-    
     if (doShutdown) {
         cmd = "sudo shutdown -h now";           // create the command
         ofLogNotice() << "Sending system shutown command" << endl;
@@ -5156,7 +5151,7 @@ void ofApp::buttonStateMachine() {
                     }
                     if (shutdownPress) {
                         exit();
-                        OF_EXIT_APP(0);
+                        
                     }
                 }
                 
