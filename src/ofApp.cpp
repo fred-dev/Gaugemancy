@@ -4539,6 +4539,7 @@ void ofApp::keyPressed(int key){
         ofToggleFullscreen();
     }
     if(key == '?'){
+        
         OF_EXIT_APP(0);
     }
     switch (operationMode)
@@ -5154,7 +5155,7 @@ void ofApp::buttonStateMachine() {
                         sender.sendMessage(m, false);
                     }
                     if (shutdownPress) {
-                        
+                        exit();
                         OF_EXIT_APP(0);
                     }
                 }
