@@ -2758,10 +2758,10 @@ void ofApp::updateLIS3DH(){
     short z = (zH << 8) | zL;
     
     // Convert the 16-bit values to floating-point values with a full-scale range of 2 g and a resolution of 12 bits
-    scaleFactor = 2.0f / (float)((1 << 12) - 1);
-    xg = x * scaleFactor;
-    yg = y * scaleFactor;
-    zg = z * scaleFactor;
+    accelScaleFactor = 2.0f / (float)((1 << 12) - 1);
+    xg = x * accelScaleFactor;
+    yg = y * accelScaleFactor;
+    zg = z * accelScaleFactor;
     
     // Print the acceleration values
     ofLogNotice() << "X = " << xg << " g, Y = " << yg << " g, Z = " << zg << " g" << endl;
