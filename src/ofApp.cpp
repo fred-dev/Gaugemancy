@@ -46,10 +46,13 @@ void ofApp::setup(){
     
     
 #ifdef HAS_ADC
-
+    
     //setup the pin to accept input from the button- raspberry pi only
     setupButton();
-
+    
+    //setup the i2c accelermeter - raspberry pi only
+    setupLIS3DH();
+    
     //setup the SPI ADC - raspberry pi only
     setupADC();
     
@@ -2727,6 +2730,42 @@ void ofApp::setupFilePaths()
 
 #ifdef HAS_ADC
 
+void ofApp::setupLIS3DH(){
+    bus = new I2c("/dev/i2c-1");
+    bus->addressSet(0x18); // the default address of the LIS3DH
+    
+    // Read the WHO_AM_I register to check if the device is present and responding
+    unsigned char whoAmI = bus->readByte(0x0F);
+    if (whoAmI != 0x33) {
+        ofLogNotice() << "LIS3DH not found, WHO_AM_I register = " << hex << whoAmI << endl;
+    }
+    else{
+        ofLogNotice()  << "LIS3DH found, WHO_AM_I register = " << hex << whoAmI << endl;
+    }
+}
+void ofApp::updateLIS3DH(){
+    // Read the X, Y, and Z acceleration registers
+    unsigned char xL = bus->readByte(0x28);
+    unsigned char xH = bus->readByte(0x29);
+    unsigned char yL = bus->readByte(0x2A);
+    unsigned char yH = bus->readByte(0x2B);
+    unsigned char zL = bus->readByte(0x2C);
+    unsigned char zH = bus->readByte(0x2D);
+    
+    // Combine the high and low bytes to get the full 16-bit acceleration values
+    short x = (xH << 8) | xL;
+    short y = (yH << 8) | yL;
+    short z = (zH << 8) | zL;
+    
+    // Convert the 16-bit values to floating-point values with a full-scale range of 2 g and a resolution of 12 bits
+    scaleFactor = 2.0f / (float)((1 << 12) - 1);
+    xg = x * scaleFactor;
+    yg = y * scaleFactor;
+    zg = z * scaleFactor;
+    
+    // Print the acceleration values
+    ofLogNotice() << "X = " << xg << " g, Y = " << yg << " g, Z = " << zg << " g" << endl;
+}
 void ofApp::setupADC()
 {
     //setup the SPI interface for rading sensor data - raspberry pi only
@@ -2756,7 +2795,7 @@ void ofApp::setupButton()
     button.export_gpio();
     ofSleepMillis(100);
     button.setdir_gpio("in");
-   
+    
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2795,7 +2834,7 @@ void ofApp::initLedRed()
     redLed.export_gpio();
     ofSleepMillis(100);
     redLed.setdir_gpio("out");
- 
+    
     redLed.setval_gpio("1");
     ofSleepMillis(200);
     redLed.setval_gpio("0");
@@ -3358,7 +3397,7 @@ void ofApp::setupNarrationGrain()
     
     narrCloud.ch(0) >> narrAmpControl.ch(0)  >> narrOutControlL.out_signal() >> narrOutCompressor.ch(0) >> engine.audio_out(0);
     narrCloud.ch(1) >> narrAmpControl.ch(1)  >> narrOutControlR.out_signal() >> narrOutCompressor.ch(1) >> engine.audio_out(1);
-        
+    
 }
 
 #ifndef HAS_ADC
@@ -3718,7 +3757,7 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
     
     mainGui.loadFromFile("mainGui.xml");
     ofLogNotice() << "Load routine complete" << endl;
-
+    
 #endif
     
 }
@@ -4963,6 +5002,7 @@ void ofApp::deviceOnlyUpdateRoutine()
     if(useHitGesture){
         checkForHits();
     }
+    updateLIS3DH();
     
     
 }

@@ -218,6 +218,8 @@ class ofApp : public ofBaseApp{
 		void setupParamsFromXML();
 		void setupFilePaths();
 #ifdef HAS_ADC
+        void setupLIS3DH();
+        void updateLIS3DH();
 		void setupADC();
 		void setupButton();
 		void initLedBlue();
@@ -634,6 +636,12 @@ class ofApp : public ofBaseApp{
 		int a2dVal[6];;
 		int a2dChannel[6];
 		unsigned char data[8][6];
+    
+        I2c * bus;
+        float accelScaleFactor;
+        float xg;
+        float yg;
+        float zg;
 
 		GPIO blueLed;
 		GPIO redLed;
