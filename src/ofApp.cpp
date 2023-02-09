@@ -1120,7 +1120,8 @@ void ofApp::loadEffectPatchSettings()
 
 
 void ofApp::exit() {
-    
+    ofLogNotice() << "Starting the EXIT function" << endl;
+
     // this is called when the app exits, we unload the audio files
     for (int i = 0; i < numberOfSlots; i++) {
         grainVoices[i] = cloud[i]->getVoicesNum();
@@ -1138,13 +1139,22 @@ void ofApp::exit() {
     relayOut.setval_gpio("1");
     ofSleepMillis(400);
     relayOut.setval_gpio("0");
-    ofLogNotice() << "relay setup" << endl;
+    ofLogNotice() << "Speaker turned off" << endl;
+    
+    string cmd = "pm2 stop all";           // create the command
+    ofLogNotice() << "PM2 sent signal to stop all" << endl;
+
+    ofSystem(cmd.c_str());
     
     if (doShutdown) {
-        string cmd = "sudo shutdown -h now";           // create the command
+        cmd = "sudo shutdown -h now";           // create the command
+        ofLogNotice() << "Sending system shutown command" << endl;
+
         ofSystem(cmd.c_str());
     }
 #endif
+    ofLogNotice() << "Completing the EXIT function" << endl;
+
 }
 
 void ofApp::initParameters()
@@ -2764,7 +2774,7 @@ void ofApp::updateLIS3DH(){
     zg = z * accelScaleFactor;
     
     // Print the acceleration values
-    ofLogNotice() << "X = " << xg << " g, Y = " << yg << " g, Z = " << zg << " g" << endl;
+    ofLogVerbose() << "X = " << xg << " g, Y = " << yg << " g, Z = " << zg << " g" << endl;
 }
 void ofApp::setupADC()
 {
@@ -4528,7 +4538,9 @@ void ofApp::keyPressed(int key){
     {
         ofToggleFullscreen();
     }
-    
+    if(key == '?'){
+        OF_EXIT_APP(0);
+    }
     switch (operationMode)
     {
         case OP_MODE_SETUP:
@@ -5142,8 +5154,7 @@ void ofApp::buttonStateMachine() {
                         sender.sendMessage(m, false);
                     }
                     if (shutdownPress) {
-                        string cmd = "pm2 stop all";           // create the command
-                        ofSystem(cmd.c_str());
+                        
                         OF_EXIT_APP(0);
                     }
                 }
