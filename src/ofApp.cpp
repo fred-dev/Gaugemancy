@@ -1142,7 +1142,7 @@ void ofApp::exit() {
     ofLogNotice() << "Speaker turned off" << endl;
     
     if (doShutdown) {
-        cmd = "sudo shutdown -h now";           // create the command
+        string cmd = "sudo shutdown -h now";           // create the command
         ofLogNotice() << "Sending system shutown command" << endl;
 
         ofSystem(cmd.c_str());
