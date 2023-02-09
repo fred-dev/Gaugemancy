@@ -1,30 +1,34 @@
-# About emptyExample
+# Gaugemancy
 
-![Screenshot of emptyExample](emptyExample.png)
+![Interface Screenshot](InterfaceScreenshot.png)
+![Grab of model](Intrument_model.png)
 
-### Learning Objectives
+### About
 
-This example is the simplest possible openFrameworks app! It does nothing. 
+This is a pretty messy project for a RPI based mulit-channel granular synthesis instrument.
 
-...Well, *almost* nothing. Although it may not be apparent, the emptyExample activates all of the default system states. (For example, it sets the default fill color to white; it just doesn't happen to draw anything with it.)
+It comprises of a hardware instrument (that is a pain to maintain), that uses mini footballs attached to pressure sensors as a configurable interface for making music type noises.
 
-The emptyExample is great for making sure that your openFrameworks development environment is compiling properly. It can also be useful as a "starter template" for making simple programs. 
+The same software when compiled for OSX or Windows (and likely linux, but I have not tried), acts as a progamming tool for the hardware instrument.
 
-The emptyExample will help you understand what are the bare necessities of an openFrameworks program. In this regard, you can think of it as a "Hello World" for OF. 
+This was all developed for a collaboration with choreographer Ali Moini for the project Gaugemancy: https://latitudescontemporaines.com/en/latitudes-prod/gaugemancy/ along with the amazing Pouya Ehsaei https://www.pouyaehsaei.com/
 
 
-### Expected Behavior
 
-When launching this app, you should see a light-gray screen. 
+### Do not use this 
 
-* There's no interaction. 
-* There's nothing to see. 
+* The code is bad. 
+* It doesnt make sense. 
+* Without the hardware it is strange but maybe fun 
 * That's it. 
 
-Instructions for using the app:
 
-* There's nothing to do. Move along.
+### If you must:
 
-### Other classes used in this file
+This is made with https://github.com/openframeworks and uses several addons outside of the OF core:
 
-This example uses no other classes.
+https://github.com/npisanti/ofxAudioFile
+https://github.com/memo/ofxMSAInteractiveObject
+https://github.com/danomatika/ofxMidi
+https://github.com/npisanti/ofxPDSP
+

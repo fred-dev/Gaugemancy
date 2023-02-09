@@ -68,20 +68,20 @@ void ofApp::setup(){
     
     
     if (presetIndex ==1) {
-        blueLed->setval_gpio("1");
-        redLed->setval_gpio("0");
+        blueLed.setval_gpio("1");
+        redLed.setval_gpio("0");
     }
     if (presetIndex == 2) {
-        blueLed->setval_gpio("1");
-        redLed->setval_gpio("1");
+        blueLed.setval_gpio("1");
+        redLed.setval_gpio("1");
     }
     if (presetIndex ==3) {
-        blueLed->setval_gpio("1");
-        redLed->setval_gpio("0");
+        blueLed.setval_gpio("1");
+        redLed.setval_gpio("0");
     }
     if (presetIndex ==4) {
-        blueLed->setval_gpio("1");
-        redLed->setval_gpio("1");
+        blueLed.setval_gpio("1");
+        redLed.setval_gpio("1");
     }
 #else
     
@@ -1130,11 +1130,11 @@ void ofApp::exit() {
     
 #ifdef HAS_ADC
     // on exit we turn our lights, off, turn off the speaker and if it is set on the XML sutdown the raspberry pi
-    blueLed->setval_gpio("0");
-    redLed->setval_gpio("0");
-    relayOut->setval_gpio("1");
+    blueLed.setval_gpio("0");
+    redLed.setval_gpio("0");
+    relayOut.setval_gpio("1");
     ofSleepMillis(400);
-    relayOut->setval_gpio("0");
+    relayOut.setval_gpio("0");
     ofLogNotice() << "relay setup" << endl;
     
     if (doShutdown) {
@@ -1347,20 +1347,20 @@ void ofApp::updatePlayNarrMode()
 #ifdef HAS_ADC
         narration.disconnectAll();
         if (presetIndex ==1) {
-            blueLed->setval_gpio("1");
-            redLed->setval_gpio("0");
+            blueLed.setval_gpio("1");
+            redLed.setval_gpio("0");
         }
         if (presetIndex == 2) {
-            blueLed->setval_gpio("1");
-            redLed->setval_gpio("1");
+            blueLed.setval_gpio("1");
+            redLed.setval_gpio("1");
         }
         if (presetIndex ==3) {
-            blueLed->setval_gpio("1");
-            redLed->setval_gpio("0");
+            blueLed.setval_gpio("1");
+            redLed.setval_gpio("0");
         }
         if (presetIndex ==4) {
-            blueLed->setval_gpio("1");
-            redLed->setval_gpio("1");
+            blueLed.setval_gpio("1");
+            redLed.setval_gpio("1");
         }
         goToMode(grainOperationModeTranslate);
         
@@ -2752,10 +2752,10 @@ void ofApp::setupButton()
 
 {
     //setup the soft button for interaction - raspberry pi only
-    button->setup("19");
-    button->export_gpio();
+    button.setup("19");
+    button.export_gpio();
     ofSleepMillis(100);
-    button->setdir_gpio("in");
+    button.setdir_gpio("in");
    
     
     if (oscDebug) {
@@ -2770,14 +2770,14 @@ void ofApp::setupButton()
 void ofApp::initLedBlue()
 {
     //setup the blue LED pin for feedback - raspberry pi only
-    blueLed->setup("5");
-    blueLed->export_gpio();
+    blueLed.setup("5");
+    blueLed.export_gpio();
     ofSleepMillis(100);
-    blueLed->setdir_gpio("out");
+    blueLed.setdir_gpio("out");
     
-    blueLed->setval_gpio("1");
+    blueLed.setval_gpio("1");
     ofSleepMillis(500);
-    blueLed->setval_gpio("0");
+    blueLed.setval_gpio("0");
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2791,14 +2791,14 @@ void ofApp::initLedBlue()
 void ofApp::initLedRed()
 {
     //setup the red LED pin for feedback - raspberry pi only
-    redLed->setup("6");
-    redLed->export_gpio();
+    redLed.setup("6");
+    redLed.export_gpio();
     ofSleepMillis(100);
-    redLed->setdir_gpio("out");
+    redLed.setdir_gpio("out");
  
-    redLed->setval_gpio("1");
+    redLed.setval_gpio("1");
     ofSleepMillis(200);
-    redLed->setval_gpio("0");
+    redLed.setval_gpio("0");
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2814,10 +2814,10 @@ void ofApp::setupSpeakerControl()
 {
     //setup the relay to turn the speaker on and off - raspberry pi only
     ofLogNotice() << "setup speaker control" << endl;
-    relayOut->setup("13");
-    relayOut->export_gpio();
+    relayOut.setup("13");
+    relayOut.export_gpio();
     ofSleepMillis(100);
-    relayOut->setdir_gpio("out");
+    relayOut.setdir_gpio("out");
     
     
     if (oscDebug) {
@@ -2832,9 +2832,9 @@ void ofApp::setupSpeakerControl()
 void ofApp::syncSpeaker()
 {
     //Turn on the speaker - raspberry pi only
-    relayOut->setval_gpio("1");
+    relayOut.setval_gpio("1");
     ofSleepMillis(400);
-    relayOut->setval_gpio("0");
+    relayOut.setval_gpio("0");
     
 }
 
@@ -3232,8 +3232,8 @@ void ofApp::setupNarration() {
             shouldTriggerNarrationPlay = false;
         }
 #ifdef HAS_ADC
-        blueLed->setval_gpio("0");
-        redLed->setval_gpio("1");
+        blueLed.setval_gpio("0");
+        redLed.setval_gpio("1");
 #endif
         goToMode(OP_MODE_WAIT_FOR_NARRATION);
     }
@@ -3471,20 +3471,20 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
     // this is the loader for files and parameters for the main granular system, single and multi
 #ifdef HAS_ADC
     if (presetIndex ==1) {
-        blueLed->setval_gpio("1");
-        redLed->setval_gpio("0");
+        blueLed.setval_gpio("1");
+        redLed.setval_gpio("0");
     }
     if (presetIndex == 2) {
-        blueLed->setval_gpio("1");
-        redLed->setval_gpio("1");
+        blueLed.setval_gpio("1");
+        redLed.setval_gpio("1");
     }
     if (presetIndex ==3) {
-        blueLed->setval_gpio("1");
-        redLed->setval_gpio("0");
+        blueLed.setval_gpio("1");
+        redLed.setval_gpio("0");
     }
     if (presetIndex ==4) {
-        blueLed->setval_gpio("0");
-        redLed->setval_gpio("1");
+        blueLed.setval_gpio("0");
+        redLed.setval_gpio("1");
     }
     
 #endif // HAS_ADC
@@ -4947,7 +4947,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 void ofApp::deviceOnlyUpdateRoutine()
 {
     // just for the raspbery pi, we get the button state
-    button->getval_gpio(state_button);
+    button.getval_gpio(state_button);
     // check if the button is doing something interesting
     buttonStateMachine();
     // if it si first launch run the calibration
@@ -4977,9 +4977,9 @@ void ofApp::buttonStateMachine() {
             click1Time = 0;
             click2Time = 0;
             click3Time = 0;
-            relayOut->setval_gpio("1");
+            relayOut.setval_gpio("1");
             ofSleepMillis(400);
-            relayOut->setval_gpio("0");
+            relayOut.setval_gpio("0");
             
             if (oscDebug) {
                 ofxOscMessage m;
@@ -5026,20 +5026,20 @@ void ofApp::buttonStateMachine() {
 #endif
 #ifdef HAS_ADC
                 if (presetIndex ==1) {
-                    blueLed->setval_gpio("1");
-                    redLed->setval_gpio("0");
+                    blueLed.setval_gpio("1");
+                    redLed.setval_gpio("0");
                 }
                 if (presetIndex == 2) {
-                    blueLed->setval_gpio("1");
-                    redLed->setval_gpio("1");
+                    blueLed.setval_gpio("1");
+                    redLed.setval_gpio("1");
                 }
                 if (presetIndex ==3) {
-                    blueLed->setval_gpio("1");
-                    redLed->setval_gpio("0");
+                    blueLed.setval_gpio("1");
+                    redLed.setval_gpio("0");
                 }
                 if (presetIndex ==4) {
-                    blueLed->setval_gpio("1");
-                    redLed->setval_gpio("1");
+                    blueLed.setval_gpio("1");
+                    redLed.setval_gpio("1");
                 }
                 narration.disconnectAll();
                 goToMode(grainOperationModeTranslate);

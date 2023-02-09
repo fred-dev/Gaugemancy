@@ -635,10 +635,10 @@ class ofApp : public ofBaseApp{
 		int a2dChannel[6];
 		unsigned char data[8][6];
 
-		GPIO* blueLed;
-		GPIO* redLed;
-		GPIO* relayOut;
-		GPIO* button;
+		GPIO blueLed;
+		GPIO redLed;
+		GPIO relayOut;
+		GPIO button;
 		string state_button;
 #else
 		int a2dVal[6];;
