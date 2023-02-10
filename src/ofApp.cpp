@@ -71,19 +71,19 @@ void ofApp::setup(){
     
     
     if (presetIndex ==1) {
-        digitalWrite(GPIO5, HIGH)
+        digitalWrite(GPIO5, HIGH);
         digitalWrite(GPIO5, LOW);
     }
     if (presetIndex == 2) {
-        digitalWrite(GPIO5, HIGH)
+        digitalWrite(GPIO5, HIGH);
         digitalWrite(GPIO5, HIGH);
     }
     if (presetIndex ==3) {
-        digitalWrite(GPIO5, HIGH)
+        digitalWrite(GPIO5, HIGH);
         digitalWrite(GPIO5, LOW);
     }
     if (presetIndex ==4) {
-        digitalWrite(GPIO5, HIGH)
+        digitalWrite(GPIO5, HIGH);
         digitalWrite(GPIO5, HIGH);
     }
 #else
@@ -1355,19 +1355,19 @@ void ofApp::updatePlayNarrMode()
 #ifdef HAS_ADC
         narration.disconnectAll();
         if (presetIndex ==1) {
-            digitalWrite(GPIO5, HIGH)
+            digitalWrite(GPIO5, HIGH);
             digitalWrite(GPIO5, LOW);
         }
         if (presetIndex == 2) {
-            digitalWrite(GPIO5, HIGH)
+            digitalWrite(GPIO5, HIGH);
             digitalWrite(GPIO5, HIGH);
         }
         if (presetIndex ==3) {
-            digitalWrite(GPIO5, HIGH)
+            digitalWrite(GPIO5, HIGH);
             digitalWrite(GPIO5, LOW);
         }
         if (presetIndex ==4) {
-            digitalWrite(GPIO5, HIGH)
+            digitalWrite(GPIO5, HIGH);
             digitalWrite(GPIO5, HIGH);
         }
         goToMode(grainOperationModeTranslate);
@@ -2823,7 +2823,7 @@ void ofApp::initLedBlue()
     //setup the blue LED pin for feedback - raspberry pi only
     
     pinMode(GPIO5, OUTPUT);
-    digitalWrite(GPIO5, HIGH)
+    digitalWrite(GPIO5, HIGH);
     ofSleepMillis(500);
     digitalWrite(GPIO5, LOW);
     
@@ -3521,15 +3521,15 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
     // this is the loader for files and parameters for the main granular system, single and multi
 #ifdef HAS_ADC
     if (presetIndex ==1) {
-        digitalWrite(GPIO5, HIGH)
+        digitalWrite(GPIO5, HIGH);
         digitalWrite(GPIO5, LOW);
     }
     if (presetIndex == 2) {
-        digitalWrite(GPIO5, HIGH)
+        digitalWrite(GPIO5, HIGH);
         digitalWrite(GPIO5, HIGH);
     }
     if (presetIndex ==3) {
-        digitalWrite(GPIO5, HIGH)
+        digitalWrite(GPIO5, HIGH);
         digitalWrite(GPIO5, LOW);
     }
     if (presetIndex ==4) {
@@ -5087,19 +5087,19 @@ void ofApp::buttonStateMachine() {
 #endif
 #ifdef HAS_ADC
                 if (presetIndex ==1) {
-                    digitalWrite(GPIO5, HIGH)
+                    digitalWrite(GPIO5, HIGH);
                     digitalWrite(GPIO5, LOW);
                 }
                 if (presetIndex == 2) {
-                    digitalWrite(GPIO5, HIGH)
+                    digitalWrite(GPIO5, HIGH);
                     digitalWrite(GPIO5, HIGH);
                 }
                 if (presetIndex ==3) {
-                    digitalWrite(GPIO5, HIGH)
+                    digitalWrite(GPIO5, HIGH);
                     digitalWrite(GPIO5, LOW);
                 }
                 if (presetIndex ==4) {
-                    digitalWrite(GPIO5, HIGH)
+                    digitalWrite(GPIO5, HIGH);
                     digitalWrite(GPIO5, HIGH);
                 }
                 narration.disconnectAll();
