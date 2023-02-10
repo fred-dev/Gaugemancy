@@ -1,35 +1,35 @@
 <?xml version="1.0"?>
 <Effects_Slot_1>
 	<Chorus_slot_1>
-		<Depth>0.959184</Depth>
+		<Depth>0.01704</Depth>
 		<Depth_Min>0</Depth_Min>
-		<Depth_Max>1</Depth_Max>
-		<Depth_connect_to>0</Depth_connect_to>
-		<Speed>107.143</Speed>
+		<Depth_Max>0.918367</Depth_Max>
+		<Depth_connect_to>1</Depth_connect_to>
+		<Speed>3.57143</Speed>
 		<Speed_Min>107.143</Speed_Min>
 		<Speed_Max>200</Speed_Max>
-		<Speed_connect_to>1</Speed_connect_to>
+		<Speed_connect_to>0</Speed_connect_to>
 		<Delay>1</Delay>
 		<Delay_Min>0</Delay_Min>
 		<Delay_Max>200</Delay_Max>
 		<Delay_connect_to>0</Delay_connect_to>
 	</Chorus_slot_1>
 	<Filter_slot_1>
-		<Freq>9184</Freq>
-		<Freq_Min>9184</Freq_Min>
+		<Freq>20000</Freq>
+		<Freq_Min>1</Freq_Min>
 		<Freq_Max>20000</Freq_Max>
-		<Freq_connect_to>1</Freq_connect_to>
+		<Freq_connect_to>0</Freq_connect_to>
 		<Reso>0</Reso>
 		<Reso_Min>0</Reso_Min>
 		<Reso_Max>1</Reso_Max>
 		<Reso_connect_to>0</Reso_connect_to>
 	</Filter_slot_1>
 	<Reverb_slot_1>
-		<Send_>0.497688</Send_>
+		<Send_>0.306122</Send_>
 		<Send_Min>0.497688</Send_Min>
 		<Send_Max>0.793607</Send_Max>
-		<Send_Connect_To>1</Send_Connect_To>
-		<Time_>3.57143</Time_>
+		<Send_Connect_To>0</Send_Connect_To>
+		<Time_>4.18367</Time_>
 		<Time_Min>0</Time_Min>
 		<Time_Max>20</Time_Max>
 		<Time_Connect_To>0</Time_Connect_To>
@@ -37,7 +37,7 @@
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>
-		<Density_>0.418367</Density_>
+		<Density_>0.142857</Density_>
 		<Density_Min>0</Density_Min>
 		<Density_Max>1</Density_Max>
 		<Density_COnnect_To>0</Density_COnnect_To>
@@ -62,7 +62,7 @@
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
-		<In_gain>0.714286</In_gain>
+		<In_gain>1</In_gain>
 	</Compressor_slot_1>
 	<Bitcrusher_slot_1>
 		<Bits>16</Bits>
@@ -77,11 +77,11 @@
 		<Rate_Connect_to>0</Rate_Connect_to>
 	</Decimator_slot_1>
 	<Delay_slot_1>
-		<Send_>0.418367</Send_>
-		<Send_Min>0.219388</Send_Min>
-		<Send_Max>0.515306</Send_Max>
-		<Send_Connect_To>3</Send_Connect_To>
-		<Time_>40.8163</Time_>
+		<Send_>0.209184</Send_>
+		<Send_Min>0</Send_Min>
+		<Send_Max>1</Send_Max>
+		<Send_Connect_To>0</Send_Connect_To>
+		<Time_>69.3878</Time_>
 		<Time_Min>0</Time_Min>
 		<Time_Max>400</Time_Max>
 		<Time_Connect_To>0</Time_Connect_To>
@@ -89,7 +89,7 @@
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>
-		<feedback_>0.142857</feedback_>
+		<feedback_>0.0918367</feedback_>
 		<feedback_Min>0</feedback_Min>
 		<feedback_Max>1</feedback_Max>
 		<feedback_COnnect_To>0</feedback_COnnect_To>
@@ -211,7 +211,7 @@
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
-		<In_gain>3.36735</In_gain>
+		<In_gain>1</In_gain>
 	</Compressor_slot_3>
 	<Bitcrusher_slot_3>
 		<Bits>16</Bits>
@@ -415,7 +415,7 @@
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
-		<In_gain>3.06122</In_gain>
+		<In_gain>1</In_gain>
 	</Compressor_slot_5>
 	<Bitcrusher_slot_5>
 		<Bits>16</Bits>
@@ -424,19 +424,19 @@
 		<Bits_Connect_To>0</Bits_Connect_To>
 	</Bitcrusher_slot_5>
 	<Delay_slot_5>
-		<Send_>0.719388</Send_>
+		<Send_>0.382653</Send_>
 		<Send_Min>0</Send_Min>
 		<Send_Max>1</Send_Max>
 		<Send_Connect_To>0</Send_Connect_To>
-		<Time_>291.837</Time_>
+		<Time_>132.653</Time_>
 		<Time_Min>0</Time_Min>
 		<Time_Max>400</Time_Max>
 		<Time_Connect_To>0</Time_Connect_To>
-		<Damping_>0.163265</Damping_>
+		<Damping_>0.566327</Damping_>
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>
-		<feedback_>0.214286</feedback_>
+		<feedback_>0.127551</feedback_>
 		<feedback_Min>0</feedback_Min>
 		<feedback_Max>1</feedback_Max>
 		<feedback_COnnect_To>0</feedback_COnnect_To>
@@ -448,11 +448,11 @@
 		<Rate_Connect_to>0</Rate_Connect_to>
 	</Decimator_slot_5>
 	<Chorus_slot_5>
-		<Depth>0</Depth>
+		<Depth>0.556641</Depth>
 		<Depth_Min>0</Depth_Min>
 		<Depth_Max>30</Depth_Max>
-		<Depth_connect_to>0</Depth_connect_to>
-		<Speed>0</Speed>
+		<Depth_connect_to>5</Depth_connect_to>
+		<Speed>0.510204</Speed>
 		<Speed_Min>0</Speed_Min>
 		<Speed_Max>100</Speed_Max>
 		<Speed_connect_to>0</Speed_connect_to>
@@ -466,17 +466,17 @@
 		<Freq_Min>1</Freq_Min>
 		<Freq_Max>20000</Freq_Max>
 		<Freq_connect_to>0</Freq_connect_to>
-		<Reso>0</Reso>
+		<Reso>0.00946668</Reso>
 		<Reso_Min>0</Reso_Min>
-		<Reso_Max>1</Reso_Max>
-		<Reso_connect_to>0</Reso_connect_to>
+		<Reso_Max>0.510204</Reso_Max>
+		<Reso_connect_to>5</Reso_connect_to>
 	</Filter_slot_5>
 	<Reverb_slot_5>
-		<Send_>0.520408</Send_>
+		<Send_>0.255102</Send_>
 		<Send_Min>0</Send_Min>
 		<Send_Max>1</Send_Max>
 		<Send_Connect_To>0</Send_Connect_To>
-		<Time_>9.69388</Time_>
+		<Time_>4.79592</Time_>
 		<Time_Min>0</Time_Min>
 		<Time_Max>20</Time_Max>
 		<Time_Connect_To>0</Time_Connect_To>
@@ -520,10 +520,10 @@
 		<In_gain>1</In_gain>
 	</Compressor_slot_6>
 	<Bitcrusher_slot_6>
-		<Bits>16</Bits>
-		<Bits_Min>1</Bits_Min>
-		<Bits_Max>16</Bits_Max>
-		<Bits_Connect_To>0</Bits_Connect_To>
+		<Bits>15</Bits>
+		<Bits_Min>16</Bits_Min>
+		<Bits_Max>10</Bits_Max>
+		<Bits_Connect_To>6</Bits_Connect_To>
 	</Bitcrusher_slot_6>
 	<Filter_slot_6>
 		<Freq>20000</Freq>
@@ -554,16 +554,16 @@
 		<feedback_COnnect_To>0</feedback_COnnect_To>
 	</Delay_slot_6>
 	<Decimator_slot_6>
-		<Rate>44100</Rate>
-		<Rate_Min>1</Rate_Min>
-		<Rate_Max>44100</Rate_Max>
-		<Rate_Connect_to>0</Rate_Connect_to>
+		<Rate>43766</Rate>
+		<Rate_Min>44100</Rate_Min>
+		<Rate_Max>26100</Rate_Max>
+		<Rate_Connect_to>6</Rate_Connect_to>
 	</Decimator_slot_6>
 	<Chorus_slot_6>
-		<Depth>0</Depth>
+		<Depth>0.0710001</Depth>
 		<Depth_Min>0</Depth_Min>
-		<Depth_Max>30</Depth_Max>
-		<Depth_connect_to>0</Depth_connect_to>
+		<Depth_Max>3.82653</Depth_Max>
+		<Depth_connect_to>6</Depth_connect_to>
 		<Speed>0</Speed>
 		<Speed_Min>0</Speed_Min>
 		<Speed_Max>100</Speed_Max>

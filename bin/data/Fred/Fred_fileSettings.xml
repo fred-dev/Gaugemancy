@@ -2,35 +2,35 @@
 <PATHS>
 	<NARR_1TION_FILE>narrationcha1_Loud.wav</NARR_1TION_FILE>
 
-	<FILE_1_1>NS_1_1.wav</FILE_1_1>
-	<FILE_2_1>NS_1_2.wav</FILE_2_1>
-	<FILE_3_1>NS_1_3.wav</FILE_3_1>
-	<FILE_4_1>NS_1_4.wav</FILE_4_1>
-	<FILE_5_1>NS_1_5.wav</FILE_5_1>
-	<FILE_6_1>NS_1_6.wav</FILE_6_1>
+	<FILE_1_1>BIRDS_1.wav</FILE_1_1>
+	<FILE_2_1>BIRDS_2.wav</FILE_2_1>
+	<FILE_3_1>BIRDS_3.wav</FILE_3_1>
+	<FILE_4_1>BIRDS_4.wav</FILE_4_1>
+	<FILE_5_1>BIRDS_5.wav</FILE_5_1>
+	<FILE_6_1>BIRDS_6.wav</FILE_6_1>
 
 
-	<FILE_1_2>NS_2_1.wav</FILE_1_2>
-	<FILE_2_2>NS_2_2.wav</FILE_2_2>
-	<FILE_3_2>NS_2_3.wav</FILE_3_2>
-	<FILE_4_2>NS_2_4.wav</FILE_4_2>
-	<FILE_5_2>NS_2_5.wav</FILE_5_2>
-	<FILE_6_2>NS_2_6.wav</FILE_6_2>
+	<FILE_1_2>RING_1.wav</FILE_1_2>
+	<FILE_2_2>RING_2.wav</FILE_2_2>
+	<FILE_3_2>RING_3.wav</FILE_3_2>
+	<FILE_4_2>RING_4.wav</FILE_4_2>
+	<FILE_5_2>RING_5.wav</FILE_5_2>
+	<FILE_6_2>RING_6.wav</FILE_6_2>
 	
-    <FILE_1_3>NS_3_1.wav</FILE_1_3>
-    <FILE_2_3>NS_3_2.wav</FILE_2_3>
-    <FILE_3_3>NS_3_3.wav</FILE_3_3>
-    <FILE_4_3>NS_3_4.wav</FILE_4_3>
-    <FILE_5_3>NS_3_5.wav</FILE_5_3>
-    <FILE_6_3>NS_3_6.wav</FILE_6_3>
+    <FILE_1_3>PAD_1.wav</FILE_1_3>
+    <FILE_2_3>PAD_2.wav</FILE_2_3>
+    <FILE_3_3>PAD_3.wav</FILE_3_3>
+    <FILE_4_3>PAD_4.wav</FILE_4_3>
+    <FILE_5_3>PAD_5.wav</FILE_5_3>
+    <FILE_6_3>PAD_6.wav</FILE_6_3>
 
 
-    <FILE_1_4>NS_4_1.wav</FILE_1_4>
-    <FILE_2_4>NS_4_2.wav</FILE_2_4>
-    <FILE_3_4>NS_4_3.wav</FILE_3_4>
-    <FILE_4_4>NS_4_4.wav</FILE_4_4>
-    <FILE_5_4>NS_4_5.wav</FILE_5_4>
-    <FILE_6_4>NS_4_6.wav</FILE_6_4>
+    <FILE_1_4>HARD_1.wav</FILE_1_4>
+    <FILE_2_4>HARD_2.wav</FILE_2_4>
+    <FILE_3_4>HARD_3.wav</FILE_3_4>
+    <FILE_4_4>HARD_4.wav</FILE_4_4>
+    <FILE_5_4>HARD_5.wav</FILE_5_4>
+    <FILE_6_4>HARD_6.wav</FILE_6_4>
 	
 
 </PATHS>

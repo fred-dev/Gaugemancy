@@ -2704,7 +2704,7 @@ void ofApp::setupParamsFromXML()
 void ofApp::setupFilePaths()
 {
     // reads the file paths of the audio files we need for te preset
-    if (fileSettingsXML.loadFile(filePathPrefix + unitID + "_fileSettings.xml")) {
+    if (fileSettingsXML.load(filePathPrefix + unitID + "_fileSettings.xml")) {
         ofLogNotice() << "File settings loaded" << endl;
         for (int i = 0; i < numberOfSlots; i++) {
             ofLogNotice() << "Getting audio file paths from " + unitID +  "_fileSettings: Slot " + ofToString(i + 1)<< endl;
@@ -2876,7 +2876,8 @@ void ofApp::syncSpeaker()
     relayOut.setval_gpio("1");
     ofSleepMillis(400);
     relayOut.setval_gpio("0");
-    
+    ofLogNotice() << "Sync Speaker" << endl;
+
 }
 
 #endif // HAS_ADC
@@ -4992,6 +4993,12 @@ void ofApp::deviceOnlyUpdateRoutine()
 {
     // just for the raspbery pi, we get the button state
     button.getval_gpio(state_button);
+    if(state_button == 0){
+        state_button = 1;
+    }
+    else{
+        state_button = 0;
+    }
     // check if the button is doing something interesting
     buttonStateMachine();
     // if it si first launch run the calibration
@@ -5108,27 +5115,27 @@ void ofApp::buttonStateMachine() {
             
         }
         
-        if (ofToInt(state_button) == 0 && clicks == 0 && waitingForClick)
+        if (state_button == 0 && clicks == 0 && waitingForClick)
         {
             clicks = 1;
             click1Time = ofGetElapsedTimeMillis();
         }
-        else if (ofToInt(state_button) == 0 && clicks == 1 && ofGetElapsedTimeMillis() - click1Time < buttonPressTimeOut && waitingForClick)
+        else if (state_button == 0 && clicks == 1 && ofGetElapsedTimeMillis() - click1Time < buttonPressTimeOut && waitingForClick)
         {
             clicks = 2;
             click2Time = ofGetElapsedTimeMillis();
         }
-        else if (ofToInt(state_button) == 0 && clicks == 2 && ofGetElapsedTimeMillis() - click2Time < buttonPressTimeOut && waitingForClick)
+        else if (state_button == 0 && clicks == 2 && ofGetElapsedTimeMillis() - click2Time < buttonPressTimeOut && waitingForClick)
         {
             clicks = 3;
             click3Time = ofGetElapsedTimeMillis();
         }
         
-        if (ofToInt(state_button) == 0)
+        if (state_button == 0)
         {
             waitingForClick = false;
         }
-        if (ofToInt(state_button) == 1)
+        if (state_button == 1)
         {
             waitingForClick = true;
             if (clicks == 1)

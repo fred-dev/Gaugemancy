@@ -21,7 +21,7 @@ public:
         ParamGroup.add(_e_bitcrush_in_bits.set("Bits", 16, 1, 16));
         ParamGroup.add(_e_bitcrush_in_bitsMin.set("Bits Min", 1, 1, 16));
         ParamGroup.add(_e_bitcrush_in_bitsMax.set("Bits Max", 16, 1, 16));
-        ParamGroup.add(_e_bitcrush_in_bitsConnectTo.set("Bits Connect To", 0, 1, 6));
+        ParamGroup.add(_e_bitcrush_in_bitsConnectTo.set("Bits Connect To", 0, 0, 6));
     }
     
     ofParameterGroup getParamGroup(){

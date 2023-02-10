@@ -647,7 +647,7 @@ class ofApp : public ofBaseApp{
 		GPIO redLed;
 		GPIO relayOut;
 		GPIO button;
-		string state_button;
+		int state_button;
 #else
 		int a2dVal[6];;
 #endif
