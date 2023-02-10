@@ -2798,6 +2798,8 @@ void ofApp::setupButton()
     //setup the soft button for interaction - raspberry pi only
     button.setup("19", "in", "high");
     button.export_gpio();
+    ofSleepMillis(100);
+    blueLed.setdir_gpio("in");
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2805,6 +2807,9 @@ void ofApp::setupButton()
         recyclingMessage.addIntArg(1);
         sender.sendMessage(recyclingMessage, false);
     }
+    
+    ofLogNotice() << "Button setup" << endl;
+
 }
 
 
