@@ -77,7 +77,7 @@
 # incorporated directly into the final executable application binary.
 ################################################################################
 # PROJECT_LDFLAGS=-Wl,-rpath=./libs
-
+PROJECT_LDFLAGS=-lwiringPi
 ################################################################################
 # PROJECT DEFINES
 #   Create a space-delimited list of DEFINES. The list will be converted into 
@@ -89,6 +89,8 @@
 ################################################################################
 # PROJECT_DEFINES = 
 
+
+PROJECT_DEFINES = -DUSE_WIRINGPI
 ################################################################################
 # PROJECT CFLAGS
 #   This is a list of fully qualified CFLAGS required when compiling for this 
