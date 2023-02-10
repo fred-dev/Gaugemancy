@@ -36,6 +36,7 @@
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <wiringPi.h>
 #endif
 
 #define NUMBER_OF_SENSORS 6
@@ -643,10 +644,10 @@ class ofApp : public ofBaseApp{
         float yg;
         float zg;
 
-		GPIO blueLed;
-		GPIO redLed;
-		GPIO relayOut;
-		GPIO button;
+//		GPIO blueLed;
+//		GPIO redLed;
+//		GPIO relayOut;
+//		GPIO button;
 		int state_button;
 #else
 		int a2dVal[6];;
