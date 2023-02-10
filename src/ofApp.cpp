@@ -2274,7 +2274,7 @@ void ofApp::updateNarrationGlitchMode()
     // we get to narration glitch mode on the device by pressing one of the sensors, that sensor value is then used to move the playhead of the narraiton granular. If the sensor values goes below the threshold we go back to the  narration play mode
 #ifdef HAS_ADC
     deviceOnlyUpdateRoutine();
-    narration.getPosition() + ofMap(normalisedA2DValues[narrrationGlitchSensor], 0.0, 1.0, -1.0 * narrationGlitchStrand, 0) >> narrCloud.in_position();
+    (narration.getPosition() + ofMap(normalisedA2DValues[narrrationGlitchSensor], 0.0, 1.0, -1.0 * narrationGlitchStrand, 0)) >> narrCloud.in_position();
     
     if (normalisedA2DValues[narrrationGlitchSensor] < narrationGlitchThreshold)
     {
@@ -4134,7 +4134,7 @@ void ofApp::populateEffectVectors(){
         pdsp::Bitcruncher* tmp_BitcrusherL = new pdsp::Bitcruncher();
         bitCrusherLs.push_back(tmp_BitcrusherL);
         pdsp::Bitcruncher* tmp_BitcrusherR = new pdsp::Bitcruncher();
-        bitCrusherRs.push_back(tmp_BitcrusherL);
+        bitCrusherRs.push_back(tmp_BitcrusherR);
         
         EFFBitCrushUnit temp_effBitCrushersParams;
         effBitCrushersParams.push_back(temp_effBitCrushersParams);
@@ -4998,12 +4998,7 @@ void ofApp::deviceOnlyUpdateRoutine()
 {
     // just for the raspbery pi, we get the button state
     button.getval_gpio(state_button);
-    if(state_button == 0){
-        state_button = 1;
-    }
-    else{
-        state_button = 0;
-    }
+    ofLogNotice() << "Button value: " + ofToString(state_button);
     // check if the button is doing something interesting
     buttonStateMachine();
     // if it si first launch run the calibration
