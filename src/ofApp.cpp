@@ -46,7 +46,7 @@ void ofApp::setup(){
     
     
 #ifdef HAS_ADC
-    wiringPiSetup() ;
+    wiringPiSetup();
     //setup the pin to accept input from the button- raspberry pi only
     setupButton();
     
@@ -71,20 +71,20 @@ void ofApp::setup(){
     
     
     if (presetIndex ==1) {
-        digitalWrite(GPIO5, HIGH);
-        digitalWrite(GPIO5, LOW);
+        digitalWrite(9, HIGH);
+        digitalWrite(9, LOW);
     }
     if (presetIndex == 2) {
-        digitalWrite(GPIO5, HIGH);
-        digitalWrite(GPIO5, HIGH);
+        digitalWrite(9, HIGH);
+        digitalWrite(9, HIGH);
     }
     if (presetIndex ==3) {
-        digitalWrite(GPIO5, HIGH);
-        digitalWrite(GPIO5, LOW);
+        digitalWrite(9, HIGH);
+        digitalWrite(9, LOW);
     }
     if (presetIndex ==4) {
-        digitalWrite(GPIO5, HIGH);
-        digitalWrite(GPIO5, HIGH);
+        digitalWrite(9, HIGH);
+        digitalWrite(9, HIGH);
     }
 #else
     
@@ -1134,11 +1134,11 @@ void ofApp::exit() {
     
 #ifdef HAS_ADC
     // on exit we turn our lights, off, turn off the speaker and if it is set on the XML sutdown the raspberry pi
-    digitalWrite(GPIO5, LOW);
-    digitalWrite(GPIO5, LOW);
-    digitalWrite(GPIO13, HIGH);
+    digitalWrite(9, LOW);
+    digitalWrite(9, LOW);
+    digitalWrite(2, HIGH);
     ofSleepMillis(400);
-    digitalWrite(GPIO13, LOW);
+    digitalWrite(2, LOW);
     ofLogNotice() << "Speaker turned off" << endl;
     
     if (doShutdown) {
@@ -1355,20 +1355,20 @@ void ofApp::updatePlayNarrMode()
 #ifdef HAS_ADC
         narration.disconnectAll();
         if (presetIndex ==1) {
-            digitalWrite(GPIO5, HIGH);
-            digitalWrite(GPIO5, LOW);
+            digitalWrite(9, HIGH);
+            digitalWrite(9, LOW);
         }
         if (presetIndex == 2) {
-            digitalWrite(GPIO5, HIGH);
-            digitalWrite(GPIO5, HIGH);
+            digitalWrite(9, HIGH);
+            digitalWrite(9, HIGH);
         }
         if (presetIndex ==3) {
-            digitalWrite(GPIO5, HIGH);
-            digitalWrite(GPIO5, LOW);
+            digitalWrite(9, HIGH);
+            digitalWrite(9, LOW);
         }
         if (presetIndex ==4) {
-            digitalWrite(GPIO5, HIGH);
-            digitalWrite(GPIO5, HIGH);
+            digitalWrite(9, HIGH);
+            digitalWrite(9, HIGH);
         }
         goToMode(grainOperationModeTranslate);
         
@@ -2797,8 +2797,8 @@ void ofApp::setupButton()
 {
     
     
-    pinMode(GPIO19, INPUT);
-    pullUpDnControl(GPIO19, PUD_UP);
+    pinMode(12, INPUT);
+    pullUpDnControl(12, PUD_UP);
     
     //setup the soft button for interaction - raspberry pi only
 //    button.setup("19", "in", "high");
@@ -2822,10 +2822,10 @@ void ofApp::initLedBlue()
 {
     //setup the blue LED pin for feedback - raspberry pi only
     
-    pinMode(GPIO5, OUTPUT);
-    digitalWrite(GPIO5, HIGH);
+    pinMode(9, OUTPUT);
+    digitalWrite(9, HIGH);
     ofSleepMillis(500);
-    digitalWrite(GPIO5, LOW);
+    digitalWrite(9, LOW);
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2842,10 +2842,10 @@ void ofApp::initLedRed()
     pinMode(GPIO6, OUTPUT);
 
     
-    digitalWrite(GPIO5, HIGH);
-    digitalWrite(GPIO5, HIGH);
+    digitalWrite(9, HIGH);
+    digitalWrite(9, HIGH);
     ofSleepMillis(200);
-    digitalWrite(GPIO5, LOW);
+    digitalWrite(9, LOW);
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2861,7 +2861,7 @@ void ofApp::setupSpeakerControl()
 {
     //setup the relay to turn the speaker on and off - raspberry pi only
     ofLogNotice() << "setup speaker control" << endl;
-    pinMode(GPIO13, OUTPUT);
+    pinMode(2, OUTPUT);
 
 
     
@@ -2879,11 +2879,11 @@ void ofApp::syncSpeaker()
 {
     
     
-    digitalWrite(GPIO13, HIGH);
+    digitalWrite(2, HIGH);
     //Turn on the speaker - raspberry pi only
-    digitalWrite(GPIO13, HIGH);
+    digitalWrite(2, HIGH);
     ofSleepMillis(400);
-    digitalWrite(GPIO13, LOW);
+    digitalWrite(2, LOW);
     ofLogNotice() << "Sync Speaker" << endl;
 
 }
@@ -3282,8 +3282,8 @@ void ofApp::setupNarration() {
             shouldTriggerNarrationPlay = false;
         }
 #ifdef HAS_ADC
-        digitalWrite(GPIO5, LOW);
-        digitalWrite(GPIO5, HIGH);
+        digitalWrite(9, LOW);
+        digitalWrite(9, HIGH);
 #endif
         goToMode(OP_MODE_WAIT_FOR_NARRATION);
     }
@@ -3521,20 +3521,20 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
     // this is the loader for files and parameters for the main granular system, single and multi
 #ifdef HAS_ADC
     if (presetIndex ==1) {
-        digitalWrite(GPIO5, HIGH);
-        digitalWrite(GPIO5, LOW);
+        digitalWrite(9, HIGH);
+        digitalWrite(9, LOW);
     }
     if (presetIndex == 2) {
-        digitalWrite(GPIO5, HIGH);
-        digitalWrite(GPIO5, HIGH);
+        digitalWrite(9, HIGH);
+        digitalWrite(9, HIGH);
     }
     if (presetIndex ==3) {
-        digitalWrite(GPIO5, HIGH);
-        digitalWrite(GPIO5, LOW);
+        digitalWrite(9, HIGH);
+        digitalWrite(9, LOW);
     }
     if (presetIndex ==4) {
-        digitalWrite(GPIO5, LOW);
-        digitalWrite(GPIO5, HIGH);
+        digitalWrite(9, LOW);
+        digitalWrite(9, HIGH);
     }
     
 #endif // HAS_ADC
@@ -5000,7 +5000,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 void ofApp::deviceOnlyUpdateRoutine()
 {
     // just for the raspbery pi, we get the button state
-    state_button = digitalRead(GPIO19);
+    state_button = digitalRead(12);
     if(state_button == 0){
         state_button = 1;
     }
@@ -5038,9 +5038,9 @@ void ofApp::buttonStateMachine() {
             click1Time = 0;
             click2Time = 0;
             click3Time = 0;
-            digitalWrite(GPIO13, HIGH);
+            digitalWrite(2, HIGH);
             ofSleepMillis(400);
-            digitalWrite(GPIO13, LOW);
+            digitalWrite(2, LOW);
             
             if (oscDebug) {
                 ofxOscMessage m;
@@ -5087,20 +5087,20 @@ void ofApp::buttonStateMachine() {
 #endif
 #ifdef HAS_ADC
                 if (presetIndex ==1) {
-                    digitalWrite(GPIO5, HIGH);
-                    digitalWrite(GPIO5, LOW);
+                    digitalWrite(9, HIGH);
+                    digitalWrite(9, LOW);
                 }
                 if (presetIndex == 2) {
-                    digitalWrite(GPIO5, HIGH);
-                    digitalWrite(GPIO5, HIGH);
+                    digitalWrite(9, HIGH);
+                    digitalWrite(9, HIGH);
                 }
                 if (presetIndex ==3) {
-                    digitalWrite(GPIO5, HIGH);
-                    digitalWrite(GPIO5, LOW);
+                    digitalWrite(9, HIGH);
+                    digitalWrite(9, LOW);
                 }
                 if (presetIndex ==4) {
-                    digitalWrite(GPIO5, HIGH);
-                    digitalWrite(GPIO5, HIGH);
+                    digitalWrite(9, HIGH);
+                    digitalWrite(9, HIGH);
                 }
                 narration.disconnectAll();
                 goToMode(grainOperationModeTranslate);
