@@ -89,8 +89,6 @@ PROJECT_LDFLAGS=-lwiringPi
 ################################################################################
 # PROJECT_DEFINES = 
 
-
-PROJECT_DEFINES = -DUSE_WIRINGPI
 ################################################################################
 # PROJECT CFLAGS
 #   This is a list of fully qualified CFLAGS required when compiling for this 
