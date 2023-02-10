@@ -2797,8 +2797,8 @@ void ofApp::setupButton()
 {
     
     
-    pinMode(GPIO19, INPUT)
-    pullUpDnControl(GPIO19, PULL_UP)
+    pinMode(GPIO19, INPUT);
+    pullUpDnControl(GPIO19, PULL_UP);
     
     //setup the soft button for interaction - raspberry pi only
 //    button.setup("19", "in", "high");
