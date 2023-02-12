@@ -5010,10 +5010,13 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 
 void ofApp::deviceOnlyUpdateRoutine()
 {
+    int oldState = state_button;
     // just for the raspbery pi, we get the button state
     state_button = digitalRead(buttonPin);
-
-    ofLogNotice() << "Button value: " + ofToString(state_button);
+    state_button = ~state_button + 1;
+    if(state_button != oldState){
+        ofLogNotice() << "Button changed value is: " + ofToString(state_button);
+    }
     // check if the button is doing something interesting
     buttonStateMachine();
     // if it si first launch run the calibration
