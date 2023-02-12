@@ -643,7 +643,8 @@ class ofApp : public ofBaseApp{
         float xg;
         float yg;
         float zg;
-
+        
+        int redLedPin, blueLedPin, relayPin, buttonPin;
 //		GPIO blueLed;
 //		GPIO redLed;
 //		GPIO relayOut;

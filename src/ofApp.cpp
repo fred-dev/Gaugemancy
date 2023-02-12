@@ -46,7 +46,12 @@ void ofApp::setup(){
     
     
 #ifdef HAS_ADC
-    wiringPiSetup();
+    wiringPiSetup() ;
+    redLedPin= 31;
+    blueLedPin =21;
+    relayPin =23;
+    buttonPin =24;
+    
     //setup the pin to accept input from the button- raspberry pi only
     setupButton();
     
@@ -55,6 +60,8 @@ void ofApp::setup(){
     
     //setup the SPI ADC - raspberry pi only
     setupADC();
+    
+    
     
     //setup the Blue LED pin- raspberry pi only
     initLedBlue();
@@ -71,20 +78,20 @@ void ofApp::setup(){
     
     
     if (presetIndex ==1) {
-        digitalWrite(24, HIGH);
-        digitalWrite(24, LOW);
+        digitalWrite(blueLedPin, HIGH);
+        digitalWrite(redLedPin, LOW);
     }
     if (presetIndex == 2) {
-        digitalWrite(24, HIGH);
-        digitalWrite(24, HIGH);
+        digitalWrite(blueLedPin, HIGH);
+        digitalWrite(redLedPin, HIGH);
     }
     if (presetIndex ==3) {
-        digitalWrite(24, HIGH);
-        digitalWrite(24, LOW);
+        digitalWrite(blueLedPin, HIGH);
+        digitalWrite(redLedPin, LOW);
     }
     if (presetIndex ==4) {
-        digitalWrite(24, HIGH);
-        digitalWrite(24, HIGH);
+        digitalWrite(blueLedPin, HIGH);
+        digitalWrite(redLedPin, HIGH);
     }
 #else
     
@@ -1134,11 +1141,11 @@ void ofApp::exit() {
     
 #ifdef HAS_ADC
     // on exit we turn our lights, off, turn off the speaker and if it is set on the XML sutdown the raspberry pi
-    digitalWrite(24, LOW);
-    digitalWrite(24, LOW);
-    digitalWrite(21, HIGH);
+    digitalWrite(blueLedPin, LOW);
+    digitalWrite(redLedPin, LOW);
+    digitalWrite(relayPin, HIGH);
     ofSleepMillis(400);
-    digitalWrite(21, LOW);
+    digitalWrite(relayPin, LOW);
     ofLogNotice() << "Speaker turned off" << endl;
     
     if (doShutdown) {
@@ -1355,20 +1362,20 @@ void ofApp::updatePlayNarrMode()
 #ifdef HAS_ADC
         narration.disconnectAll();
         if (presetIndex ==1) {
-            digitalWrite(24, HIGH);
-            digitalWrite(24, LOW);
+            digitalWrite(blueLedPin, HIGH);
+            digitalWrite(redLedPin, LOW);
         }
         if (presetIndex == 2) {
-            digitalWrite(24, HIGH);
-            digitalWrite(24, HIGH);
+            digitalWrite(blueLedPin, HIGH);
+            digitalWrite(redLedPin, HIGH);
         }
         if (presetIndex ==3) {
-            digitalWrite(24, HIGH);
-            digitalWrite(24, LOW);
+            digitalWrite(blueLedPin, HIGH);
+            digitalWrite(redLedPin, LOW);
         }
         if (presetIndex ==4) {
-            digitalWrite(24, HIGH);
-            digitalWrite(24, HIGH);
+            digitalWrite(blueLedPin, HIGH);
+            digitalWrite(redLedPin, HIGH);
         }
         goToMode(grainOperationModeTranslate);
         
@@ -2797,8 +2804,8 @@ void ofApp::setupButton()
 {
     
     
-    pinMode(10, INPUT);
-    pullUpDnControl(10, PUD_UP);
+    pinMode(buttonPin, INPUT);
+    pullUpDnControl(buttonPin, PUD_UP);
     
     //setup the soft button for interaction - raspberry pi only
 //    button.setup("19", "in", "high");
@@ -2822,10 +2829,10 @@ void ofApp::initLedBlue()
 {
     //setup the blue LED pin for feedback - raspberry pi only
     
-    pinMode(24, OUTPUT);
-    digitalWrite(24, HIGH);
+    pinMode(blueLedPin, OUTPUT);
+    digitalWrite(blueLedPin, HIGH);
     ofSleepMillis(500);
-    digitalWrite(24, LOW);
+    digitalWrite(blueLedPin, LOW);
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2839,13 +2846,11 @@ void ofApp::initLedBlue()
 void ofApp::initLedRed()
 {
     //setup the red LED pin for feedback - raspberry pi only
-    pinMode(GPIO6, OUTPUT);
+    pinMode(redLedPin, OUTPUT)
 
-    
-    digitalWrite(24, HIGH);
-    digitalWrite(24, HIGH);
+    digitalWrite(redLedPin, HIGH);
     ofSleepMillis(200);
-    digitalWrite(24, LOW);
+    digitalWrite(redLedPin, LOW);
     
     if (oscDebug) {
         recyclingMessage.clear();
@@ -2861,7 +2866,7 @@ void ofApp::setupSpeakerControl()
 {
     //setup the relay to turn the speaker on and off - raspberry pi only
     ofLogNotice() << "setup speaker control" << endl;
-    pinMode(21, OUTPUT);
+    pinMode(relayPin, OUTPUT);
 
 
     
@@ -2879,11 +2884,11 @@ void ofApp::syncSpeaker()
 {
     
     
-    digitalWrite(21, HIGH);
+    digitalWrite(relayPin, HIGH);
     //Turn on the speaker - raspberry pi only
-    digitalWrite(21, HIGH);
+    digitalWrite(relayPin, HIGH);
     ofSleepMillis(400);
-    digitalWrite(21, LOW);
+    digitalWrite(relayPin, LOW);
     ofLogNotice() << "Sync Speaker" << endl;
 
 }
@@ -3282,8 +3287,8 @@ void ofApp::setupNarration() {
             shouldTriggerNarrationPlay = false;
         }
 #ifdef HAS_ADC
-        digitalWrite(24, LOW);
-        digitalWrite(24, HIGH);
+        digitalWrite(blueLedPin, LOW);
+        digitalWrite(redLedPin, HIGH);
 #endif
         goToMode(OP_MODE_WAIT_FOR_NARRATION);
     }
@@ -3521,20 +3526,20 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
     // this is the loader for files and parameters for the main granular system, single and multi
 #ifdef HAS_ADC
     if (presetIndex ==1) {
-        digitalWrite(24, HIGH);
-        digitalWrite(24, LOW);
+        digitalWrite(blueLedPin, HIGH);
+        digitalWrite(redLedPin, LOW);
     }
     if (presetIndex == 2) {
-        digitalWrite(24, HIGH);
-        digitalWrite(24, HIGH);
+        digitalWrite(blueLedPin, HIGH);
+        digitalWrite(redLedPin, HIGH);
     }
     if (presetIndex ==3) {
-        digitalWrite(24, HIGH);
-        digitalWrite(24, LOW);
+        digitalWrite(blueLedPin, HIGH);
+        digitalWrite(redLedPin, LOW);
     }
     if (presetIndex ==4) {
-        digitalWrite(24, LOW);
-        digitalWrite(24, HIGH);
+        digitalWrite(blueLedPin, LOW);
+        digitalWrite(redLedPin, HIGH);
     }
     
 #endif // HAS_ADC
@@ -5000,7 +5005,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 void ofApp::deviceOnlyUpdateRoutine()
 {
     // just for the raspbery pi, we get the button state
-    state_button = digitalRead(10);
+    state_button = digitalRead(buttonPin);
     if(state_button == 0){
         state_button = 1;
     }
@@ -5038,9 +5043,9 @@ void ofApp::buttonStateMachine() {
             click1Time = 0;
             click2Time = 0;
             click3Time = 0;
-            digitalWrite(21, HIGH);
+            digitalWrite(relayPin, HIGH);
             ofSleepMillis(400);
-            digitalWrite(21, LOW);
+            digitalWrite(relayPin, LOW);
             
             if (oscDebug) {
                 ofxOscMessage m;
@@ -5087,20 +5092,20 @@ void ofApp::buttonStateMachine() {
 #endif
 #ifdef HAS_ADC
                 if (presetIndex ==1) {
-                    digitalWrite(24, HIGH);
-                    digitalWrite(24, LOW);
+                    digitalWrite(blueLedPin, HIGH);
+                    digitalWrite(redLedPin, LOW);
                 }
                 if (presetIndex == 2) {
-                    digitalWrite(24, HIGH);
-                    digitalWrite(24, HIGH);
+                    digitalWrite(blueLedPin, HIGH);
+                    digitalWrite(redLedPin, HIGH);
                 }
                 if (presetIndex ==3) {
-                    digitalWrite(24, HIGH);
-                    digitalWrite(24, LOW);
+                    digitalWrite(blueLedPin, HIGH);
+                    digitalWrite(redLedPin, LOW);
                 }
                 if (presetIndex ==4) {
-                    digitalWrite(24, HIGH);
-                    digitalWrite(24, HIGH);
+                    digitalWrite(blueLedPin, HIGH);
+                    digitalWrite(redLedPin, HIGH);
                 }
                 narration.disconnectAll();
                 goToMode(grainOperationModeTranslate);
