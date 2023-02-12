@@ -46,6 +46,12 @@ void ofApp::setup(){
     
     
 #ifdef HAS_ADC
+    
+//    BLUE LED GPIO 5 PIN 29 WPI 21
+//    RED LED GPIO 6 PIN 31 WPI 31
+//    RELAY GPIO 13 PIN 33 WPI 23
+//    BUTTON GPIO 19 PIN 35 WPI 24
+    
     wiringPiSetup() ;
     redLedPin= 31;
     blueLedPin =21;
