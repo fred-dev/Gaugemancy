@@ -51,7 +51,7 @@ void ofApp::setup(){
 //    RED LED GPIO 6 PIN 31 WPI 31
 //    RELAY GPIO 13 PIN 33 WPI 23
 //    BUTTON GPIO 19 PIN 35 WPI 24
-    
+        
     wiringPiSetup() ;
     redLedPin= 31;
     blueLedPin =21;
@@ -5012,12 +5012,7 @@ void ofApp::deviceOnlyUpdateRoutine()
 {
     // just for the raspbery pi, we get the button state
     state_button = digitalRead(buttonPin);
-    if(state_button == 0){
-        state_button = 1;
-    }
-    else{
-        state_button = 0;
-    }
+
     ofLogNotice() << "Button value: " + ofToString(state_button);
     // check if the button is doing something interesting
     buttonStateMachine();
