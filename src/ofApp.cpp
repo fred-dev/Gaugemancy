@@ -2846,7 +2846,7 @@ void ofApp::initLedBlue()
 void ofApp::initLedRed()
 {
     //setup the red LED pin for feedback - raspberry pi only
-    pinMode(redLedPin, OUTPUT)
+    pinMode(redLedPin, OUTPUT);
 
     digitalWrite(redLedPin, HIGH);
     ofSleepMillis(200);
