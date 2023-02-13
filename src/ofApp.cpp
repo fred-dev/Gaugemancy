@@ -5121,27 +5121,27 @@ void ofApp::buttonStateMachine() {
             
         }
         
-        if (state_button == 0 && clicks == 0 && waitingForClick)
+        if (state_button == 1 && clicks == 0 && waitingForClick)
         {
             clicks = 1;
             click1Time = ofGetElapsedTimeMillis();
         }
-        else if (state_button == 0 && clicks == 1 && ofGetElapsedTimeMillis() - click1Time < buttonPressTimeOut && waitingForClick)
+        else if (state_button == 1 && clicks == 1 && ofGetElapsedTimeMillis() - click1Time < buttonPressTimeOut && waitingForClick)
         {
             clicks = 2;
             click2Time = ofGetElapsedTimeMillis();
         }
-        else if (state_button == 0 && clicks == 2 && ofGetElapsedTimeMillis() - click2Time < buttonPressTimeOut && waitingForClick)
+        else if (state_button == 1 && clicks == 2 && ofGetElapsedTimeMillis() - click2Time < buttonPressTimeOut && waitingForClick)
         {
             clicks = 3;
             click3Time = ofGetElapsedTimeMillis();
         }
         
-        if (state_button == 0)
+        if (state_button == 1)
         {
             waitingForClick = false;
         }
-        if (state_button == 1)
+        if (state_button == 0)
         {
             waitingForClick = true;
             if (clicks == 1)
