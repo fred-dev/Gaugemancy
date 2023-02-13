@@ -4998,12 +4998,12 @@ void ofApp::deviceOnlyUpdateRoutine()
 {
     // just for the raspbery pi, we get the button state
     button.getval_gpio(state_button);
-//    if(state_button == 0){
-//        state_button = 1;
-//    }
-//    else{
-//        state_button = 0;
-//    }
+    if(state_button == 0){
+        state_button = 1;
+    }
+    else{
+        state_button = 0;
+    }
     ofLogNotice() << "Button value: " + ofToString(state_button);
     // check if the button is doing something interesting
     buttonStateMachine();
