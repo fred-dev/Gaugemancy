@@ -5004,7 +5004,6 @@ void ofApp::deviceOnlyUpdateRoutine()
     else{
         state_button = 0;
     }
-    ofLogNotice() << "Button value: " + ofToString(state_button);
     // check if the button is doing something interesting
     buttonStateMachine();
     // if it si first launch run the calibration
