@@ -7,6 +7,9 @@ module.exports = {
     exec_interpreter: "none",
     exec_mode : "fork_mode",
     wait_boot: 3000,
-    user: "raspberry",
+   env: {
+      PATH: process.env.PATH,
+      GPIO_PATH: "/sys/class/gpio"
+    }
   }]
 }
