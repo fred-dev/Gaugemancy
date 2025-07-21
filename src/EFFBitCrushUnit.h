@@ -4,7 +4,7 @@
 #include "ofxPDSP.h"
 
 
-class EFFBitCrushUnit  {
+class EFFBitCrushUnit  : public EffectBase{
 public:
     
  
@@ -24,8 +24,14 @@ public:
         ParamGroup.add(_e_bitcrush_in_bitsConnectTo.set("Bits Connect To", 0, 0, 6));
     }
     
-    ofParameterGroup getParamGroup(){
-        return ParamGroup;
+    ofParameterGroup& getParamGroup() {
+        return ParamGroup; // Return the reference
+    }
+    
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update bit depth based on sensorValue
+        int bits = static_cast<int>(sensorValue * (_e_bitcrush_in_bitsMax - _e_bitcrush_in_bitsMin) + _e_bitcrush_in_bitsMin);
+        _e_bitcrush_in_bits.set(bits);
     }
     
     void DoClear(){
@@ -49,7 +55,6 @@ public:
     }
     
     
-
-    
+   
     
 };

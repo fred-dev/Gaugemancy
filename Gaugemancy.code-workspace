@@ -1,0 +1,36 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "${workspaceRoot}/../../../../libs/openFrameworks"
+		},
+		{
+			"path": "${workspaceRoot}/../../../../addons/ofxAudioFile"
+		},
+		{
+			"path": "${workspaceRoot}/../../../../addons/ofxGui"
+		},
+		{
+			"path": "${workspaceRoot}/../../../../addons/ofxMSAInteractiveObject"
+		},
+		{
+			"path": "${workspaceRoot}/../../../../addons/ofxMidi"
+		},
+		{
+			"path": "${workspaceRoot}/../../../../addons/ofxOsc"
+		},
+		{
+			"path": "${workspaceRoot}/../../../../addons/ofxPDSP"
+		},
+		{
+			"path": "${workspaceRoot}/../../../../addons/ofxPoco"
+		},
+		{
+			"path": "${workspaceRoot}/../../../../addons/ofxXmlSettings"
+		}
+	],
+	"openFrameworksProjectGeneratorVersion": "0.90.0",
+	"settings": {}
+}

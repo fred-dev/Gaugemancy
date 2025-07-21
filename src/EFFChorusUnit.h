@@ -4,7 +4,7 @@
 #include "ofxPDSP.h"
 
 
-class EFFChorusUnit  {
+class EFFChorusUnit  : public EffectBase{
 public:
     
 
@@ -48,10 +48,25 @@ public:
         ParamGroup.add(_e_chorus_in_delayConnectTo.set("Delay connect to", 0, 0, 6));
     }
     
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update depth
+        float depth = sensorValue * (_e_chorus_in_depthMax - _e_chorus_in_depthMin) + _e_chorus_in_depthMin;
+        _e_chorus_in_depth.set(depth);
+
+        // Update speed
+        float speed = sensorValue * (_e_chorus_in_speedMax - _e_chorus_in_speedMin) + _e_chorus_in_speedMin;
+        _e_chorus_in_speed.set(speed);
+
+        // Update delay
+        float delay = sensorValue * (_e_chorus_in_delayMax - _e_chorus_in_delayMin) + _e_chorus_in_delayMin;
+        _e_chorus_in_delay.set(delay);
+    }
+
+    
     void setParameterGroupName(std::string name){
         ParamGroup.setName(name);
     }
-    ofParameterGroup getParamGroup(){
+    ofParameterGroup& getParamGroup() {
         return ParamGroup;
     }
     void DoClear(){

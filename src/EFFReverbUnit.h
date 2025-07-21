@@ -4,7 +4,7 @@
 #include "ofxPDSP.h"
 
 
-class EFFReverbUnit  {
+class EFFReverbUnit  : public EffectBase{
 public:
     
 
@@ -85,8 +85,39 @@ public:
 
     }
     
-    ofParameterGroup getParamGroup(){
-        
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update mix
+        float mix = sensorValue * (_e_reverb_in_mixMax - _e_reverb_in_mixMin) + _e_reverb_in_mixMin;
+        _e_reverb_in_mix.set(mix);
+
+        // Update time
+        float time = sensorValue * (_e_reverb_in_timeMax - _e_reverb_in_timeMin) + _e_reverb_in_timeMin;
+        _e_reverb_in_time.set(time);
+
+        // Update damping
+        float damping = sensorValue * (_e_reverb_in_dampingMax - _e_reverb_in_dampingMin) + _e_reverb_in_dampingMin;
+        _e_reverb_in_damping.set(damping);
+
+        // Update density
+        float density = sensorValue * (_e_reverb_in_densityMax - _e_reverb_in_densityMin) + _e_reverb_in_densityMin;
+        _e_reverb_in_density.set(density);
+
+        // Update hiCut
+        float hiCut = sensorValue * (_e_reverb_in_hiCutMax - _e_reverb_in_hiCutMin) + _e_reverb_in_hiCutMin;
+        _e_reverb_in_hiCut.set(hiCut);
+
+        // Update modulation frequency
+        float modFreq = sensorValue * (_e_reverb_in_modFreqMax - _e_reverb_in_modFreqMin) + _e_reverb_in_modFreqMin;
+        _e_reverb_in_modFreq.set(modFreq);
+
+        // Update modulation amount
+        float modAmount = sensorValue * (_e_reverb_in_modAmountMax - _e_reverb_in_modAmountMin) + _e_reverb_in_modAmountMin;
+        _e_reverb_in_modAmount.set(modAmount);
+    }
+
+    
+    ofParameterGroup& getParamGroup() {
+
         return ParamGroup;
     }
     

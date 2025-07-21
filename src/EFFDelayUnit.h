@@ -4,7 +4,7 @@
 #include "ofxPDSP.h"
 
 
-class EFFDelayUnit  {
+class EFFDelayUnit  : public EffectBase{
 public:
     
 
@@ -58,8 +58,26 @@ public:
         
     }
     
-    ofParameterGroup getParamGroup(){
-        
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update send level
+        float send = sensorValue * (_e_delay_in_sendMax - _e_delay_in_sendMin) + _e_delay_in_sendMin;
+        _e_delay_in_send.set(send);
+
+        // Update delay time
+        float time = sensorValue * (_e_delay_in_timeMax - _e_delay_in_timeMin) + _e_delay_in_timeMin;
+        _e_delay_in_time.set(time);
+
+        // Update damping
+        float damping = sensorValue * (_e_delay_in_dampingMax - _e_delay_in_dampingMin) + _e_delay_in_dampingMin;
+        _e_delay_in_damping.set(damping);
+
+        // Update feedback
+        float feedback = sensorValue * (_e_delay_in_feedbackMax - _e_delay_in_feedbackMin) + _e_delay_in_feedbackMin;
+        _e_delay_in_feedback.set(feedback);
+    }
+    
+    ofParameterGroup& getParamGroup() {
+
         return ParamGroup;
     }
     void DoClear(){

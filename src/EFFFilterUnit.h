@@ -4,7 +4,7 @@
 #include "ofxPDSP.h"
 
 
-class EFFFilterUnit  {
+class EFFFilterUnit  : public EffectBase{
 public:
 
     ofParameter<int> _e_MLAD_in_freq;
@@ -35,10 +35,20 @@ public:
         ParamGroup.add(_e_MLAD_in_resoConnectTo.set("Reso connect to", 0, 0, 6));
     }
     
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update frequency
+        float freq = sensorValue * (_e_MLAD_in_freqMax - _e_MLAD_in_freqMin) + _e_MLAD_in_freqMin;
+        _e_MLAD_in_freq.set(freq);
+
+        // Update resonance
+        float reso = sensorValue * (_e_MLAD_in_resoMax - _e_MLAD_in_resoMin) + _e_MLAD_in_resoMin;
+        _e_MLAD_in_reso.set(reso);
+    }
+    
     void setParameterGroupName(std::string name){
         ParamGroup.setName(name);
     }
-    ofParameterGroup getParamGroup(){
+    ofParameterGroup& getParamGroup() {
         return ParamGroup;
     }
     
@@ -58,7 +68,5 @@ public:
         
     }
     
-
-
 
 };

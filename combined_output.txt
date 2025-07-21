@@ -1,0 +1,2163 @@
+_______________NEW FILE CONTENTS_______________
+==== Contents of ISensorStrategy.h ====
+// ISensorStrategy.h
+// Gaugemancy
+//
+// Created by Fred Rodrigues on 02/11/2024.
+
+#pragma once
+#include "ofMain.h"
+
+class ISensorStrategy {
+public:
+    virtual ~ISensorStrategy() = default;
+    virtual void updateSensorData() = 0;
+    virtual ofParameter<float> getSensorValue(const std::string& name) const = 0;
+};
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of ISensorStrategy.cpp ====
+//
+//  ISensorStrategy.cpp
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 02/11/2024.
+//
+
+#pragma once
+#include "ISensorStrategy.h"
+
+class SPIStrategy : public ISensorStrategy {
+public:
+    void updateSensorData() override;
+    ofParameter<float> getSensorValue(const std::string& name) const override;
+
+private:
+    // Add SPI-specific members here
+};
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of onScreenButton.h ====
+
+#pragma once
+
+#include "ofxMSAInteractiveObject.h"
+
+
+#define		IDLE_COLOR		0xFFFFFF
+#define		OVER_COLOR		0x00FF00
+#define		DOWN_COLOR		0xFF0000
+
+class onScreenButton : public ofxMSAInteractiveObject  {
+public:
+    
+    string buttonName;
+    int buttonMessage;
+    ofTrueTypeFont labelFont;
+    bool buttonActive;
+    void setup(string label, int message) {
+        enableMouseEvents();
+        enableKeyEvents();
+        labelFont.load("verdana.ttf",15);
+        buttonName=label;
+        buttonMessage = message;
+        buttonActive=false;
+        ofLogVerbose()<<buttonName +  " button::setup()"<<endl;
+
+        
+    }
+    
+    void exit() {
+        
+        ofLogVerbose()<< buttonName +  " button::exit() - goodbye!"<<endl;
+    }
+    
+    
+    void update() {
+        //		x = ofGetWidth()/2 + cos(ofGetElapsedTimef() * 0.2) * ofGetWidth()/4;
+        //		y = ofGetHeight()/2 + sin(ofGetElapsedTimef() * 0.2) * ofGetHeight()/4;
+    }
+    
+    
+    void draw() {
+        ofPushStyle();
+        if(isMousePressed()) ofSetHexColor(DOWN_COLOR);
+        else if(isMouseOver()) ofSetHexColor(OVER_COLOR);
+        else if (buttonActive) ofSetHexColor(DOWN_COLOR);
+        else ofSetHexColor(IDLE_COLOR);
+        
+        
+        ofNoFill();
+        
+        ofDrawRectangle(x, y, width, height);
+        
+        if (buttonActive) ofSetHexColor(DOWN_COLOR);
+        else ofSetHexColor(IDLE_COLOR);
+        labelFont.drawString(buttonName, x + ((width - labelFont.getStringBoundingBox(buttonName, 0, 0).getWidth())/2), y + ((height - labelFont.getStringBoundingBox(buttonName, 0, 0).getHeight())));
+
+        ofPopStyle();
+        
+    }
+    
+    virtual void onRollOver(int x, int y) {
+		ofLogVerbose() <<buttonName +  " button::onRollOver x " + ofToString( x) + " y " + ofToString( y) + buttonName <<endl;
+    }
+    
+    virtual void onRollOut() {
+        ofLogVerbose()<<buttonName +  " button::onRollOut x " + ofToString( x) + " y " + ofToString( y)<<endl;
+    }
+    
+    virtual void onPress(int x, int y, int button) {
+        ofLogVerbose()<<buttonName +  " button::onPress x " + ofToString( x) + " y " + ofToString( y)<<endl;
+    }
+    
+    virtual void onRelease(int x, int y, int button) {
+        ofLogVerbose()<<buttonName +  " button::onRelease x "+  ofToString( x) + " y " + ofToString( y)<<endl;
+		ofSendMessage(ofToString(buttonMessage));
+    }
+    
+    virtual void onReleaseOutside(int x, int y, int button) {
+        ofLogVerbose()<<buttonName +  " button::onReleaseOutside x " + ofToString( x) + " y " + ofToString( y)<<endl;
+    }
+    
+    
+};
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of AudioManager.h ====
+// AudioManager.h
+//
+//  AudioManager.h
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 02/11/2024.
+//
+
+#pragma once
+#include "ISensorStrategy.h"
+#include "SettingsManager.h"
+#include "EffectManager.h"
+
+class AudioManager {
+public:
+    AudioManager(); // Added constructor declaration
+    void setup(std::shared_ptr<ISensorStrategy> sensorStrategy, SettingsManager* settingsManager);
+    void updateEffects();
+    void applyPreset(const std::string& presetName, SettingsManager* settingsManager);
+    EffectManager& getEffectManager() { return effectManager; }
+
+private:
+    std::shared_ptr<ISensorStrategy> sensorStrategy;
+    SettingsManager* settingsManager;
+    EffectManager effectManager; // Manages all effects
+};
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of AudioManager.cpp ====
+// AudioManager.cpp
+//
+//  AudioManager.cpp
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 02/11/2024.
+//
+
+#include "AudioManager.h"
+
+AudioManager::AudioManager() {
+    // Initialize any necessary members here
+}
+
+void AudioManager::setup(std::shared_ptr<ISensorStrategy> sensorStrategy, SettingsManager* settingsManager) {
+    this->sensorStrategy = sensorStrategy;
+    this->settingsManager = settingsManager;
+    effectManager.setup(); // Initialize effects
+}
+
+void AudioManager::updateEffects() {
+    // Replace "sensorName" with actual sensor IDs as needed
+    auto sensorValue = sensorStrategy->getSensorValue("sensorName");
+    effectManager.updateEffects(sensorValue);
+}
+
+void AudioManager::applyPreset(const std::string& presetName, SettingsManager* settingsManager) {
+    // Load effect parameters for the preset and update each effect
+    ofParameterGroup presetParameters = settingsManager->getPresetParameters(presetName);
+    effectManager.applyPreset(presetParameters);
+}
+// Add tests at the bottom of the file.
+#ifdef UNIT_TESTS
+#define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
+#include "doctest.h"
+#include "SimulationStrategy.h"
+#include "SettingsManager.h"
+
+TEST_CASE("AudioManager Setup") {
+    AudioManager audioManager;
+    auto sensorStrategy = std::make_shared<SimulationStrategy>();
+    SettingsManager settingsManager;
+    audioManager.setup(sensorStrategy, &settingsManager);
+    SUCCEED();
+}
+
+TEST_CASE("AudioManager Update Effects") {
+    AudioManager audioManager;
+    auto sensorStrategy = std::make_shared<SimulationStrategy>();
+    SettingsManager settingsManager;
+    audioManager.setup(sensorStrategy, &settingsManager);
+
+    // Mock the sensor value
+    sensorStrategy->setMockSensorValue("sensorName", 0.5f);
+
+    audioManager.updateEffects();
+
+    // Verify that effects have been updated (similar to EffectManager tests)
+    auto& bitCrush = audioManager.getEffectManager().getEffects()[0];
+    int expectedBits = static_cast<int>(0.5f * (dynamic_cast<EFFBitCrushUnit*>(bitCrush)->_e_bitcrush_in_bitsMax - dynamic_cast<EFFBitCrushUnit*>(bitCrush)->_e_bitcrush_in_bitsMin) + dynamic_cast<EFFBitCrushUnit*>(bitCrush)->_e_bitcrush_in_bitsMin);
+    CHECK(dynamic_cast<EFFBitCrushUnit*>(bitCrush)->_e_bitcrush_in_bits == expectedBits);
+}
+
+TEST_CASE("AudioManager Apply Preset") {
+    AudioManager audioManager;
+    auto sensorStrategy = std::make_shared<SimulationStrategy>();
+    SettingsManager settingsManager;
+    audioManager.setup(sensorStrategy, &settingsManager);
+
+    // Assuming settingsManager is set up to return a preset
+    audioManager.applyPreset("TestPreset", &settingsManager);
+
+    // Verify that effects have been updated according to the preset
+    // This depends on how getPresetParameters is implemented
+}
+#endif // UNIT_TESTS
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of EffectManager.h ====
+// EffectManager.h
+//
+//  EffectManager.h
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 03/11/2024.
+//
+
+#pragma once
+#include "EffectBase.h"
+#include "EFFBitCrushUnit.h"
+#include "EFFFilterUnit.h"
+#include "EFFDelayUnit.h"
+#include "EFFDecimatorUnit.h"
+#include "EFFChorusUnit.h"
+#include "EFFReverbUnit.h"
+#include "EFFCompressorUnit.h"
+
+class EffectManager {
+public:
+    EffectManager();
+    void setup();
+    void updateEffects(const ofParameter<float>& sensorValue); // Update all effects with sensor data
+    void applyPreset(const ofParameterGroup& preset);          // Apply preset settings to effects
+    std::vector<EffectBase*>& getEffects() { return effects; }
+
+private:
+    EFFBitCrushUnit bitCrushEffect;
+    EFFFilterUnit filterEffect;
+    EFFDelayUnit delayEffect;
+    EFFDecimatorUnit decimatorEffect;
+    EFFChorusUnit chorusEffect;
+    EFFReverbUnit reverbEffect;
+    EFFCompressorUnit compressorEffect;
+
+    std::vector<EffectBase*> effects; // Store effects as base pointers for easy management
+};
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of EffectManager.cpp ====
+// EffectManager.cpp
+//
+//  EffectManager.cpp
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 03/11/2024.
+//
+
+#include "EffectManager.h"
+
+EffectManager::EffectManager() {
+    // Initialize all effects
+    effects.push_back(&bitCrushEffect);
+    effects.push_back(&filterEffect);
+    effects.push_back(&delayEffect);
+    effects.push_back(&decimatorEffect);
+    effects.push_back(&chorusEffect);
+    effects.push_back(&reverbEffect);
+    effects.push_back(&compressorEffect);
+}
+
+void EffectManager::setup() {
+    for (auto& effect : effects) {
+        effect->setup();
+    }
+}
+
+void EffectManager::updateEffects(const ofParameter<float>& sensorValue) {
+    for (auto& effect : effects) {
+        effect->update(sensorValue);
+    }
+}
+
+void EffectManager::applyPreset(const ofParameterGroup& preset) {
+    for (auto& effect : effects) {
+        // Assuming each effect has a method to apply parameters from the preset
+        effect->getParamGroup() = preset;
+    }
+}
+
+// Add tests at the bottom of the file.
+#ifdef UNIT_TESTS
+#define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
+#include "doctest.h"
+
+TEST_CASE("EffectManager Initialization") {
+    EffectManager effectManager;
+    CHECK(effectManager.getEffects().size() == 7); // We have 7 effects
+}
+
+TEST_CASE("EffectManager Setup") {
+    EffectManager effectManager;
+    effectManager.setup();
+    // Since setup doesn't return values, we assume no exceptions mean success
+    SUCCEED();
+}
+
+TEST_CASE("EffectManager Update Effects") {
+    EffectManager effectManager;
+    effectManager.setup();
+
+    ofParameter<float> sensorValue(0.5f);
+    effectManager.updateEffects(sensorValue);
+
+    // Check that effects have been updated
+    // For simplicity, we'll check one parameter from one effect
+    auto& bitCrush = effectManager.getEffects()[0];
+    int expectedBits = static_cast<int>(0.5f * (dynamic_cast<EFFBitCrushUnit*>(bitCrush)->_e_bitcrush_in_bitsMax - dynamic_cast<EFFBitCrushUnit*>(bitCrush)->_e_bitcrush_in_bitsMin) + dynamic_cast<EFFBitCrushUnit*>(bitCrush)->_e_bitcrush_in_bitsMin);
+    CHECK(dynamic_cast<EFFBitCrushUnit*>(bitCrush)->_e_bitcrush_in_bits == expectedBits);
+}
+
+TEST_CASE("EffectManager Apply Preset") {
+    EffectManager effectManager;
+    effectManager.setup();
+
+    // Create a preset with specific values
+    ofParameterGroup preset;
+    ofParameter<int> presetParam("Bits", 8);
+    preset.add(presetParam);
+
+    effectManager.applyPreset(preset);
+
+    // Check that the first effect's parameter has been updated
+    auto& bitCrush = effectManager.getEffects()[0];
+    CHECK(dynamic_cast<EFFBitCrushUnit*>(bitCrush)->_e_bitcrush_in_bits == 8);
+}
+#endif // UNIT_TESTS
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of SettingsManager.h ====
+//
+//  SettingsManager.h
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 02/11/2024.
+//
+
+#pragma once
+#include "ofMain.h"
+
+#include "ofxXmlSettings.h"
+
+class SettingsManager {
+public:
+    SettingsManager();
+    ~SettingsManager();
+
+    void loadSettings(const std::string& filepath);
+    ofParameter<int> getEffectParameter(const std::string& effectName, const std::string& param);
+    ofParameterGroup getPresetParameters(const std::string& presetName);
+
+
+private:
+    ofxXmlSettings settings;
+    ofParameterGroup parameters;
+};
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of SettingsManager.cpp ====
+//
+//  SettingsManager.cpp
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 02/11/2024.
+//
+
+#include "SettingsManager.h"
+
+SettingsManager::SettingsManager() {}
+
+SettingsManager::~SettingsManager() {}
+
+void SettingsManager::loadSettings(const std::string& filepath) {
+    if (settings.loadFile(filepath)) {
+        // Load settings into ofParameterGroup
+    }
+}
+
+ofParameter<int> SettingsManager::getEffectParameter(const std::string& effectName, const std::string& param) {
+    // Example: retrieve parameters for an effect
+    return parameters.getInt(effectName + ":" + param);
+}
+
+ofParameterGroup SettingsManager::getPresetParameters(const std::string& presetName) {
+    ofParameterGroup presetGroup;
+    // Load the preset parameters from settings into presetGroup
+    // This will depend on how presets are stored in your settings file
+    return presetGroup;
+}
+
+// Add tests at the bottom of the file.
+#ifdef UNIT_TESTS
+#define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
+#include "doctest.h"
+
+TEST_CASE("SettingsManager Load Settings") {
+    SettingsManager settingsManager;
+    settingsManager.loadSettings("test_settings.xml"); // Ensure this file exists for testing
+    SUCCEED();
+}
+
+TEST_CASE("SettingsManager Get Effect Parameter") {
+    SettingsManager settingsManager;
+    auto param = settingsManager.getEffectParameter("BitCrush", "Bits");
+    CHECK(param == 42); // As per our mock implementation
+}
+
+TEST_CASE("SettingsManager Get Preset Parameters") {
+    SettingsManager settingsManager;
+    auto presetGroup = settingsManager.getPresetParameters("TestPreset");
+    CHECK(presetGroup.getName() == "TestPreset");
+    CHECK(presetGroup.contains("Bits"));
+    auto bitsParam = presetGroup.getInt("Bits");
+    CHECK(bitsParam == 8);
+}
+#endif // UNIT_TESTS
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of PresetManager.h ====
+//
+//  PresetManager.h
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 02/11/2024.
+//
+
+#pragma once
+#include "AudioManager.h"
+#include "SettingsManager.h"
+
+class PresetManager {
+public:
+    PresetManager();
+    ~PresetManager();
+
+    void setup(AudioManager* audioManager, SettingsManager* settingsManager);
+    void applyPreset(const std::string& presetName);
+
+private:
+    AudioManager* audioManager;
+    SettingsManager* settingsManager;
+};
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of PresetManager.cpp ====
+//
+//  PresetManager.cpp
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 02/11/2024.
+//
+
+#include "PresetManager.h"
+
+PresetManager::PresetManager() {}
+
+PresetManager::~PresetManager() {}
+
+void PresetManager::setup(AudioManager* audioManager, SettingsManager* settingsManager) {
+    this->audioManager = audioManager;
+    this->settingsManager = settingsManager;
+}
+
+void PresetManager::applyPreset(const std::string& presetName) {
+    // Load preset parameters from SettingsManager and update AudioManager
+    audioManager->applyPreset(presetName, settingsManager);
+}
+
+// Add tests at the bottom of the file.
+#ifdef UNIT_TESTS
+#define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
+#include "doctest.h"
+#include "SimulationStrategy.h"
+
+TEST_CASE("PresetManager Apply Preset") {
+    AudioManager audioManager;
+    auto sensorStrategy = std::make_shared<SimulationStrategy>();
+    SettingsManager settingsManager;
+    audioManager.setup(sensorStrategy, &settingsManager);
+
+    PresetManager presetManager;
+    presetManager.setup(&audioManager, &settingsManager);
+
+    presetManager.applyPreset("TestPreset");
+
+    // Verify that the audio manager's effects have been updated
+    auto& bitCrush = audioManager.getEffectManager().getEffects()[0];
+    CHECK(dynamic_cast<EFFBitCrushUnit*>(bitCrush)->_e_bitcrush_in_bits == 8);
+}
+#endif // UNIT_TESTS
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of AudioPlayer.h ====
+
+#pragma once
+
+#include "ofMain.h"
+#include "ofxPDSP.h"
+
+    
+class AudioPlayer : public pdsp::Patchable {
+		
+public:
+    AudioPlayer() { patch(); } 
+    AudioPlayer( const AudioPlayer & other ) { patch(); } 
+        	~AudioPlayer()
+	{
+		std::cout << "Audio player destructor called" << std::endl;
+	}
+    
+    ofParameterGroup    ui;
+    
+    void load(string path);	
+    void play();
+    void pause(bool pause);
+    void stop();
+	float getPosition();
+	bool isLoaded();
+	void setVolume(float vol);
+	bool loaded;
+	void setPosition(float pos);
+	bool getIsPaused();
+    
+private:
+    void patch ();
+
+    void loadButtonCall( bool & value );
+    void sampleChangedCall( string & value );
+    void loadSample( string path );
+    
+    pdsp::Sampler       sampler0;
+    pdsp::ADSR          env;
+    pdsp::Amp           amp0;
+    
+    pdsp::Amp           fader0;
+    pdsp::DBtoLin       dBtoLin;
+    pdsp::Parameter     faderControl;    
+
+    pdsp::Parameter     pitchControl;
+    pdsp::Parameter     smoothControl;
+
+    pdsp::SampleBuffer  sample;    
+    ofParameter<bool>   loadButton;
+    ofParameter<string> samplePath;
+    ofParameter<string> sampleName;
+
+    ofParameter<bool>   bPlay;
+    ofParameter<bool>   bPause;
+    ofParameter<bool>   bStop;
+
+    pdsp::TriggerControl    sampleTrig;
+    pdsp::TriggerControl    envGate;
+    
+    static int number;
+
+    void onPlay( bool & value );
+    void onPause( bool & value );
+    void onStop( bool & value );
+    
+    bool bSemaphore;
+};   
+    
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of AudioPlayer.cpp ====
+
+// AudioPlayer.cpp
+// Nicola Pisanti, MIT License, 2016
+
+#include "AudioPlayer.h"
+
+int AudioPlayer::number = 0;
+
+void AudioPlayer::patch (){
+   
+    addModuleOutput("0", fader0 );
+    pitchControl >> sampler0.in_pitch();
+    
+    sampleTrig >> sampler0 >> amp0;
+    envGate    >> env      >> amp0.in_mod();
+    sampler0 >> amp0 >> fader0;
+    faderControl >> dBtoLin  >> fader0.in_mod();
+    sampler0.addSample( &sample, 0 );
+
+    smoothControl >> env.in_attack();
+    smoothControl >> env.in_release();
+
+    ui.setName( "pdsp player " + ofToString(++number));
+    ui.add( faderControl.set("volume", 0, -48, 24) );
+    ui.add( loadButton.set( "load", false ));
+    ui.add( sampleName.set("sample", "no sample"));
+    ui.add( samplePath.set("path", "no path"));
+    ui.add( pitchControl.set("pitch", 0, -24, 24));
+    ui.add( smoothControl.set("fade ms", 0, 0, 50)); 
+    ui.add( bPlay.set("play", false) );
+    ui.add( bPause.set("pause", false) );
+    ui.add( bStop.set("stop", true) );
+    
+    loadButton.addListener(this, &AudioPlayer::loadButtonCall );
+    samplePath.addListener(this, &AudioPlayer::sampleChangedCall );
+    bPlay.addListener(this, &AudioPlayer::onPlay );
+    bPause.addListener(this, &AudioPlayer::onPause );
+    bStop.addListener(this, &AudioPlayer::onStop );
+    
+    bSemaphore = true;
+    sample.setVerbose(true);
+	loaded = false;
+}
+
+void AudioPlayer::onPlay( bool & value ) {
+    
+    if( bSemaphore ) {
+        bSemaphore = false;
+        if ( bStop ) {
+            bPlay = true;
+            bStop = false;
+            envGate.trigger(1.0f);
+            sampleTrig.trigger(1.0f);
+            ofLogVerbose() << "[pdsp] player: playing\n";
+        } else if( bPause ) {
+            ofLogVerbose() << "[pdsp] player: unpaused\n";
+            bPlay = true;
+            bPause = false;
+            envGate.trigger(1.0f);            
+        } else {
+            bPlay = true;
+            sampleTrig.trigger(1.0f);
+        }
+        bSemaphore = true;
+    }
+
+}
+
+void AudioPlayer::onPause( bool & value ) {
+    
+    if( bSemaphore ) {
+        bSemaphore = false;
+        if ( bPlay ) {
+            bPause = true;
+            bPlay = false;
+            ofLogVerbose() << "[pdsp] player: paused\n";
+            envGate.off();
+        } else if( bStop ) {
+            bPause = false;
+            ofLogVerbose() << "[pdsp] player: impossible to pause on stop";
+        } else {
+            ofLogVerbose() << "[pdsp] player: unpaused\n";
+            bPlay = true;
+            bPause = false;
+            envGate.trigger(1.0f);        
+        }
+        bSemaphore = true;
+    }
+}
+
+void AudioPlayer::onStop( bool & value ) {
+
+    if( bSemaphore ) {
+        bSemaphore = false;
+        if ( bPlay || bPause ) {
+            bStop = true;
+            bPlay = false;
+            bPause = false;
+            ofLogVerbose() << "[pdsp] player: stopped\n";
+            envGate.off();          
+        }
+        bSemaphore = true;
+    }
+}
+
+void AudioPlayer::loadButtonCall( bool & value ) {
+    if(value){
+
+        float fvalue = faderControl.get();
+        faderControl.set(0.0f);
+        
+        //Open the Open File Dialog
+        ofFileDialogResult openFileResult= ofSystemLoadDialog("select an audio sample"); 
+        
+        //Check if the user opened a file
+        if (openFileResult.bSuccess){
+            
+            string path = openFileResult.getPath();
+            
+            samplePath = path;
+        
+            ofLogVerbose("file loaded");
+			loaded = true;
+            
+        }else {
+            ofLogVerbose("User hit cancel");
+			loaded = false;
+        }
+
+        // switch to mono if the sample has just one channel
+            sampler0.setSample( &sample, 0, 0 );
+       
+        loadButton = false;
+        
+        faderControl.set(fvalue);
+        
+        bool dummy = true;
+        onStop( dummy );
+    }
+}
+
+void AudioPlayer::sampleChangedCall( string & value ) {
+    
+    ofLogVerbose( "loading" + value );
+    loadSample( samplePath );    
+
+    auto v = ofSplitString(samplePath, "/" );
+    sampleName = v[v.size()-1];
+}
+    
+void AudioPlayer::loadSample( string path ) {
+    sample.load( path );
+}
+
+void AudioPlayer::load( string path ) {
+    samplePath = path;
+	loaded = true;
+}
+
+void AudioPlayer::play() {
+    bPlay = bPlay ? false : true;
+}
+
+void AudioPlayer::pause(bool pause){
+    bPause = pause;
+}
+
+void AudioPlayer::stop() {
+    bStop = bStop ? false : true;
+}
+
+float AudioPlayer::getPosition()
+{
+	return sampler0.meter_position();
+}
+	
+bool AudioPlayer::isLoaded()
+{
+	return loaded;
+}
+
+void AudioPlayer::setVolume(float vol)
+{
+	if (loaded)
+	{
+		faderControl.set(vol);
+	}
+}
+
+void AudioPlayer::setPosition(float pos)
+{
+	pos >> sampler0.in_start();
+}
+
+bool AudioPlayer::getIsPaused()
+{
+	return bPause;
+}
+
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of EFFBitCrushUnit.h ====
+
+#pragma once
+
+#include "ofxPDSP.h"
+
+
+class EFFBitCrushUnit  : public EffectBase{
+public:
+    
+ 
+    ofParameter<int> _e_bitcrush_in_bits;
+    ofParameter<int> _e_bitcrush_in_bitsMin;
+    ofParameter<int> _e_bitcrush_in_bitsMax;
+    ofParameter<int> _e_bitcrush_in_bitsConnectTo;
+    ofParameterGroup ParamGroup;
+    bool usesSend =true;
+    bool isMono = true;
+    
+    
+    void setup(){
+        ParamGroup.add(_e_bitcrush_in_bits.set("Bits", 16, 1, 16));
+        ParamGroup.add(_e_bitcrush_in_bitsMin.set("Bits Min", 1, 1, 16));
+        ParamGroup.add(_e_bitcrush_in_bitsMax.set("Bits Max", 16, 1, 16));
+        ParamGroup.add(_e_bitcrush_in_bitsConnectTo.set("Bits Connect To", 0, 0, 6));
+    }
+    
+    ofParameterGroup& getParamGroup() {
+        return ParamGroup; // Return the reference
+    }
+    
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update bit depth based on sensorValue
+        int bits = static_cast<int>(sensorValue * (_e_bitcrush_in_bitsMax - _e_bitcrush_in_bitsMin) + _e_bitcrush_in_bitsMin);
+        _e_bitcrush_in_bits.set(bits);
+    }
+    
+    void DoClear(){
+        ParamGroup.clear();
+    }
+    
+    void setParameterGroupName(std::string name){
+        ParamGroup.setName(name);
+    }
+    
+    bool getUsesSend(){
+        return usesSend;
+    }
+    
+    bool getIsMono(){
+        return isMono;
+    }
+    
+    void exit() {
+        
+    }
+    
+    
+    // Add tests at the bottom of the file.
+    #ifdef UNIT_TESTS
+    #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
+    #include "doctest.h"
+
+    TEST_CASE("EFFBitCrushUnit Initialization") {
+        EFFBitCrushUnit bitCrush;
+        bitCrush.setup();
+
+        CHECK(bitCrush._e_bitcrush_in_bits == 16);
+        CHECK(bitCrush._e_bitcrush_in_bitsMin == 1);
+        CHECK(bitCrush._e_bitcrush_in_bitsMax == 16);
+    }
+
+    TEST_CASE("EFFBitCrushUnit Update Function") {
+        EFFBitCrushUnit bitCrush;
+        bitCrush.setup();
+
+        // Test with sensorValue = 0.0 (should set bits to bitsMin)
+        ofParameter<float> sensorValue(0.0f);
+        bitCrush.update(sensorValue);
+        CHECK(bitCrush._e_bitcrush_in_bits == bitCrush._e_bitcrush_in_bitsMin);
+
+        // Test with sensorValue = 1.0 (should set bits to bitsMax)
+        sensorValue.set(1.0f);
+        bitCrush.update(sensorValue);
+        CHECK(bitCrush._e_bitcrush_in_bits == bitCrush._e_bitcrush_in_bitsMax);
+
+        // Test with sensorValue = 0.5
+        sensorValue.set(0.5f);
+        bitCrush.update(sensorValue);
+        int expectedBits = static_cast<int>(0.5f * (bitCrush._e_bitcrush_in_bitsMax - bitCrush._e_bitcrush_in_bitsMin) + bitCrush._e_bitcrush_in_bitsMin);
+        CHECK(bitCrush._e_bitcrush_in_bits == expectedBits);
+    }
+    #endif // UNIT_TESTS
+    
+    
+};
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of EFFDecimatorUnit.h ====
+
+#pragma once
+
+#include "ofxPDSP.h"
+
+
+class EFFDecimatorUnit  : public EffectBase{
+public:
+
+    ofParameter<int> _e_decomator_in_rate;
+    ofParameter<int> _e_decomator_in_rateMin;
+    ofParameter<int> _e_decomator_in_rateMax;
+    ofParameter<int> _e_decomator_in_rateConnectTo;
+    ofParameterGroup ParamGroup;
+    bool usesSend = false;
+    bool isMono = true;
+    
+    
+    void setup(){
+        ParamGroup.add(_e_decomator_in_rate.set("Rate", 44100, 1, 44100));
+        ParamGroup.add(_e_decomator_in_rateMin.set("Rate Min", 1, 1, 44100));
+        ParamGroup.add(_e_decomator_in_rateMax.set("Rate Max", 44100, 1, 44100));
+        ParamGroup.add(_e_decomator_in_rateConnectTo.set("Rate Connect to", 0, 0, 6));
+    }
+    
+    ofParameterGroup& getParamGroup() {
+        return ParamGroup;
+    }
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update decimation rate
+        int rate = static_cast<int>(sensorValue * (_e_decomator_in_rateMax - _e_decomator_in_rateMin) + _e_decomator_in_rateMin);
+        _e_decomator_in_rate.set(rate);
+    }
+    
+    void setParameterGroupName(std::string name){
+        ParamGroup.setName(name);
+    }
+    
+    void DoClear(){
+        ParamGroup.clear();
+    }
+    
+    
+    bool getUsesSend(){
+        return usesSend;
+    }
+    
+    bool getIsMono(){
+        return isMono;
+    }
+    
+    void exit() {
+        
+    }
+    
+    
+ 
+    
+    
+    
+};
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of EFFFilterUnit.h ====
+
+#pragma once
+
+#include "ofxPDSP.h"
+
+
+class EFFFilterUnit  : public EffectBase{
+public:
+
+    ofParameter<int> _e_MLAD_in_freq;
+    ofParameter<int> _e_MLAD_in_freqMin;
+    ofParameter<int> _e_MLAD_in_freqMax;
+    ofParameter<int> _e_MLAD_in_freqConnectTo;
+    
+    ofParameter<float> _e_MLAD_in_reso;
+    ofParameter<float> _e_MLAD_in_resoMin;
+    ofParameter<float> _e_MLAD_in_resoMax;
+    ofParameter<int> _e_MLAD_in_resoConnectTo;
+    
+    ofParameterGroup ParamGroup;
+    
+    bool usesSend = false;
+    bool isMono = true;
+    
+    
+    void setup(){
+        ParamGroup.add(_e_MLAD_in_freq.set("Freq", 20000, 1, 20000));
+        ParamGroup.add(_e_MLAD_in_freqMin.set("Freq Min", 1, 1, 20000));
+        ParamGroup.add(_e_MLAD_in_freqMax.set("Freq Max", 20000, 1, 20000));
+        ParamGroup.add(_e_MLAD_in_freqConnectTo.set("Freq connect to", 0, 0, 6));
+        
+        ParamGroup.add(_e_MLAD_in_reso.set("Reso", 0, 0, 1));
+        ParamGroup.add(_e_MLAD_in_resoMin.set("Reso Min", 0, 0, 1));
+        ParamGroup.add(_e_MLAD_in_resoMax.set("Reso Max", 1, 0, 1));
+        ParamGroup.add(_e_MLAD_in_resoConnectTo.set("Reso connect to", 0, 0, 6));
+    }
+    
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update frequency
+        float freq = sensorValue * (_e_MLAD_in_freqMax - _e_MLAD_in_freqMin) + _e_MLAD_in_freqMin;
+        _e_MLAD_in_freq.set(freq);
+
+        // Update resonance
+        float reso = sensorValue * (_e_MLAD_in_resoMax - _e_MLAD_in_resoMin) + _e_MLAD_in_resoMin;
+        _e_MLAD_in_reso.set(reso);
+    }
+    
+    void setParameterGroupName(std::string name){
+        ParamGroup.setName(name);
+    }
+    ofParameterGroup& getParamGroup() {
+        return ParamGroup;
+    }
+    
+    void DoClear(){
+        ParamGroup.clear();
+    }
+    
+    bool getUsesSend(){
+        return usesSend;
+    }
+    
+    bool getIsMono(){
+        return isMono;
+    }
+    
+    void exit() {
+        
+    }
+    
+    // Add tests at the bottom of the file.
+    #ifdef UNIT_TESTS
+    #define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
+    #include "doctest.h"
+
+    TEST_CASE("EFFFilterUnit Initialization") {
+        EFFFilterUnit filterUnit;
+        filterUnit.setup();
+
+        CHECK(filterUnit._e_MLAD_in_freq == 20000);
+        CHECK(filterUnit._e_MLAD_in_freqMin == 1);
+        CHECK(filterUnit._e_MLAD_in_freqMax == 20000);
+        CHECK(filterUnit._e_MLAD_in_reso == 0.0f);
+        CHECK(filterUnit._e_MLAD_in_resoMin == 0.0f);
+        CHECK(filterUnit._e_MLAD_in_resoMax == 1.0f);
+    }
+
+    TEST_CASE("EFFFilterUnit Update Function") {
+        EFFFilterUnit filterUnit;
+        filterUnit.setup();
+
+        // Test with sensorValue = 0.0
+        ofParameter<float> sensorValue(0.0f);
+        filterUnit.update(sensorValue);
+        CHECK(filterUnit._e_MLAD_in_freq == filterUnit._e_MLAD_in_freqMin);
+        CHECK(filterUnit._e_MLAD_in_reso == filterUnit._e_MLAD_in_resoMin);
+
+        // Test with sensorValue = 1.0
+        sensorValue.set(1.0f);
+        filterUnit.update(sensorValue);
+        CHECK(filterUnit._e_MLAD_in_freq == filterUnit._e_MLAD_in_freqMax);
+        CHECK(filterUnit._e_MLAD_in_reso == filterUnit._e_MLAD_in_resoMax);
+
+        // Test with sensorValue = 0.5
+        sensorValue.set(0.5f);
+        filterUnit.update(sensorValue);
+        float expectedFreq = 0.5f * (filterUnit._e_MLAD_in_freqMax - filterUnit._e_MLAD_in_freqMin) + filterUnit._e_MLAD_in_freqMin;
+        float expectedReso = 0.5f * (filterUnit._e_MLAD_in_resoMax - filterUnit._e_MLAD_in_resoMin) + filterUnit._e_MLAD_in_resoMin;
+        CHECK(filterUnit._e_MLAD_in_freq == expectedFreq);
+        CHECK(filterUnit._e_MLAD_in_reso == expectedReso);
+    }
+    #endif // UNIT_TESTS
+
+
+};
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of ofApp.h ====
+#pragma once
+
+#include "ofxPDSP.h"
+#include "ofxGui.h"
+#include "ofxXmlSettings.h"
+#include "ofxOsc.h"
+
+#include "SettingsManager.h"
+#include "PresetManager.h"
+#include "AudioManager.h"
+#include "ISensorStrategy.h"
+#include "SPIStrategy.h"
+#include "SimulationStrategy.h"
+#include "UIManager.h"
+
+// Define TARGET_RASPBERRY_PI if not on OSX or Windows
+#ifndef TARGET_OSX
+#ifndef TARGET_WIN32
+#define TARGET_RASPBERRY_PI
+#endif
+#endif
+
+// Include onScreenButton only when not on Raspberry Pi
+#ifndef TARGET_RASPBERRY_PI
+#include "onScreenButton.h"
+#endif
+
+// Include Raspberry Pi-specific headers
+#ifdef TARGET_RASPBERRY_PI
+#include "ofxGPIO.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <linux/i2c-dev.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <wiringPi.h>
+#endif
+
+#define NUMBER_OF_SENSORS 6
+#define NUMBER_OF_EFFECTS 6
+#define NUMBER_OF_PRESETS 4
+
+// Operation modes
+#define OP_MODE_SETUP 0
+#define OP_MODE_WAIT_FOR_NARRATION 1
+#define OP_MODE_PLAY_NARRATION 2
+#define OP_MODE_NARRATION_GUI 6
+#define OP_MODE_NARRATION_GLITCH 9
+#define OP_MODE_SWITCH_PRESETS 3
+#define OP_MODE_MULTI_GRAIN_MODE 4
+#define OP_MODE_SINGLE_GRAIN_MODE 5
+#define OP_MODE_SIMULATION_MULTI 7
+#define OP_MODE_SIMULATION_SINGLE 8
+
+// Button action messages
+#define BTN_MSG_A_PAUSE_NARRATION 9
+#define BTN_MSG_A_SKIP_NARRATION 10
+#define BTN_MSG_A_RESTART_NARRATION 11
+#define BTN_MSG_A_GLITCH_NARRATION 12
+#define BTN_MSG_A_TOGGLE_SIMULATION 13
+#define BTN_MSG_A_SWITCH_PRESETS 14
+#define BTN_MSG_A_RETURN_TO_NARRATION 15
+#define BTN_MSG_A_NARRATION_GUI 16
+#define BTN_MSG_A_SAVE_GRANULAR 17
+#define BTN_MSG_A_SAVE_NARRATION 18
+#define BTN_MSG_A_PAUSE_SIMULATION 19
+#define BTN_MSG_A_CURVES_OR_SIMULATION_DISPLAY 20
+#define BTN_MSG_A_EFFECTS_OR_GRANULAR 28
+
+// Button mode messages
+#define BTN_MSG_M_OP_MODE_PLAY_NARRATION 21
+#define BTN_MSG_M_OP_MODE_SWITCH_PRESETS 22
+#define BTN_MSG_M_OP_MODE_GRAIN_MODE 23
+#define BTN_MSG_M_OP_MODE_NARRATION_GUI 24
+#define BTN_MSG_M_OP_MODE_SIMULATION 25
+#define BTN_MSG_M_OP_MODE_NARRATION_GLITCH 26
+#define BTN_MSG_M_EXIT 27
+
+// Size of on-screen buttons
+#define BUTTON_WIDTH 250
+#define BUTTON_HEIGHT 45
+
+//#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+//#include "doctest.h"
+
+class ofApp : public ofBaseApp {
+public:
+    void setup();
+    void update();
+    void draw();
+    void exit();
+    void keyPressed(int key);
+    void keyReleased(int key);
+    void mouseMoved(int x, int y);
+    void mouseDragged(int x, int y, int button);
+    void mousePressed(int x, int y, int button);
+    void mouseReleased(int x, int y, int button);
+    void mouseScrolled(int x, int y, float scrollX, float scrollY); // Added missing declaration
+    void resetValuesAfterChanges();
+    void mouseEntered(int x, int y);
+    void mouseExited(int x, int y);
+    void windowResized(int w, int h);
+    void dragEvent(ofDragInfo dragInfo);
+    void gotMessage(ofMessage msg);
+
+private:
+    SettingsManager settingsManager;
+    PresetManager presetManager;
+    AudioManager audioManager;
+    std::shared_ptr<ISensorStrategy> sensorStrategy;
+    std::unique_ptr<UIManager> uiManager;
+
+    int operationMode;
+
+#ifndef TARGET_RASPBERRY_PI
+    std::vector<onScreenButton*> onScreenButtons;
+    void setupButtons();
+#endif
+};
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of ofApp.cpp ====
+#include "ofApp.h"
+
+//--------------------------------------------------------------
+void ofApp::setup() {
+#ifdef TARGET_RASPBERRY_PI
+    sensorStrategy = std::make_shared<SPIStrategy>();
+#else
+    sensorStrategy = std::make_shared<SimulationStrategy>();
+    uiManager = std::make_unique<UIManager>(&audioManager);
+    setupButtons(); // Setup buttons
+#endif
+
+    settingsManager.loadSettings("settings.xml");
+    audioManager.setup(sensorStrategy, &settingsManager);
+    presetManager.setup(&audioManager, &settingsManager);
+
+    operationMode = OP_MODE_SETUP; // Initialize operation mode
+}
+//--------------------------------------------------------------
+void ofApp::update() {
+    sensorStrategy->updateSensorData();
+    audioManager.updateEffects();
+
+    if (uiManager) {
+        uiManager->update();
+    }
+
+#ifndef TARGET_RASPBERRY_PI
+    for (auto button : onScreenButtons) {
+        button->update();
+    }
+#endif
+}
+
+//--------------------------------------------------------------
+void ofApp::draw() {
+    if (uiManager) {
+        uiManager->draw();
+    }
+
+#ifndef TARGET_RASPBERRY_PI
+    for (auto button : onScreenButtons) {
+        button->draw();
+    }
+#endif
+}
+
+//--------------------------------------------------------------
+void ofApp::exit() {
+#ifndef TARGET_RASPBERRY_PI
+    for (auto button : onScreenButtons) {
+        button->disableMouseEvents();
+        delete button;
+    }
+    onScreenButtons.clear();
+#endif
+}
+
+//--------------------------------------------------------------
+void ofApp::keyPressed(int key) {
+    // Handle key presses if necessary
+}
+
+//--------------------------------------------------------------
+void ofApp::keyReleased(int key) {
+    // Handle key releases if necessary
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseMoved(int x, int y) {
+    // Handle mouse movement if necessary
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseDragged(int x, int y, int button) {
+    // Handle mouse dragging if necessary
+}
+
+//--------------------------------------------------------------
+void ofApp::mousePressed(int x, int y, int button) {
+    // Handle mouse presses if necessary
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseReleased(int x, int y, int button) {
+    // Handle mouse releases if necessary
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
+    // Handle mouse scrolling if necessary
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseEntered(int x, int y) {
+    // Handle mouse enter events if necessary
+}
+
+//--------------------------------------------------------------
+void ofApp::mouseExited(int x, int y) {
+    // Handle mouse exit events if necessary
+}
+
+//--------------------------------------------------------------
+void ofApp::windowResized(int w, int h) {
+    // Handle window resize events if necessary
+}
+
+//--------------------------------------------------------------
+void ofApp::gotMessage(ofMessage msg) {
+    int messageID = ofToInt(msg.message);
+    switch (messageID) {
+        case BTN_MSG_M_OP_MODE_PLAY_NARRATION:
+            operationMode = OP_MODE_PLAY_NARRATION;
+            // Implement behavior for playing narration
+            ofLogVerbose() << "Switched to OP_MODE_PLAY_NARRATION";
+            break;
+
+        case BTN_MSG_M_OP_MODE_SWITCH_PRESETS:
+            // Implement behavior for switching presets
+            presetManager.applyPreset("NextPreset");
+            ofLogVerbose() << "Applied next preset";
+            break;
+
+        // Handle other messages
+        default:
+            ofLogVerbose() << "Received unknown message: " << messageID;
+            break;
+    }
+}
+
+//--------------------------------------------------------------
+void ofApp::dragEvent(ofDragInfo dragInfo) {
+    // Handle drag-and-drop events if necessary
+}
+
+#ifndef TARGET_RASPBERRY_PI
+void ofApp::setupButtons() {
+    int x = 10;
+    int y = 10;
+    int spacing = BUTTON_HEIGHT + 10;
+
+    onScreenButton* playNarrationButton = new onScreenButton();
+    playNarrationButton->setup("Play Narration", BTN_MSG_M_OP_MODE_PLAY_NARRATION);
+    playNarrationButton->setPosition(x, y);
+    playNarrationButton->setSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+    onScreenButtons.push_back(playNarrationButton);
+    y += spacing;
+
+    onScreenButton* switchPresetsButton = new onScreenButton();
+    switchPresetsButton->setup("Switch Presets", BTN_MSG_M_OP_MODE_SWITCH_PRESETS);
+    switchPresetsButton->setPosition(x, y);
+    switchPresetsButton->setSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+    onScreenButtons.push_back(switchPresetsButton);
+    y += spacing;
+
+    // Add more buttons as needed
+}
+#endif
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of EFFReverbUnit.h ====
+
+#pragma once
+
+#include "ofxPDSP.h"
+
+
+class EFFReverbUnit  : public EffectBase{
+public:
+    
+
+    ofParameter<float> _e_reverb_in_mix;
+    ofParameter<float> _e_reverb_in_mixMin;
+    ofParameter<float> _e_reverb_in_mixMax;
+    ofParameter<int> _e_reverb_in_mixConnectTo;
+    
+    ofParameter<float> _e_reverb_in_damping;
+    ofParameter<float> _e_reverb_in_dampingMin;
+    ofParameter<float> _e_reverb_in_dampingMax;
+    ofParameter<int> _e_reverb_in_dampingConnectTo;
+    
+    ofParameter<float> _e_reverb_in_density;
+    ofParameter<float> _e_reverb_in_densityMin;
+    ofParameter<float> _e_reverb_in_densityMax;
+    ofParameter<int> _e_reverb_in_densityConnectTo;
+
+    ofParameter<float> _e_reverb_in_hiCut;
+    ofParameter<float> _e_reverb_in_hiCutMin;
+    ofParameter<float> _e_reverb_in_hiCutMax;
+    ofParameter<int> _e_reverb_in_hiCutConnectTo;
+
+    ofParameter<float> _e_reverb_in_modAmount;
+    ofParameter<float> _e_reverb_in_modAmountMin;
+    ofParameter<float> _e_reverb_in_modAmountMax;
+    ofParameter<int> _e_reverb_in_modAmountConnectTo;
+
+    ofParameter<float> _e_reverb_in_modFreq;
+    ofParameter<float> _e_reverb_in_modFreqMin;
+    ofParameter<float> _e_reverb_in_modFreqMax;
+    ofParameter<int> _e_reverb_in_modFreqConnectTo;
+
+    ofParameter<float> _e_reverb_in_time;
+    ofParameter<float> _e_reverb_in_timeMin;
+    ofParameter<float> _e_reverb_in_timeMax;
+    ofParameter<int> _e_reverb_in_timeConnectTo;
+
+    ofParameterGroup ParamGroup;
+    bool usesSend =true;
+    bool isMono = false;
+    
+    void setup(){
+        ParamGroup.add(_e_reverb_in_mix.set("Send ", 0.0, 0, 1));
+        ParamGroup.add(_e_reverb_in_mixMin.set("Send Min", 0.0, 0, 1));
+        ParamGroup.add(_e_reverb_in_mixMax.set("Send Max", 1, 0, 1));
+        ParamGroup.add(_e_reverb_in_mixConnectTo.set("Send Connect To", 0, 0, 6));
+        
+        ParamGroup.add(_e_reverb_in_time.set("Time ", 0.0, 0.0, 20));
+        ParamGroup.add(_e_reverb_in_timeMin.set("Time Min", 0.0, 0.0, 20));
+        ParamGroup.add(_e_reverb_in_timeMax.set("Time Max", 20, 0.0, 20));
+        ParamGroup.add(_e_reverb_in_timeConnectTo.set("Time Connect To", 0, 0, 6));
+
+        ParamGroup.add(_e_reverb_in_damping.set("Damping ", 0.0, 0, 1));
+        ParamGroup.add(_e_reverb_in_dampingMin.set("Damping Min", 0.0, 0, 1));
+        ParamGroup.add(_e_reverb_in_dampingMax.set("Damping Max", 1, 0, 1));
+        ParamGroup.add(_e_reverb_in_dampingConnectTo.set("Damping Connect To", 0, 0, 6));
+
+        ParamGroup.add(_e_reverb_in_density.set("Density ", 0.0, 0, 1));
+        ParamGroup.add(_e_reverb_in_densityMin.set("Density Min", 0.0, 0, 1));
+        ParamGroup.add(_e_reverb_in_densityMax.set("Density Max", 1, 0, 1));
+        ParamGroup.add(_e_reverb_in_densityConnectTo.set("Density COnnect To", 0, 0, 6));
+
+        ParamGroup.add(_e_reverb_in_hiCut.set("Hi cut ", 0.0, 0, 20000));
+        ParamGroup.add(_e_reverb_in_hiCutMin.set("Hi cut Min", 0.0, 0, 20000));
+        ParamGroup.add(_e_reverb_in_hiCutMax.set("Hi cut Max", 20000, 0, 20000));
+        ParamGroup.add(_e_reverb_in_hiCutConnectTo.set("Hi cut Connect To", 0, 0, 6));
+
+        ParamGroup.add(_e_reverb_in_modFreq.set("Mod freq ", 0.0, 0, 20000));
+        ParamGroup.add(_e_reverb_in_modFreqMin.set("Mod freq Min", 0.0, 0, 20000));
+        ParamGroup.add(_e_reverb_in_modFreqMax.set("Mod freq Max", 20000, 0, 20000));
+        ParamGroup.add(_e_reverb_in_modFreqConnectTo.set("Mod freq Connect To", 0, 0, 6));
+
+        ParamGroup.add(_e_reverb_in_modAmount.set("Mod amount ", 0.0, 0, 1));
+        ParamGroup.add(_e_reverb_in_modAmountMin.set("Mod amount Min", 0.0, 0, 1));
+        ParamGroup.add(_e_reverb_in_modAmountMax.set("Mod amount Max", 1, 0, 1));
+        ParamGroup.add(_e_reverb_in_modAmountConnectTo.set("Mod amount Connect To",0, 0, 6));
+
+    }
+    
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update mix
+        float mix = sensorValue * (_e_reverb_in_mixMax - _e_reverb_in_mixMin) + _e_reverb_in_mixMin;
+        _e_reverb_in_mix.set(mix);
+
+        // Update time
+        float time = sensorValue * (_e_reverb_in_timeMax - _e_reverb_in_timeMin) + _e_reverb_in_timeMin;
+        _e_reverb_in_time.set(time);
+
+        // Update damping
+        float damping = sensorValue * (_e_reverb_in_dampingMax - _e_reverb_in_dampingMin) + _e_reverb_in_dampingMin;
+        _e_reverb_in_damping.set(damping);
+
+        // Update density
+        float density = sensorValue * (_e_reverb_in_densityMax - _e_reverb_in_densityMin) + _e_reverb_in_densityMin;
+        _e_reverb_in_density.set(density);
+
+        // Update hiCut
+        float hiCut = sensorValue * (_e_reverb_in_hiCutMax - _e_reverb_in_hiCutMin) + _e_reverb_in_hiCutMin;
+        _e_reverb_in_hiCut.set(hiCut);
+
+        // Update modulation frequency
+        float modFreq = sensorValue * (_e_reverb_in_modFreqMax - _e_reverb_in_modFreqMin) + _e_reverb_in_modFreqMin;
+        _e_reverb_in_modFreq.set(modFreq);
+
+        // Update modulation amount
+        float modAmount = sensorValue * (_e_reverb_in_modAmountMax - _e_reverb_in_modAmountMin) + _e_reverb_in_modAmountMin;
+        _e_reverb_in_modAmount.set(modAmount);
+    }
+
+    
+    ofParameterGroup& getParamGroup() {
+
+        return ParamGroup;
+    }
+    
+    bool getIsMono(){
+        return isMono;
+    }
+    
+    void setParameterGroupName(std::string name){
+        ParamGroup.setName(name);
+    }
+    
+    void DoClear(){
+        ParamGroup.clear();
+    }
+    bool getUsesSend(){
+        return usesSend;
+    }
+    
+    void exit() {
+        
+        ofLogVerbose()<<"MyTestObject::exit() - goodbye!\n"<<endl;
+    }
+    
+
+    
+    void draw() {
+        
+        
+        
+    }
+    
+    
+};
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of EFFDelayUnit.h ====
+
+#pragma once
+
+#include "ofxPDSP.h"
+
+
+class EFFDelayUnit  : public EffectBase{
+public:
+    
+
+    
+    ofParameter<float> _e_delay_in_send;
+    ofParameter<float> _e_delay_in_sendMin;
+    ofParameter<float> _e_delay_in_sendMax;
+    ofParameter<int> _e_delay_in_sendConnectTo;
+    
+    ofParameter<float> _e_delay_in_time;
+    ofParameter<float> _e_delay_in_timeMin;
+    ofParameter<float> _e_delay_in_timeMax;
+    ofParameter<int> _e_delay_in_timeConnectTo;
+    
+    ofParameter<float> _e_delay_in_damping;
+    ofParameter<float> _e_delay_in_dampingMin;
+    ofParameter<float> _e_delay_in_dampingMax;
+    ofParameter<int> _e_delay_in_dampingConnectTo;
+    
+    ofParameter<float> _e_delay_in_feedback;
+    ofParameter<float> _e_delay_in_feedbackMin;
+    ofParameter<float> _e_delay_in_feedbackMax;
+    ofParameter<int> _e_delay_in_feedbackConnectTo;
+    
+
+    
+    ofParameterGroup ParamGroup;
+    bool usesSend =true;
+    bool isMono = true;
+    
+    void setup(){
+        ParamGroup.add(_e_delay_in_send.set("Send ", 0.0, 0, 1));
+        ParamGroup.add(_e_delay_in_sendMin.set("Send Min", 0.0, 0, 1));
+        ParamGroup.add(_e_delay_in_sendMax.set("Send Max", 1.0, 0, 1));
+        ParamGroup.add(_e_delay_in_sendConnectTo.set("Send Connect To", 0, 0, 6));
+        
+        ParamGroup.add(_e_delay_in_time.set("Time ", 0.0, 0.0, 400));
+        ParamGroup.add(_e_delay_in_timeMin.set("Time Min", 0.0, 0.0, 400));
+        ParamGroup.add(_e_delay_in_timeMax.set("Time Max", 400, 0.0, 400));
+        ParamGroup.add(_e_delay_in_timeConnectTo.set("Time Connect To", 0, 0, 6));
+        
+        ParamGroup.add(_e_delay_in_damping.set("Damping ", 0.0, 0, 1));
+        ParamGroup.add(_e_delay_in_dampingMin.set("Damping Min", 0.0, 0, 1));
+        ParamGroup.add(_e_delay_in_dampingMax.set("Damping Max", 1.0, 0, 1));
+        ParamGroup.add(_e_delay_in_dampingConnectTo.set("Damping Connect To", 0, 0, 6));
+        
+        ParamGroup.add(_e_delay_in_feedback.set("feedback ", 0.0, 0, 1));
+        ParamGroup.add(_e_delay_in_feedbackMin.set("feedback Min", 0.0, 0, 1));
+        ParamGroup.add(_e_delay_in_feedbackMax.set("feedback Max", 1.0, 0, 1));
+        ParamGroup.add(_e_delay_in_feedbackConnectTo.set("feedback COnnect To", 0, 0, 6));
+        
+    }
+    
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update send level
+        float send = sensorValue * (_e_delay_in_sendMax - _e_delay_in_sendMin) + _e_delay_in_sendMin;
+        _e_delay_in_send.set(send);
+
+        // Update delay time
+        float time = sensorValue * (_e_delay_in_timeMax - _e_delay_in_timeMin) + _e_delay_in_timeMin;
+        _e_delay_in_time.set(time);
+
+        // Update damping
+        float damping = sensorValue * (_e_delay_in_dampingMax - _e_delay_in_dampingMin) + _e_delay_in_dampingMin;
+        _e_delay_in_damping.set(damping);
+
+        // Update feedback
+        float feedback = sensorValue * (_e_delay_in_feedbackMax - _e_delay_in_feedbackMin) + _e_delay_in_feedbackMin;
+        _e_delay_in_feedback.set(feedback);
+    }
+    
+    ofParameterGroup& getParamGroup() {
+
+        return ParamGroup;
+    }
+    void DoClear(){
+        ParamGroup.clear();
+    }
+    bool getIsMono(){
+        return isMono;
+    }
+    
+    void setParameterGroupName(std::string name){
+        ParamGroup.setName(name);
+    }
+    
+    
+    bool getUsesSend(){
+        return usesSend;
+    }
+    
+    void exit() {
+        
+        ofLogVerbose()<<"MyTestObject::exit() - goodbye!\n"<<endl;
+    }
+    
+
+    
+    
+    void draw() {
+        
+        
+        
+    }
+    
+    
+};
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of EFFChorusUnit.h ====
+
+#pragma once
+
+#include "ofxPDSP.h"
+
+
+class EFFChorusUnit  : public EffectBase{
+public:
+    
+
+
+    ofParameter<float> _e_chorus_in_depth;
+    ofParameter<float> _e_chorus_in_depthMin;
+    ofParameter<float> _e_chorus_in_depthMax;
+    ofParameter<int> _e_chorus_in_depthConnectTo;
+    
+    ofParameter<float> _e_chorus_in_speed;
+    ofParameter<float> _e_chorus_in_speedMin;
+    ofParameter<float> _e_chorus_in_speedMax;
+    ofParameter<int> _e_chorus_in_speedConnectTo;
+    
+    ofParameter<float> _e_chorus_in_delay;
+    ofParameter<float> _e_chorus_in_delayMin;
+    ofParameter<float> _e_chorus_in_delayMax;
+    ofParameter<int> _e_chorus_in_delayConnectTo;
+
+    
+    ofParameterGroup ParamGroup;
+    
+    bool usesSend = false;
+    bool isMono = false;
+    
+    
+    void setup(){
+        ParamGroup.add(_e_chorus_in_depth.set("Depth", 0, 0, 30));
+        ParamGroup.add(_e_chorus_in_depthMin.set("Depth Min", 0, 0, 30));
+        ParamGroup.add(_e_chorus_in_depthMax.set("Depth Max", 30, 0, 30));
+        ParamGroup.add(_e_chorus_in_depthConnectTo.set("Depth connect to", 0, 0, 6));
+        
+        ParamGroup.add(_e_chorus_in_speed.set("Speed", 0, 0, 100));
+        ParamGroup.add(_e_chorus_in_speedMin.set("Speed Min", 0, 0, 100));
+        ParamGroup.add(_e_chorus_in_speedMax.set("Speed Max", 100, 0, 100));
+        ParamGroup.add(_e_chorus_in_speedConnectTo.set("Speed connect to", 0, 0, 6));
+        
+        ParamGroup.add(_e_chorus_in_delay.set("Delay", 0, 0, 200));
+        ParamGroup.add(_e_chorus_in_delayMin.set("Delay Min", 0, 0, 200));
+        ParamGroup.add(_e_chorus_in_delayMax.set("Delay Max", 200, 0, 200));
+        ParamGroup.add(_e_chorus_in_delayConnectTo.set("Delay connect to", 0, 0, 6));
+    }
+    
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update depth
+        float depth = sensorValue * (_e_chorus_in_depthMax - _e_chorus_in_depthMin) + _e_chorus_in_depthMin;
+        _e_chorus_in_depth.set(depth);
+
+        // Update speed
+        float speed = sensorValue * (_e_chorus_in_speedMax - _e_chorus_in_speedMin) + _e_chorus_in_speedMin;
+        _e_chorus_in_speed.set(speed);
+
+        // Update delay
+        float delay = sensorValue * (_e_chorus_in_delayMax - _e_chorus_in_delayMin) + _e_chorus_in_delayMin;
+        _e_chorus_in_delay.set(delay);
+    }
+
+    
+    void setParameterGroupName(std::string name){
+        ParamGroup.setName(name);
+    }
+    ofParameterGroup& getParamGroup() {
+        return ParamGroup;
+    }
+    void DoClear(){
+        ParamGroup.clear();
+    }
+    bool getUsesSend(){
+        return usesSend;
+    }
+    
+    bool getIsMono(){
+        return isMono;
+    }
+    
+    void exit() {
+        
+    }
+    
+
+
+
+
+};
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of SimulationStrategy.h ====
+//
+//  SimulationStrategy.h
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 02/11/2024.
+//
+
+#pragma once
+#include "ISensorStrategy.h"
+
+class SimulationStrategy : public ISensorStrategy {
+public:
+    void updateSensorData() override;
+    ofParameter<float> getSensorValue(const std::string& name) const override;
+    void setMockSensorValue(const std::string& name, float value);
+
+};
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of SimulationStrategy.cpp ====
+//
+//  SimulationStrategy.cpp
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 02/11/2024.
+//
+
+#include "SimulationStrategy.h"
+
+void SimulationStrategy::updateSensorData() {
+    // Generate simulated sensor data
+}
+
+ofParameter<float> SimulationStrategy::getSensorValue(const std::string& name) const {
+    // Return simulated sensor value
+    return ofParameter<float>(0.5f); // Example value
+}
+
+void SimulationStrategy::setMockSensorValue(const std::string& name, float value) {
+   // sensorValues[name].set(value);
+}
+
+// Add tests at the bottom of the file.
+#ifdef UNIT_TESTS
+#define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
+#include "doctest.h"
+
+TEST_CASE("SimulationStrategy Get Sensor Value") {
+    SimulationStrategy strategy;
+    strategy.setMockSensorValue("sensor1", 0.75f);
+
+    auto value = strategy.getSensorValue("sensor1");
+    CHECK(value == 0.75f);
+
+    auto defaultValue = strategy.getSensorValue("nonexistent_sensor");
+    CHECK(defaultValue == 0.0f);
+}
+#endif // UNIT_TESTS
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of UIManager.h ====
+//
+//  UIManager.h
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 02/11/2024.
+//
+
+#pragma once
+#include "ofxGui.h"
+#include "AudioManager.h"
+
+class UIManager {
+public:
+    UIManager(AudioManager* audioManager);
+    void setup();
+    void update();
+    void draw();
+
+private:
+    AudioManager* audioManager;
+    ofxPanel gui;
+    ofParameterGroup uiParams;
+};
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of UIManager.cpp ====
+//
+//  UIManager.cpp
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 02/11/2024.
+//
+
+#include "UIManager.h"
+
+UIManager::UIManager(AudioManager* audioManager) : audioManager(audioManager) {}
+
+void UIManager::setup() {
+    gui.setup("Audio Effects");
+    for (auto& effect : audioManager->getEffectManager().getEffects()) {
+        gui.add(effect->getParamGroup());
+    }
+}
+
+void UIManager::update() {
+    // Update GUI elements based on real-time data
+}
+
+void UIManager::draw() {
+    gui.draw();
+}
+
+// Add tests at the bottom of the file.
+#ifdef UNIT_TESTS
+#define DOCTEST_CONFIG_IMPLEMENTATION_IN_DLL
+#include "doctest.h"
+#include "SimulationStrategy.h"
+#include "SettingsManager.h"
+
+TEST_CASE("UIManager Setup") {
+    AudioManager audioManager;
+    auto sensorStrategy = std::make_shared<SimulationStrategy>();
+    SettingsManager settingsManager;
+    audioManager.setup(sensorStrategy, &settingsManager);
+
+    UIManager uiManager(&audioManager);
+    uiManager.setup();
+
+    // Since we can't easily test GUI elements, we assume no exceptions mean success
+    SUCCEED();
+}
+#endif // UNIT_TESTS
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of EFFCompressorUnit.h ====
+
+#pragma once
+
+#include "ofxPDSP.h"
+
+
+class EFFCompressorUnit : public EffectBase {
+public:
+    
+    
+    ofParameter<float> _e_compressor_in_gain;
+
+    ofParameter<float> _e_compressor_in_attack;
+    ofParameter<float> _e_compressor_in_knee;
+    ofParameter<float> _e_compressor_in_ratio;
+    ofParameter<float> _e_compressor_in_release;
+    ofParameter<float> _e_compressor_in_threshold;
+    ofParameter<float>  _e_compressor_comp_meter;
+
+
+    
+    ofParameterGroup ParamGroup;
+    
+    bool usesSend = false;
+    bool isMono = false;
+    
+    
+    void setup(){
+        ParamGroup.add(_e_compressor_in_gain.set("In gain", 1.0, 0.0, 10.0));
+        ParamGroup.add(_e_compressor_in_threshold.set("Threshold",0.0f, -50.0f, 0.0f ));
+        ParamGroup.add(_e_compressor_comp_meter.set("GR meter", 0.0f, 0.0f, -25.0f) );
+        ParamGroup.add(_e_compressor_in_attack.set("Attack (MS)", 10.0f, 1.0f, 60.0f));
+        ParamGroup.add(_e_compressor_in_release.set("Release (MS)", 50.0f, 10.0f, 250.0f ));
+        ParamGroup.add(_e_compressor_in_knee.set("Knee", 1, 0, 1));
+        ParamGroup.add(_e_compressor_in_ratio.set("Ratio", 10, 1, 40));
+    }
+    
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update input gain
+        float gain = sensorValue * (_e_compressor_in_gain.getMax() - _e_compressor_in_gain.getMin()) + _e_compressor_in_gain.getMin();
+        _e_compressor_in_gain.set(gain);
+
+        // Update threshold (note that threshold usually decreases with higher sensor values)
+        float threshold = sensorValue * (_e_compressor_in_threshold.getMax() - _e_compressor_in_threshold.getMin()) + _e_compressor_in_threshold.getMin();
+        _e_compressor_in_threshold.set(threshold);
+
+        // Update attack time
+        float attack = sensorValue * (_e_compressor_in_attack.getMax() - _e_compressor_in_attack.getMin()) + _e_compressor_in_attack.getMin();
+        _e_compressor_in_attack.set(attack);
+
+        // Update release time
+        float release = sensorValue * (_e_compressor_in_release.getMax() - _e_compressor_in_release.getMin()) + _e_compressor_in_release.getMin();
+        _e_compressor_in_release.set(release);
+
+        // Update knee (assuming it's a boolean parameter)
+        int kneeValue = sensorValue >= 0.5f ? 1 : 0;
+        _e_compressor_in_knee.set(kneeValue);
+
+        // Update ratio
+        float ratio = sensorValue * (_e_compressor_in_ratio.getMax() - _e_compressor_in_ratio.getMin()) + _e_compressor_in_ratio.getMin();
+        _e_compressor_in_ratio.set(ratio);
+    }
+
+    
+    void setParameterGroupName(std::string name){
+        ParamGroup.setName(name);
+    }
+    ofParameterGroup& getParamGroup() {
+        return ParamGroup;
+    }
+    
+    void DoClear(){
+        ParamGroup.clear();
+    }
+    
+    bool getUsesSend(){
+        return usesSend;
+    }
+    
+    bool getIsMono(){
+        return isMono;
+    }
+    
+    void exit() {
+        
+    }
+    
+
+
+};
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of main.cpp ====
+
+#include "ofMain.h"
+#include "ofApp.h"
+
+
+#ifndef TARGET_OSX
+#ifndef TARGET_WIN32
+#define HAS_ADC
+#else
+#endif
+#endif
+
+#ifndef HAS_ADC
+
+
+//========================================================================
+int main( ){
+    ofSetupOpenGL(1920,1080, OF_FULLSCREEN);            // <-------- setup the GL context
+
+    // this kicks off the running of my app
+    // can be OF_WINDOW or OF_FULLSCREEN
+    // pass in width and height too:
+    ofRunApp(new ofApp());
+
+}
+
+#else
+
+#include "ofAppNoWindow.h"
+
+int main() {
+
+    auto window = make_shared<ofAppNoWindow>();
+    
+    ofRunApp(window, make_shared<ofApp>());
+    ofRunMainLoop();
+}
+#endif // !HAS_ADC
+
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of EffectBase.h ====
+//
+//  EffectBase.h
+//  Gaugemancy
+//
+//  Created by Fred Rodrigues on 03/11/2024.
+//
+
+#pragma once
+#include "ofMain.h"
+
+class EffectBase {
+public:
+    virtual ~EffectBase() = default;
+    virtual void setup() = 0;
+    virtual void update(const ofParameter<float>& sensorValue) = 0;
+    virtual ofParameterGroup& getParamGroup() = 0;
+};
+
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of SPIStrategy.h ====
+// SPIStrategy.h
+// Gaugemancy
+//
+// Created by Fred Rodrigues on 02/11/2024.
+
+#pragma once
+#include "ISensorStrategy.h"
+#include <map>
+
+class SPIStrategy : public ISensorStrategy {
+public:
+    SPIStrategy();
+    ~SPIStrategy();
+
+    void updateSensorData() override;
+    ofParameter<float> getSensorValue(const std::string& name) const override;
+
+private:
+    std::map<std::string, ofParameter<float>> sensorValues;
+    // Add SPI-specific members here, such as file descriptors or handles
+};
+
+_______________NEW FILE CONTENTS_______________
+==== Contents of SPIStrategy.cpp ====
+// SPIStrategy.cpp
+// Gaugemancy
+//
+// Created by Fred Rodrigues on 02/11/2024.
+
+#include "SPIStrategy.h"
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/spi/spidev.h>
+#include "ofLog.h"
+
+SPIStrategy::SPIStrategy() {
+    // Initialize SPI communication settings here if necessary
+}
+
+SPIStrategy::~SPIStrategy() {
+    // Clean up SPI communication here if necessary
+}
+
+void SPIStrategy::updateSensorData() {
+    // Implement SPI data retrieval
+    // This is a placeholder implementation and should be adapted to your specific hardware
+
+    // Open SPI device
+    int fd = open("/dev/spidev0.0", O_RDWR);
+    if (fd < 0) {
+        ofLogError("SPIStrategy") << "Failed to open SPI device";
+        return;
+    }
+
+    // Set SPI mode, bits per word, speed, etc.
+    uint8_t mode = SPI_MODE_0;
+    uint8_t bits = 8;
+    uint32_t speed = 500000;
+    if (ioctl(fd, SPI_IOC_WR_MODE, &mode) == -1) {
+        ofLogError("SPIStrategy") << "Failed to set SPI mode";
+        close(fd);
+        return;
+    }
+    if (ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &bits) == -1) {
+        ofLogError("SPIStrategy") << "Failed to set bits per word";
+        close(fd);
+        return;
+    }
+    if (ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed) == -1) {
+        ofLogError("SPIStrategy") << "Failed to set max speed";
+        close(fd);
+        return;
+    }
+
+    // Prepare SPI transfer structures
+    uint8_t tx[] = {0x00}; // Command to read sensor data (modify as needed)
+    uint8_t rx[2] = {0, 0};
+
+    struct spi_ioc_transfer tr = {
+        .tx_buf = (unsigned long)tx,
+        .rx_buf = (unsigned long)rx,
+        .len = sizeof(rx),
+        .speed_hz = speed,
+        .delay_usecs = 0,
+        .bits_per_word = bits,
+    };
+
+    // Perform SPI transaction
+    if (ioctl(fd, SPI_IOC_MESSAGE(1), &tr) < 1) {
+        ofLogError("SPIStrategy") << "Failed to send SPI message";
+        close(fd);
+        return;
+    }
+
+    // Convert received data to sensor values
+    // Assuming we're reading a 10-bit ADC value from the sensor
+    uint16_t rawValue = (rx[0] << 8) | rx[1];
+    float sensorValue = static_cast<float>(rawValue) / 1023.0f; // Normalize to 0.0 - 1.0
+
+    // Update sensorValues map
+    sensorValues["sensor1"].set(sensorValue);
+
+    // Close SPI device
+    close(fd);
+}
+
+ofParameter<float> SPIStrategy::getSensorValue(const std::string& name) const {
+    auto it = sensorValues.find(name);
+    if (it != sensorValues.end()) {
+        return it->second;
+    } else {
+        // Return a default value if sensor not found
+        ofLogWarning("SPIStrategy") << "Sensor '" << name << "' not found. Returning default value.";
+        return ofParameter<float>(0.0f);
+    }
+}
+
+

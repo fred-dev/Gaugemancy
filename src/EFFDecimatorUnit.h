@@ -4,7 +4,7 @@
 #include "ofxPDSP.h"
 
 
-class EFFDecimatorUnit  {
+class EFFDecimatorUnit  : public EffectBase{
 public:
 
     ofParameter<int> _e_decomator_in_rate;
@@ -23,8 +23,13 @@ public:
         ParamGroup.add(_e_decomator_in_rateConnectTo.set("Rate Connect to", 0, 0, 6));
     }
     
-    ofParameterGroup getParamGroup(){
+    ofParameterGroup& getParamGroup() {
         return ParamGroup;
+    }
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update decimation rate
+        int rate = static_cast<int>(sensorValue * (_e_decomator_in_rateMax - _e_decomator_in_rateMin) + _e_decomator_in_rateMin);
+        _e_decomator_in_rate.set(rate);
     }
     
     void setParameterGroupName(std::string name){

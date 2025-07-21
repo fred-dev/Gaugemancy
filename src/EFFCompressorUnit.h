@@ -4,7 +4,7 @@
 #include "ofxPDSP.h"
 
 
-class EFFCompressorUnit  {
+class EFFCompressorUnit : public EffectBase {
 public:
     
     
@@ -35,10 +35,37 @@ public:
         ParamGroup.add(_e_compressor_in_ratio.set("Ratio", 10, 1, 40));
     }
     
+    void update(const ofParameter<float>& sensorValue) override {
+        // Update input gain
+        float gain = sensorValue * (_e_compressor_in_gain.getMax() - _e_compressor_in_gain.getMin()) + _e_compressor_in_gain.getMin();
+        _e_compressor_in_gain.set(gain);
+
+        // Update threshold (note that threshold usually decreases with higher sensor values)
+        float threshold = sensorValue * (_e_compressor_in_threshold.getMax() - _e_compressor_in_threshold.getMin()) + _e_compressor_in_threshold.getMin();
+        _e_compressor_in_threshold.set(threshold);
+
+        // Update attack time
+        float attack = sensorValue * (_e_compressor_in_attack.getMax() - _e_compressor_in_attack.getMin()) + _e_compressor_in_attack.getMin();
+        _e_compressor_in_attack.set(attack);
+
+        // Update release time
+        float release = sensorValue * (_e_compressor_in_release.getMax() - _e_compressor_in_release.getMin()) + _e_compressor_in_release.getMin();
+        _e_compressor_in_release.set(release);
+
+        // Update knee (assuming it's a boolean parameter)
+        int kneeValue = sensorValue >= 0.5f ? 1 : 0;
+        _e_compressor_in_knee.set(kneeValue);
+
+        // Update ratio
+        float ratio = sensorValue * (_e_compressor_in_ratio.getMax() - _e_compressor_in_ratio.getMin()) + _e_compressor_in_ratio.getMin();
+        _e_compressor_in_ratio.set(ratio);
+    }
+
+    
     void setParameterGroupName(std::string name){
         ParamGroup.setName(name);
     }
-    ofParameterGroup getParamGroup(){
+    ofParameterGroup& getParamGroup() {
         return ParamGroup;
     }
     
