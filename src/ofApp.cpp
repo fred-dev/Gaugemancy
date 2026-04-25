@@ -125,11 +125,11 @@ void ofApp::draw() {
 void ofApp::exit() {
     ofLogNotice("ofApp") << "Application exiting...";
     
-    // Cleanup audio
-    engine.clear();
-    
     // Cleanup grain clouds
     grainClouds.clear();
+    
+    // Stop audio engine
+    engine.exit();
     
     ofLogNotice("ofApp") << "Goodbye!";
 }
