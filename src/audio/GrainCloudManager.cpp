@@ -1,5 +1,5 @@
 #include "GrainCloudManager.h"
-
+#include "ofxXmlSettings.h"
 GrainCloudManager::GrainCloudManager()
     : voiceId(0)
     , playing(false)
@@ -38,7 +38,7 @@ void GrainCloudManager::loadAudioFile(const std::string& filePath) {
 
 void GrainCloudManager::loadParametersFromXML(const std::string& xmlPath) {
     ofxXmlSettings xml;
-    if (xml.loadFile(xmlPath)) {
+    if (xml.load(xmlPath)) {
         ofLogNotice("GrainCloudManager") << "Loading parameters from: " << xmlPath;
         
         // Load parameters from XML
@@ -163,7 +163,7 @@ void GrainCloudManager::saveParametersToXML(const std::string& xmlPath) {
     xml.addValue("ENVELOPE_ATTACK", currentParams.envelopeAttack);
     xml.addValue("ENVELOPE_DECAY", currentParams.envelopeDecay);
     
-    if (xml.saveFile(xmlPath)) {
+    if (xml.save(xmlPath)) {
         ofLogNotice("GrainCloudManager") << "Saved parameters to: " << xmlPath;
     } else {
         ofLogError("GrainCloudManager") << "Failed to save parameters to: " << xmlPath;

@@ -71,7 +71,7 @@ bool PresetManager::loadPresetConfig(int presetIndex) {
     std::string filename = basePath + unitId + "_preset_" + ofToString(presetIndex + 1) + ".xml";
     ofxXmlSettings xml;
     
-    if (xml.loadFile(filename)) {
+    if (xml.load(filename)) {
         parsePresetFromXML(presetIndex);
         return true;
     }
@@ -81,7 +81,7 @@ bool PresetManager::loadPresetConfig(int presetIndex) {
 }
 
 bool PresetManager::loadAppSettings(const std::string& filename) {
-    if (appSettingsXML.loadFile(filename)) {
+    if (appSettingsXML.load(filename)) {
         audioDeviceId = appSettingsXML.getValue("AUDIO_DEVICE_ID", 0);
         engineBufferSize = appSettingsXML.getValue("ENGINE_BUFFER_SIZE", 512);
         numberOfBuffers = appSettingsXML.getValue("NUMBER_OF_BUFFERS", 4);
