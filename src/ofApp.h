@@ -111,16 +111,8 @@ private:
     int presetIndex;
     bool firstRun;
     
-    // App settings (loaded from XML)
+    // App settings (loaded from XML via PresetManager)
     int logLevel;
-    bool hasNarration;
-    std::string narrationFilePath;
-    float narrationVolume;
-    
-    // Audio engine settings
-    int audioDeviceId;
-    int engineBufferSize;
-    int numberOfBuffers;
     
     // =========================================================================
     // Initialization Methods

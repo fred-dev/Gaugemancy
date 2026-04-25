@@ -68,19 +68,19 @@ void ofApp::setup() {
     sensorProcessor.setup();
     
     // Setup narration if needed
-    if (!hasNarration) {
+    if (!presetManager.hasNarrationTrack()) {
         modeManager.changeMode(OperationMode::MultiGrain);
     } else {
         // Setup narration player
-        narration.load(narrationFilePath);
+        narration.load(presetManager.getNarrationFilePath());
         modeManager.changeMode(OperationMode::WaitForNarration);
     }
     
     // Setup audio engine
     engine.listDevices();
     engine.setChannels(0, 2);
-    engine.setDeviceID(audioDeviceId);
-    engine.setup(44100, engineBufferSize, numberOfBuffers);
+    engine.setDeviceID(presetManager.getAudioDeviceId());
+    engine.setup(44100, presetManager.getEngineBufferSize(), presetManager.getNumberOfBuffers());
     
     ofLogNotice("ofApp") << "=== Application Ready ===";
 }
@@ -128,8 +128,8 @@ void ofApp::exit() {
     // Cleanup grain clouds
     grainClouds.clear();
     
-    // Stop audio engine
-    engine.exit();
+    // Stop audio engine - pdsp engine cleanup is handled automatically
+    // when the engine object goes out of scope
     
     ofLogNotice("ofApp") << "Goodbye!";
 }
@@ -183,16 +183,12 @@ void ofApp::initParameters() {
 
 //--------------------------------------------------------------
 void ofApp::setupParamsFromXML() {
-    // Load application settings from XML
+    // Load application settings from XML via PresetManager
     std::string appSettingsPath = filePathPrefix + "appSettings.xml";
     
-    if (appSettingsXML.loadFile(appSettingsPath)) {
+    if (appSettingsXML.load(appSettingsPath)) {
         unitID = appSettingsXML.getValue("UNIT_ID", std::string("unknown"));
         logLevel = appSettingsXML.getValue("LOG_LEVEL", 3);
-        
-        hasNarration = appSettingsXML.getValue("HAS_NARRATION", false);
-        narrationFilePath = appSettingsXML.getValue("NARRATION_PATH", std::string(""));
-        narrationVolume = appSettingsXML.getValue("NARRATION_VOLUME", 0.8f);
         
         localIpFromXML = appSettingsXML.getValue("LOCAL_IP", std::string(""));
         remoteOSCIp = appSettingsXML.getValue("REMOTE_IP", std::string("127.0.0.1"));
@@ -202,15 +198,14 @@ void ofApp::setupParamsFromXML() {
     } else {
         ofLogWarning("ofApp") << "Could not load app settings, using defaults";
         unitID = "default";
-        hasNarration = false;
     }
 }
 
 //--------------------------------------------------------------
 void ofApp::setupFilePaths() {
     // File paths are loaded by PresetManager
-    for (int i = 1; i <= 4; i++) {
-        presetManager.loadPreset(i);
+    for (int i = 0; i < 4; i++) {
+        presetManager.loadPresetConfig(i);
     }
 }
 
@@ -223,10 +218,10 @@ void ofApp::setupGrainCloud(const std::vector<std::string>& paths, const std::st
     
     for (size_t i = 0; i < numVoices; i++) {
         auto cloud = std::make_unique<GrainCloudManager>();
-        cloud->setup(i, 64);
+        cloud->setup(i);
         
-        if (i < paths.size()) {
-            cloud->loadSample(paths[i]);
+        if (i < paths.size() && !paths[i].empty()) {
+            cloud->loadAudioFile(paths[i]);
         }
         
         grainClouds.push_back(std::move(cloud));
@@ -372,25 +367,25 @@ float ofApp::quarticEaseOut(float value) {
 }
 
 void ofApp::switchPresets() {
-    presetIndex = (presetIndex % 4) + 1;
-    presetManager.switchToPreset(presetIndex);
+    presetManager.switchToNextPreset();
+    presetIndex = presetManager.getCurrentPresetIndex();
     
     // Reload grain clouds with new preset files
     auto paths = presetManager.getFilePathsForPreset(presetIndex);
-    setupGrainCloud(paths, unitID + "_preset_" + ofToString(presetIndex) + ".xml");
+    setupGrainCloud(paths, unitID + "_preset_" + ofToString(presetIndex + 1) + ".xml");
 }
 
 void ofApp::getAccumulatedPressure() {
     accumulatedPressure = 0.0f;
     for (int i = 0; i < 6; i++) {
-        accumulatedPressure += a2dVal[i];
+        accumulatedPressure += sensorProcessor.getRawValue(i);
     }
     accumulatedPressureNormalised = accumulatedPressure / accumulationDenominator;
 }
 
 void ofApp::checkForHits() {
-    // Delegated to SensorDataProcessor
-    sensorProcessor.checkForHits();
+    // Delegated to SensorDataProcessor with threshold parameters
+    sensorProcessor.checkForHits(hitThreshold, troughThreshold);
 }
 
 void ofApp::onHitRoutine() {
@@ -427,7 +422,9 @@ void ofApp::applyDynamicValuesToParameters(
 }
 
 void ofApp::calibrateOnStart() {
-    sensorProcessor.calibrate();
+    // Initialize base values with zeros for first calibration
+    std::vector<int> baseValues(6, 0);
+    sensorProcessor.calibrate(baseValues);
 }
 
 void ofApp::loadRoutine(int target) {
