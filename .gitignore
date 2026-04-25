@@ -45,3 +45,15 @@ coverage/
 htmlcov/
 .coverage
 ```
+Project.xcconfig
+Makefile
+config.make
+bin/Gaugemancy.app/Contents/Info.plist
+bin/Gaugemancy.app/Contents/PkgInfo
+Gaugemancy.xcodeproj/project.pbxproj
+Gaugemancy.xcodeproj/project.pbxproj
+Gaugemancy.xcodeproj/project.xcworkspace/xcuserdata/fredrodrigues.xcuserdatad/UserInterfaceState.xcuserstate
+Gaugemancy.xcodeproj/xcshareddata/xcschemes/Gaugemancy Debug.xcscheme
+Gaugemancy.xcodeproj/xcshareddata/xcschemes/Gaugemancy Release.xcscheme
+Makefile
+Project.xcconfig
