@@ -1,1 +1,59 @@
-Nothing should be ignored since only source code files (.cpp and .h) were modified.
+```
+# Compiled and build artifacts
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Dependencies
+node_modules/
+venv/
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+target/
+.gradle/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Build directories
+build/
+dist/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+```
+Project.xcconfig
+Makefile
+config.make
+bin/Gaugemancy.app/Contents/Info.plist
+bin/Gaugemancy.app/Contents/PkgInfo
+Gaugemancy.xcodeproj/project.pbxproj
+Gaugemancy.xcodeproj/project.pbxproj
+Gaugemancy.xcodeproj/project.xcworkspace/xcuserdata/fredrodrigues.xcuserdatad/UserInterfaceState.xcuserstate
+Gaugemancy.xcodeproj/xcshareddata/xcschemes/Gaugemancy Debug.xcscheme
+Gaugemancy.xcodeproj/xcshareddata/xcschemes/Gaugemancy Release.xcscheme
+Makefile
+Project.xcconfig

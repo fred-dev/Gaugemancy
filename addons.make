@@ -1,0 +1,7 @@
+ofxAudioFile
+ofxGui
+ofxMSAInteractiveObject
+ofxMidi
+ofxOsc
+ofxPDSP
+ofxXmlSettings
