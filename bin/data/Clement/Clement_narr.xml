@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<Narration>
+	<in_length>1628.6</in_length>
+	<in_pos_jitter>4.0</in_pos_jitter>
+	<in_density>8.216</in_density>
+	<distance_jitter>80</distance_jitter>
+	<pitch_jitter>0.0</pitch_jitter>
+	<spread>0</spread>
+	<pitch_>0</pitch_>
+	<direction>1</direction>
+		<Narration_Compressor>
+		<In_gain>3.0</In_gain>
+		<Threshold>0</Threshold>
+		<GR_meter>0</GR_meter>
+		<Attack__MS_>1</Attack__MS_>
+		<Release__MS_>50</Release__MS_>
+		<Knee>1</Knee>
+		<Ratio>10</Ratio>
+	</Narration_Compressor>
+</Narration>
+
+	
