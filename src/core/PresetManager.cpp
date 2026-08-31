@@ -91,7 +91,7 @@ bool PresetManager::loadAppSettings(const std::string& filename) {
 }
 
 bool PresetManager::loadUserSettings(const std::string& filename) {
-    if (userSettingsXML.loadFile(filename)) {
+    if (userSettingsXML.load(filename)) {
         hasNarration = userSettingsXML.getValue("HAS_NARRATION", false);
         narrationFilePath = userSettingsXML.getValue("NARRATION_FILE", "");
         return true;

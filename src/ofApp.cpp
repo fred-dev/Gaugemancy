@@ -3,14 +3,16 @@
 //--------------------------------------------------------------
 void ofApp::setup() {
     ofLogNotice("ofApp") << "=== Application Starting ===";
+	ofSetLogLevel(OF_LOG_VERBOSE);
+
     
     // Set file path prefix based on platform
 #ifdef HAS_ADC
     filePathPrefix = "/media/Data/";
     ofLogNotice("ofApp") << "Running on Raspberry Pi with ADC";
 #else
-    filePathPrefix = ofToDataPath("");
-    ofLogNotice("ofApp") << "Running on Desktop/Laptop";
+	filePathPrefix = "";
+	ofLogNotice("ofApp") << "Running on Desktop/Laptop";
 #endif
     
     // Initialize parameters
@@ -18,13 +20,15 @@ void ofApp::setup() {
     
     // Load settings from XML
     setupParamsFromXML();
-    
+	ofSetLogLevel(OF_LOG_VERBOSE);
+
     // Setup preset manager
     presetManager.setup(filePathPrefix, unitID);
     
     // Load file paths from XML
     setupFilePaths();
-    
+	ofSetLogLevel(OF_LOG_VERBOSE);
+
     // Setup grain clouds for current preset
     auto paths = presetManager.getFilePathsForPreset(presetIndex);
     setupGrainCloud(paths, unitID + "_preset_" + ofToString(presetIndex) + ".xml");
@@ -80,6 +84,7 @@ void ofApp::setup() {
     engine.listDevices();
     engine.setChannels(0, 2);
     engine.setDeviceID(presetManager.getAudioDeviceId());
+	
     engine.setup(44100, presetManager.getEngineBufferSize(), presetManager.getNumberOfBuffers());
     
     ofLogNotice("ofApp") << "=== Application Ready ===";
@@ -144,9 +149,9 @@ void ofApp::initParameters() {
     firstPresetSwitch = true;
     
     // Audio engine settings
-    engineBufferSize = 512;
-    numberOfBuffers = 4;
-    audioDeviceId = 0;
+//    engineBufferSize = 512;
+//    numberOfBuffers = 4;
+//    audioDeviceId = 0;
     
     // Sensor settings
     maxSensorValue = 4095;
@@ -185,9 +190,13 @@ void ofApp::initParameters() {
 void ofApp::setupParamsFromXML() {
     // Load application settings from XML via PresetManager
     std::string appSettingsPath = filePathPrefix + "appSettings.xml";
+	ofLogNotice("ofApp") << filePathPrefix + "appSettings.xml";
+
     
     if (appSettingsXML.load(appSettingsPath)) {
         unitID = appSettingsXML.getValue("UNIT_ID", std::string("unknown"));
+		ofLogNotice("ofApp") << "Loaded app settings for unit: " << unitID;
+
         logLevel = appSettingsXML.getValue("LOG_LEVEL", 3);
         
         localIpFromXML = appSettingsXML.getValue("LOCAL_IP", std::string(""));
