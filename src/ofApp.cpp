@@ -641,8 +641,6 @@ void ofApp::initParameters()
     waitingForClick = true;
 #endif
     presetIndex = 1;
-    isCheckingHitPeaks = false;
-    isCheckingHitTroughs = false;
     narrationIsPlaying = false;
     presetSwitchTimer = ofGetElapsedTimeMillis();
     
@@ -2055,7 +2053,15 @@ void ofApp::setupParamsFromSettings()
     // this is for a gestural input, where the performers squeeze several sensors rapidly, how soft does a non press have to be
     troughThreshold = appSettingsJson.value("TROUGH_THRESHOLD", 0.025);
     ofLogNotice() << "TROUGH_THRESHOLD = " + ofToString(troughThreshold) << endl;
-    
+
+    HitGestureDetector::Config hitGestureConfig;
+    hitGestureConfig.hitThreshold = hitThreshHold;
+    hitGestureConfig.troughThreshold = troughThreshold;
+    hitGestureConfig.maxPeakDurationMs = maxPeakDuration;
+    hitGestureConfig.maxTroughDurationMs = maxTroughDuration;
+    hitGestureConfig.requiredHits = requiredHits;
+    hitGestureDetector = HitGestureDetector(hitGestureConfig);
+
     // in accumulated pressure we go to single grain mode
     useAccumulatedPressure = appSettingsJson.value("ACCUMULATED_PRESSURE", false);
     ofLogNotice() << "ACCUMULATED_PRESSURE = " + ofToString(useAccumulatedPressure) << endl;
@@ -3798,185 +3804,6 @@ void ofApp::normaliseADCValues()
     }
 }
 
-void ofApp::checkForHits()
-{
-    // this method checks for gestural input, the performers squeeing the units hard and rapidly, they can use this to change presets kind of shitty way about it but it works
-    if (!isCheckingHitPeaks && !isCheckingHitTroughs)
-    {
-        ofLogNotice() << "checking for any peaks" << endl;
-        for (int u = 0; u < NUMBER_OF_SENSORS; u++)
-        {
-            if (normalisedA2DValues[u] > hitThreshHold)
-            {
-                
-                hitPeakChecker += 1;
-                oldValues[u] = normalisedA2DValues[u];
-                hadHitPeak[u] = true;
-            }
-        }
-        if (hitPeakChecker>1)
-        {
-            ofLogNotice() << "found peaks, checking for trough" << endl;
-            isCheckingHitTroughs = true;
-            timeSinceLastHitTrough = ofGetElapsedTimeMillis();
-            hitPeakChecker = 0;
-            
-        }
-        else
-        {
-            ofLogNotice() << "No peaks found, exiting this bit" << endl;
-            
-            hitPeakChecker = 0;
-            for (int z = 0; z < NUMBER_OF_SENSORS; z++)
-            {
-                oldValues[z] = 0;
-                hadHitPeak[z] = false;
-            }
-            
-        }
-    }
-    
-    if (ofGetElapsedTimeMillis() - timeSinceLastHitTrough < maxTroughDuration && isCheckingHitTroughs)
-    {
-        hitTroughChecker = 0;
-        ofLogNotice() << "inside checking troughs" << endl;
-        for (int u = 0; u < NUMBER_OF_SENSORS; u++)
-        {
-            hadHitTrough[u] = false;
-            if (hadHitPeak[u])
-            {
-                
-                if (normalisedA2DValues[u] < troughThreshold)
-                {
-                    hitTroughChecker += 1;
-                    hadHitTrough[u] = true;
-                    
-                    
-                }
-                if (hitTroughChecker > 1)
-                {
-                    ofLogNotice() << ofToString(hitTroughChecker) + " troughs found" << endl;
-                    completedFullHits += 1;
-                    if (completedFullHits > requiredHits - 1)
-                    {
-                        ofLogNotice() << "Total hits reached target " + ofToString(completedFullHits) << endl;
-                        
-                        timeSinceLastHitPeak = 0;
-                        timeSinceLastHitTrough = 0;
-                        hitTroughChecker = 0;
-                        completedFullHits = 0;
-                        for (int t = 0; t < NUMBER_OF_SENSORS; t++)
-                        {
-                            hadHitPeak[t] = false;
-                            hadHitTrough[t] = false;
-                        }
-                        isCheckingHitTroughs = false;
-                        isCheckingHitPeaks = false;
-                        onHitRoutine();
-                        goto finished;
-                    }
-                    hitTroughChecker = 0;
-                    timeSinceLastHitPeak = ofGetElapsedTimeMillis();
-                    isCheckingHitPeaks = true;
-                    isCheckingHitTroughs = false;
-                }
-            }
-        }
-        
-    }
-finished:
-    if (ofGetElapsedTimeMillis() - timeSinceLastHitTrough > maxTroughDuration && isCheckingHitTroughs)
-    {
-        if (hitTroughChecker > 1)
-        {
-            ofLogNotice() << ofToString(hitTroughChecker) + " troughs found" << endl;
-            completedFullHits += 1;
-            if (completedFullHits > requiredHits - 1)
-            {
-                ofLogNotice() << "Total hits reached target " + ofToString(completedFullHits) << endl;
-                completedFullHits = 0;
-                onHitRoutine();
-            }
-            hitTroughChecker = 0;
-            timeSinceLastHitPeak = ofGetElapsedTimeMillis();
-            isCheckingHitPeaks = true;
-            isCheckingHitTroughs = false;
-        }
-        
-        else {
-            isCheckingHitTroughs = false;
-            isCheckingHitPeaks = false;
-            timeSinceLastHitPeak = 0;
-            timeSinceLastHitTrough = 0;
-            hitTroughChecker = 0;
-            completedFullHits = 0;
-            for (int t = 0; t < NUMBER_OF_SENSORS; t++)
-            {
-                hadHitPeak[t] = false;
-                hadHitTrough[t] = false;
-            }
-            ofLogNotice() << "Hit count aborted no suitable trough" << endl;
-            
-        }
-    }
-    
-    if (ofGetElapsedTimeMillis() - timeSinceLastHitPeak < maxPeakDuration && isCheckingHitPeaks)
-    {
-        ofLogNotice() << "inside checking peaks" << endl;
-        hitPeakChecker = 0;
-        for (int u = 0; u < NUMBER_OF_SENSORS; u++)
-        {
-            hadHitPeak[u] = false;
-            if (hadHitTrough[u])
-            {
-                
-                if (normalisedA2DValues[u] > hitThreshHold)
-                {
-                    hitPeakChecker += 1;
-                    
-                    oldValues[u] = normalisedA2DValues[u];
-                    hadHitPeak[u] = true;
-                    if (hitPeakChecker > 1)
-                    {
-                        isCheckingHitTroughs = true;
-                        timeSinceLastHitTrough = false;
-                        hitPeakChecker = 0;
-                        ofLogNotice() << "Enough peaks found going to check troughs" << endl;
-                        timeSinceLastHitTrough = ofGetElapsedTimeMillis();
-                        
-                    }
-                }
-            }
-        }
-    }
-    if (ofGetElapsedTimeMillis() - timeSinceLastHitPeak > maxPeakDuration && isCheckingHitPeaks)
-    {
-        if (hitPeakChecker > 1)
-        {
-            isCheckingHitTroughs = true;
-            timeSinceLastHitTrough = false;
-            hitPeakChecker = 0;
-            ofLogNotice() << "Enough peaks found going to check troughs" << endl;
-            timeSinceLastHitTrough = ofGetElapsedTimeMillis();
-            
-        }
-        else {
-            isCheckingHitPeaks = false;
-            isCheckingHitTroughs = false;
-            timeSinceLastHitPeak = 0;
-            timeSinceLastHitTrough = 0;
-            hitPeakChecker = 0;
-            for (int t = 0; t < NUMBER_OF_SENSORS; t++)
-            {
-                hadHitPeak[t] = false;
-                hadHitTrough[t] = false;
-            }
-            ofLogNotice() << "Hit count aborted no suitable peaks" << endl;
-            
-        }
-    }
-}
-
 void ofApp::onHitRoutine()
 {
     // if they make enough hits in time then we run whatever is in here, for the moment it changes presets
@@ -4500,7 +4327,13 @@ void ofApp::deviceOnlyUpdateRoutine()
     normaliseADCValues();
     // this checks for the gestural input (lots of squeazing rapidly
     if(useHitGesture){
-        checkForHits();
+        std::array<float, HitGestureDetector::kNumSensors> sensorFrame;
+        for (int i = 0; i < HitGestureDetector::kNumSensors; i++) {
+            sensorFrame[i] = normalisedA2DValues[i];
+        }
+        if (hitGestureDetector.update(sensorFrame, ofGetElapsedTimeMillis())) {
+            onHitRoutine();
+        }
     }
     updateLIS3DH();
     

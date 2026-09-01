@@ -2,6 +2,7 @@
 
 #include "ofJson.h"
 #include "ofFileUtils.h"
+#include "HitGestureDetector.h"
 #include "ofxPDSP.h"
 #include "ofxGui.h"
 #include "ofxOsc.h"
@@ -456,12 +457,11 @@ class ofApp : public ofBaseApp{
 		std::vector<int>					baseSensorValues;
 		std::vector<int> zeroValues;	
 
-		bool fireHitSwitch, isCountingHits, isCheckingHitPeaks, isCheckingHitTroughs, hadHitPeak[6], hadHitTrough[6];
         bool useHitGesture;
-		void checkForHits();
 		void onHitRoutine();
-		int timeBetweenHits, timeSinceLastHitPeak, timeSinceLastHitTrough, oldValues[6], hitsCollected, hitPeakChecker, maxPeakDuration, hitTroughsCollected, hitTroughChecker, maxTroughDuration, completedFullHits, requiredHits;
+		int maxPeakDuration, maxTroughDuration, requiredHits;
 		float hitThreshHold, troughThreshold;
+		HitGestureDetector hitGestureDetector;
 
 		//OP_MODE_ACCUULATE_MODE
 		bool useAccumulatedPressure;

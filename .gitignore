@@ -37,6 +37,7 @@
 
 # Folders
 */obj/
+tests/build/
 
 # Different adding.make for different platforms so
 addons.make
