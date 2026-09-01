@@ -23,9 +23,9 @@ void ofApp::setup(){
     setupParamsFromSettings();
 
     // based on the settings populate the vectors with blanks
+    // (populateVectors() calls populateEffectVectors() itself at the end --
+    // this used to also call it a second time here, redundantly)
     populateVectors();
-
-    populateEffectVectors();
 
     // read the audio file paths from the settings so we know what to load
     setupFilePaths();
@@ -411,41 +411,38 @@ void ofApp::loadEffectPatchSettings()
             effReverbsParams[i].DoClear();
             effCompressorsParams[i].DoClear();
             
-            cloud[i]->disconnectAll();
-            ampControl[i]->disconnectAll();
-            outputAmpL[i]->disconnectAll();
-            outputAmpR[i]->disconnectAll();
+            slots[i].cloud->disconnectAll();
+            slots[i].ampControl->disconnectAll();
+            slots[i].outputAmpL->disconnectAll();
+            slots[i].outputAmpR->disconnectAll();
             
             ofLogNotice()<< "Removing bitcrusher from slot " + ofToString(i+1) << endl;
-            bitCrusherLs[i]->disconnectAll();
-            bitCrusherRs[i]->disconnectAll();
+            slots[i].bitCrusherLs->disconnectAll();
+            slots[i].bitCrusherRs->disconnectAll();
             
             ofLogNotice()<< "Removing decimator from slot " + ofToString(i+1) << endl;
-            decimatorLs[i]->disconnectAll();
-            decimatorRs[i]->disconnectAll();
+            slots[i].decimatorLs->disconnectAll();
+            slots[i].decimatorRs->disconnectAll();
             
             ofLogNotice()<< "Removing chorus from slot " + ofToString(i+1) << endl;
-            choruss[i]->disconnectAll();
+            slots[i].choruss->disconnectAll();
             
             ofLogNotice()<< "Removing filter from slot " + ofToString(i+1) << endl;
-            multiLadderFilterLs[i]->disconnectAll();
-            multiLadderFilterRs[i]->disconnectAll();
+            slots[i].multiLadderFilterLs->disconnectAll();
+            slots[i].multiLadderFilterRs->disconnectAll();
             
             ofLogNotice()<< "Removing delay from slot " + ofToString(i+1) << endl;
-            delayLs[i]->disconnectAll();
-            delayRs[i]->disconnectAll();
-            delaySends[i]->disconnectAll();
+            slots[i].delayLs->disconnectAll();
+            slots[i].delayRs->disconnectAll();
+            slots[i].delaySends->disconnectAll();
             
             ofLogNotice()<< "Removing reverb from slot " + ofToString(i+1) << endl;
-            reverbs[i]->disconnectAll();
-            reverbSends[i]->disconnectAll();
-        }
-        if(!firstRun){
-            clearEffectVectors();
+            slots[i].reverbs->disconnectAll();
+            slots[i].reverbSends->disconnectAll();
         }
         populateEffectVectors();
     }
-    
+
     if (firstRun) {
         for (int j = 0; j < NUMBER_OF_PRESETS; j++)
         {
@@ -558,41 +555,41 @@ void ofApp::loadEffectPatchSettings()
 
         for (int ch = 0; ch < 2; ch++)
         {
-            pdsp::Amp * outputAmp = (ch == 0) ? outputAmpL[e] : outputAmpR[e];
+            pdsp::Amp * outputAmp = (ch == 0) ? slots[e].outputAmpL.get() : slots[e].outputAmpR.get();
 
             // fixed insert order: bitcrush -> decimator -> chorus -> filter
-            pdsp::Patchable * node = &(cloud[e]->ch(ch) >> ampControl[e]->ch(ch));
+            pdsp::Patchable * node = &(slots[e].cloud->ch(ch) >> slots[e].ampControl->ch(ch));
 
             if (fx.hasBitCrusher) {
-                pdsp::Bitcruncher * bitCrusher = (ch == 0) ? bitCrusherLs[e] : bitCrusherRs[e];
+                pdsp::Bitcruncher * bitCrusher = (ch == 0) ? slots[e].bitCrusherLs.get() : slots[e].bitCrusherRs.get();
                 *node >> *bitCrusher;
                 node = bitCrusher;
             }
             if (fx.hasDecimator) {
-                pdsp::Decimator * decimator = (ch == 0) ? decimatorLs[e] : decimatorRs[e];
+                pdsp::Decimator * decimator = (ch == 0) ? slots[e].decimatorLs.get() : slots[e].decimatorRs.get();
                 *node >> *decimator;
                 node = decimator;
             }
             if (fx.hasChorus) {
-                pdsp::Patchable & chorus = choruss[e]->ch(ch);
+                pdsp::Patchable & chorus = slots[e].choruss->ch(ch);
                 *node >> chorus;
                 node = &chorus;
             }
             if (fx.hasFilter) {
-                pdsp::MultiLadder4 * filter = (ch == 0) ? multiLadderFilterLs[e] : multiLadderFilterRs[e];
+                pdsp::MultiLadder4 * filter = (ch == 0) ? slots[e].multiLadderFilterLs.get() : slots[e].multiLadderFilterRs.get();
                 *node >> *filter;
                 node = filter;
             }
 
             // dry path is always connected, delay/reverb are parallel sends off the same insert-chain output
-            *node >> outputAmp->out_signal() >> compressors[e]->ch(ch) >> engine.audio_out(ch);
+            *node >> outputAmp->out_signal() >> slots[e].compressors->ch(ch) >> engine.audio_out(ch);
 
             if (fx.hasDelay) {
-                pdsp::Delay * delay = (ch == 0) ? delayLs[e] : delayRs[e];
-                *node >> *delaySends[e] >> *delay >> outputAmp->out_signal() >> compressors[e]->ch(ch) >> engine.audio_out(ch);
+                pdsp::Delay * delay = (ch == 0) ? slots[e].delayLs.get() : slots[e].delayRs.get();
+                *node >> *slots[e].delaySends >> *delay >> outputAmp->out_signal() >> slots[e].compressors->ch(ch) >> engine.audio_out(ch);
             }
             if (fx.hasReverb) {
-                *node >> *reverbSends[e] >> reverbs[e]->ch(ch) >> outputAmp->out_signal() >> compressors[e]->ch(ch) >> engine.audio_out(ch);
+                *node >> *slots[e].reverbSends >> slots[e].reverbs->ch(ch) >> outputAmp->out_signal() >> slots[e].compressors->ch(ch) >> engine.audio_out(ch);
             }
         }
     }
@@ -604,11 +601,11 @@ void ofApp::exit() {
 
     // this is called when the app exits, we unload the audio files
     for (int i = 0; i < numberOfSlots; i++) {
-        grainVoices[i] = cloud[i]->getVoicesNum();
-        if (sampleData[i]->loaded())
+        slots[i].grainVoices = slots[i].cloud->getVoicesNum();
+        if (slots[i].sampleData->loaded())
         {
-            ampControl[i]->set(0.0f);
-            sampleData[i]->unLoad();
+            slots[i].ampControl->set(0.0f);
+            slots[i].sampleData->unLoad();
         }
     }
     
@@ -1071,14 +1068,14 @@ void ofApp::mapSimulatedDataSingle()
     {
         controlX[s] = ofMap(accumulatedPressureNormalised, 0.0, 1.0, uiX[s], uiMaxX[s], true);
         controlY[s] = ofMap(_volume[s], 0.0, 1.0, uiMaxY[s], uiY[s]);
-        accumulatedPressureNormalised >> cloud[s]->in_position();
-        _spread[s] >> cloud[s]->in_position_jitter();
-        _in_length[s] >> cloud[s]->in_length();
-        _in_density[s] >> cloud[s]->in_density();
-        _in_distance_jitter[s] >> cloud[s]->in_distance_jitter();
-        _in_pitch_jitter[s] >> cloud[s]->in_pitch_jitter();
-        _grainDirection[s] >> cloud[s]->in_direction();
-        _in_pitch[s] >> cloud[s]->in_pitch();
+        accumulatedPressureNormalised >> slots[s].cloud->in_position();
+        _spread[s] >> slots[s].cloud->in_position_jitter();
+        _in_length[s] >> slots[s].cloud->in_length();
+        _in_density[s] >> slots[s].cloud->in_density();
+        _in_distance_jitter[s] >> slots[s].cloud->in_distance_jitter();
+        _in_pitch_jitter[s] >> slots[s].cloud->in_pitch_jitter();
+        _grainDirection[s] >> slots[s].cloud->in_direction();
+        _in_pitch[s] >> slots[s].cloud->in_pitch();
     }
 }
 
@@ -1112,14 +1109,14 @@ void ofApp::mapSimulatedDataMulti()
     {
         controlX[s] = ofMap(_posX[s], 0.0, 1.0, uiX[s], uiMaxX[s]);
         controlY[s] = ofMap(_volume[s], 0.0, 1.0, uiMaxY[s], uiY[s]);
-        _posX[s] >> cloud[s]->in_position();
-        _spread[s] >> cloud[s]->in_position_jitter();
-        _in_length[s] >> cloud[s]->in_length();
-        _in_density[s] >> cloud[s]->in_density();
-        _in_distance_jitter[s] >> cloud[s]->in_distance_jitter();
-        _in_pitch_jitter[s] >> cloud[s]->in_pitch_jitter();
-        _grainDirection[s] >> cloud[s]->in_direction();
-        _in_pitch[s] >> cloud[s]->in_pitch();
+        _posX[s] >> slots[s].cloud->in_position();
+        _spread[s] >> slots[s].cloud->in_position_jitter();
+        _in_length[s] >> slots[s].cloud->in_length();
+        _in_density[s] >> slots[s].cloud->in_density();
+        _in_distance_jitter[s] >> slots[s].cloud->in_distance_jitter();
+        _in_pitch_jitter[s] >> slots[s].cloud->in_pitch_jitter();
+        _grainDirection[s] >> slots[s].cloud->in_direction();
+        _in_pitch[s] >> slots[s].cloud->in_pitch();
         
     }
 }
@@ -1198,10 +1195,10 @@ void ofApp::drawGrainClouds()
             //draw grains
             ofSetRectMode(OF_RECTMODE_CENTER);
             int grainsY = uiY[j] + uiHeigth[j] / 2;
-            for (int k = 0; k < grainVoices[j]; ++k) {
-                float xpos = uiX[j] + (uiWidth[j] * cloud[j]->meter_position(k));
-                float dimensionX = cloud[j]->meter_env(k) * 10;
-                float dimensionY = cloud[j]->meter_env(k) * 50;
+            for (int k = 0; k < slots[j].grainVoices; ++k) {
+                float xpos = uiX[j] + (uiWidth[j] * slots[j].cloud->meter_position(k));
+                float dimensionX = slots[j].cloud->meter_env(k) * 10;
+                float dimensionY = slots[j].cloud->meter_env(k) * 50;
                 ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
             }
         }
@@ -2422,14 +2419,14 @@ void ofApp::updateParametersFromValuesMulti()
         }
     }
     for (int i = 0; i < numberOfSlots; i++) {
-        _posX[i] >> cloud[i]->in_position();
-        _spread[i] >> cloud[i]->in_position_jitter();
-        _in_length[i] >> cloud[i]->in_length();
-        _in_density[i] >> cloud[i]->in_density();
-        _in_distance_jitter[i] >> cloud[i]->in_distance_jitter();
-        _in_pitch_jitter[i] >> cloud[i]->in_pitch_jitter();
-        _grainDirection[i] >> cloud[i]->in_direction();
-        _in_pitch[i] >> cloud[i]->in_pitch();
+        _posX[i] >> slots[i].cloud->in_position();
+        _spread[i] >> slots[i].cloud->in_position_jitter();
+        _in_length[i] >> slots[i].cloud->in_length();
+        _in_density[i] >> slots[i].cloud->in_density();
+        _in_distance_jitter[i] >> slots[i].cloud->in_distance_jitter();
+        _in_pitch_jitter[i] >> slots[i].cloud->in_pitch_jitter();
+        _grainDirection[i] >> slots[i].cloud->in_direction();
+        _in_pitch[i] >> slots[i].cloud->in_pitch();
     }
 }
 void ofApp::UpdatePlayheadWithTimer(){
@@ -2437,14 +2434,14 @@ void ofApp::UpdatePlayheadWithTimer(){
     if(positionFromTime > 0.985){
         positionFromTime = 0.985;
     }
-    positionFromTime >> cloud[0]->in_position();
-    _in_length[0] >> cloud[0]->in_length();
-    _in_density[0] >> cloud[0]->in_density();
-    _in_distance_jitter[0] >> cloud[0]->in_distance_jitter();
-    _in_pitch_jitter[0] >> cloud[0]->in_pitch_jitter();
-    _grainDirection[0] >> cloud[0]->in_direction();
-    _in_pitch[0] >> cloud[0]->in_pitch();
-    _spread[0] >> cloud[0]->in_position_jitter();
+    positionFromTime >> slots[0].cloud->in_position();
+    _in_length[0] >> slots[0].cloud->in_length();
+    _in_density[0] >> slots[0].cloud->in_density();
+    _in_distance_jitter[0] >> slots[0].cloud->in_distance_jitter();
+    _in_pitch_jitter[0] >> slots[0].cloud->in_pitch_jitter();
+    _grainDirection[0] >> slots[0].cloud->in_direction();
+    _in_pitch[0] >> slots[0].cloud->in_pitch();
+    _spread[0] >> slots[0].cloud->in_position_jitter();
 }
 void ofApp::getAccumulatedPressure()
 {
@@ -2483,21 +2480,21 @@ void ofApp::getAccumulatedPressure()
         }
         
         //then apply the curved data to the granular and set the volume as it should be (could be mapped to a sensor)
-        //accumulatedPressureNormalised >> cloud[0]->in_position();
+        //accumulatedPressureNormalised >> slots[0].cloud->in_position();
         UpdatePlayheadWithTimer();
-        ampControl[0]->set(_volume[0]);
+        slots[0].ampControl->set(_volume[0]);
         ofLogVerbose() << "Accumulated pressure is " + ofToString(accumulatedPressureNormalised) << endl;
         
     }
     // of it does not pass the threshold then reset the volume and playhead position
     else if (accumulatedPressureNormalised<normalisedA2DValuesMin) {
-        0.0 >> cloud[0]->in_position();
-        ampControl[0]->set(0.0);
+        0.0 >> slots[0].cloud->in_position();
+        slots[0].ampControl->set(0.0);
     }
 #ifndef HAS_ADC
     if (timeUpdateFromKey) {
         UpdatePlayheadWithTimer();
-        ampControl[0]->set(_volume[0]);
+        slots[0].ampControl->set(_volume[0]);
     }
 #endif
     
@@ -2510,13 +2507,13 @@ void ofApp::applyDynamicValuesToParameters(int &k, std::vector<ofParameter<int>>
         
         if (normalisedA2DValues[v]<normalisedA2DValuesMin)
         {
-            ampControl[k]->set(0.0);
+            slots[k].ampControl->set(0.0);
         }
         else
         {
             //drawGrains[k] = true;
             parameter[k] = ofMap(normalisedA2DValues[v], 0.0, 1.0, parameterMin[k], parameterMax[k]);
-            ampControl[k]->set(_volume[k]);
+            slots[k].ampControl->set(_volume[k]);
         }
         
         ofLogVerbose() << paramName + " on slot " + ofToString(k) + " = " + ofToString(parameter[k]) + " mapped between " + ofToString(parameterMin[k]) + " and " + ofToString(parameterMax[k]) + " on sensor " + ofToString(v+1)<< endl;
@@ -2545,65 +2542,65 @@ void ofApp::transferEfffectParamtersToUnits(){
     for (int j = 0; j < numberOfSlots; j++)
     {
         if(effectsPatching[presetIndex-1][j].hasBitCrusher){
-            effBitCrushersParams[j]._e_bitcrush_in_bits >> bitCrusherLs[j]->in_bits();
-            effBitCrushersParams[j]._e_bitcrush_in_bits >> bitCrusherRs[j]->in_bits();
+            effBitCrushersParams[j]._e_bitcrush_in_bits >> slots[j].bitCrusherLs->in_bits();
+            effBitCrushersParams[j]._e_bitcrush_in_bits >> slots[j].bitCrusherRs->in_bits();
         }
         
         if(effectsPatching[presetIndex-1][j].hasDecimator){
             
-            effDecimatorsParams[j]._e_decomator_in_rate >> decimatorLs[j]->in_freq();
-            effDecimatorsParams[j]._e_decomator_in_rate >> decimatorRs[j]->in_freq();
+            effDecimatorsParams[j]._e_decomator_in_rate >> slots[j].decimatorLs->in_freq();
+            effDecimatorsParams[j]._e_decomator_in_rate >> slots[j].decimatorRs->in_freq();
         }
         if(effectsPatching[presetIndex-1][j].hasChorus){
             
-            effChorussParams[j]._e_chorus_in_depth >> choruss[j]->in_depth();
-            effChorussParams[j]._e_chorus_in_speed >> choruss[j]->in_speed();
-            effChorussParams[j]._e_chorus_in_delay >> choruss[j]->in_delay();
+            effChorussParams[j]._e_chorus_in_depth >> slots[j].choruss->in_depth();
+            effChorussParams[j]._e_chorus_in_speed >> slots[j].choruss->in_speed();
+            effChorussParams[j]._e_chorus_in_delay >> slots[j].choruss->in_delay();
             
         }
         if(effectsPatching[presetIndex-1][j].hasFilter){
             
-            effFiltersParams[j]._e_MLAD_in_freq >> multiLadderFilterLs[j]->in_freq();
-            effFiltersParams[j]._e_MLAD_in_reso >> multiLadderFilterLs[j]->in_reso();
+            effFiltersParams[j]._e_MLAD_in_freq >> slots[j].multiLadderFilterLs->in_freq();
+            effFiltersParams[j]._e_MLAD_in_reso >> slots[j].multiLadderFilterLs->in_reso();
             
-            effFiltersParams[j]._e_MLAD_in_freq >> multiLadderFilterRs[j]->in_freq();
-            effFiltersParams[j]._e_MLAD_in_reso >> multiLadderFilterRs[j]->in_reso();
+            effFiltersParams[j]._e_MLAD_in_freq >> slots[j].multiLadderFilterRs->in_freq();
+            effFiltersParams[j]._e_MLAD_in_reso >> slots[j].multiLadderFilterRs->in_reso();
             
         }
         if(effectsPatching[presetIndex-1][j].hasDelay){
             
-            effDelaysParams[j]._e_delay_in_send >> delaySends[j]->in_mod();
+            effDelaysParams[j]._e_delay_in_send >> slots[j].delaySends->in_mod();
             
-            effDelaysParams[j]._e_delay_in_time >> delayLs[j]->in_time();
-            effDelaysParams[j]._e_delay_in_damping >> delayLs[j]->in_damping();
-            effDelaysParams[j]._e_delay_in_feedback >> delayLs[j]->in_feedback();
+            effDelaysParams[j]._e_delay_in_time >> slots[j].delayLs->in_time();
+            effDelaysParams[j]._e_delay_in_damping >> slots[j].delayLs->in_damping();
+            effDelaysParams[j]._e_delay_in_feedback >> slots[j].delayLs->in_feedback();
             
-            effDelaysParams[j]._e_delay_in_time >> delayRs[j]->in_time();
-            effDelaysParams[j]._e_delay_in_damping >> delayRs[j]->in_damping();
-            effDelaysParams[j]._e_delay_in_feedback >> delayRs[j]->in_feedback();
+            effDelaysParams[j]._e_delay_in_time >> slots[j].delayRs->in_time();
+            effDelaysParams[j]._e_delay_in_damping >> slots[j].delayRs->in_damping();
+            effDelaysParams[j]._e_delay_in_feedback >> slots[j].delayRs->in_feedback();
             
         }
         if(effectsPatching[presetIndex-1][j].hasReverb){
             
-            effReverbsParams[j]._e_reverb_in_mix >> reverbSends[j]->in_mod();
-            effReverbsParams[j]._e_reverb_in_time >> reverbs[j]->in_time();
-            effReverbsParams[j]._e_reverb_in_damping >> reverbs[j]->in_damping();
-            effReverbsParams[j]._e_reverb_in_density >> reverbs[j]->in_density();
-            effReverbsParams[j]._e_reverb_in_hiCut >> reverbs[j]->in_hi_cut();
-            effReverbsParams[j]._e_reverb_in_modFreq >> reverbs[j]->in_mod_freq();
-            effReverbsParams[j]._e_reverb_in_modAmount >> reverbs[j]->in_mod_amount();
+            effReverbsParams[j]._e_reverb_in_mix >> slots[j].reverbSends->in_mod();
+            effReverbsParams[j]._e_reverb_in_time >> slots[j].reverbs->in_time();
+            effReverbsParams[j]._e_reverb_in_damping >> slots[j].reverbs->in_damping();
+            effReverbsParams[j]._e_reverb_in_density >> slots[j].reverbs->in_density();
+            effReverbsParams[j]._e_reverb_in_hiCut >> slots[j].reverbs->in_hi_cut();
+            effReverbsParams[j]._e_reverb_in_modFreq >> slots[j].reverbs->in_mod_freq();
+            effReverbsParams[j]._e_reverb_in_modAmount >> slots[j].reverbs->in_mod_amount();
             
             
         }
-        effCompressorsParams[j]._e_compressor_in_gain >> outputAmpL[j]->in_mod();
-        effCompressorsParams[j]._e_compressor_in_gain >> outputAmpR[j]->in_mod();
+        effCompressorsParams[j]._e_compressor_in_gain >> slots[j].outputAmpL->in_mod();
+        effCompressorsParams[j]._e_compressor_in_gain >> slots[j].outputAmpR->in_mod();
         
-        effCompressorsParams[j]._e_compressor_in_attack >> compressors[j]->in_attack();
-        effCompressorsParams[j]._e_compressor_in_knee >> compressors[j]->in_knee();
-        effCompressorsParams[j]._e_compressor_in_ratio >> compressors[j]->in_ratio();
-        effCompressorsParams[j]._e_compressor_in_release >> compressors[j]->in_release();
-        effCompressorsParams[j]._e_compressor_in_threshold >> compressors[j]->in_threshold();
-        effCompressorsParams[j]._e_compressor_comp_meter.set(compressors[j]->meter_GR());
+        effCompressorsParams[j]._e_compressor_in_attack >> slots[j].compressors->in_attack();
+        effCompressorsParams[j]._e_compressor_in_knee >> slots[j].compressors->in_knee();
+        effCompressorsParams[j]._e_compressor_in_ratio >> slots[j].compressors->in_ratio();
+        effCompressorsParams[j]._e_compressor_in_release >> slots[j].compressors->in_release();
+        effCompressorsParams[j]._e_compressor_in_threshold >> slots[j].compressors->in_threshold();
+        effCompressorsParams[j]._e_compressor_comp_meter.set(slots[j].compressors->meter_GR());
         
     }
 }
@@ -2977,10 +2974,10 @@ void ofApp::controlOn(int x, int y) {
     
     for (int z = 0; z < numberOfSlots; z++) {
         if (x > uiX[z] && x<uiMaxX[z] && y>uiY[z] && y < uiMaxY[z]) {
-            ofMap(x, uiX[z], uiMaxX[z], 0.0f, 1.0f, true) >> cloud[z]->in_position();
+            ofMap(x, uiX[z], uiMaxX[z], 0.0f, 1.0f, true) >> slots[z].cloud->in_position();
             
             currentTarget = z;
-            ampControl[z]->set(_volume[z]);
+            slots[z].ampControl->set(_volume[z]);
             drawGrains[z] = true;
             controlX[z] = x;
             controlY[z] = ofMap(_volume[z], 0, 1, uiMaxY[z], uiY[z]);
@@ -3038,18 +3035,18 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
     //--------GRAINCLOUD-----------------------
     for (int i = 0; i < numberOfSlots; i++) {
         
-        grainVoices[i] = cloud[i]->getVoicesNum();
+        slots[i].grainVoices = slots[i].cloud->getVoicesNum();
         // if we have samples unload them
-        if (sampleData[i]->loaded())
+        if (slots[i].sampleData->loaded())
         {
-            ampControl[i]->set(0.0f);
-            sampleData[i]->unLoad();
+            slots[i].ampControl->set(0.0f);
+            slots[i].sampleData->unLoad();
         }
         
-        sampleData[i]->setVerbose(true);
-        sampleData[i]->load(paths[i]);
+        slots[i].sampleData->setVerbose(true);
+        slots[i].sampleData->load(paths[i]);
         
-        cloud[i]->setSample(sampleData[i]); // give to the pdsp::GrainCloud the pointer to the sample
+        slots[i].cloud->setSample(slots[i].sampleData.get()); // give to the pdsp::GrainCloud the pointer to the sample
         
         
         if (firstRun) {
@@ -3137,43 +3134,43 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
         
         switch (_window_type_id[i]) {
             case 0:
-                cloud[i]->setWindowType(pdsp::Rectangular);
+                slots[i].cloud->setWindowType(pdsp::Rectangular);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Rectangular" << endl;
                 break;
             case 1:
-                cloud[i]->setWindowType(pdsp::Triangular);
+                slots[i].cloud->setWindowType(pdsp::Triangular);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Triangular" << endl;
                 break;
             case 2:
-                cloud[i]->setWindowType(pdsp::Hann);
+                slots[i].cloud->setWindowType(pdsp::Hann);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Hann" << endl;
                 break;
             case 3:
-                cloud[i]->setWindowType(pdsp::Hamming);
+                slots[i].cloud->setWindowType(pdsp::Hamming);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Hamming" << endl;
                 break;
             case 4:
-                cloud[i]->setWindowType(pdsp::Blackman);
+                slots[i].cloud->setWindowType(pdsp::Blackman);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Blackman" << endl;
                 break;
             case 5:
-                cloud[i]->setWindowType(pdsp::BlackmanHarris);
+                slots[i].cloud->setWindowType(pdsp::BlackmanHarris);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: BlackmanHarris" << endl;
                 break;
             case 6:
-                cloud[i]->setWindowType(pdsp::SineWindow);
+                slots[i].cloud->setWindowType(pdsp::SineWindow);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: SineWindow" << endl;
                 break;
             case 7:
-                cloud[i]->setWindowType(pdsp::Welch);
+                slots[i].cloud->setWindowType(pdsp::Welch);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Welch" << endl;
                 break;
             case 8:
-                cloud[i]->setWindowType(pdsp::Gaussian);
+                slots[i].cloud->setWindowType(pdsp::Gaussian);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Gaussian" << endl;
                 break;
             case 9:
-                cloud[i]->setWindowType(pdsp::Tukey);
+                slots[i].cloud->setWindowType(pdsp::Tukey);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Tukey" << endl;
                 break;
         }
@@ -3184,27 +3181,27 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
         
         
         // apply all base settings to the grainular objects
-        _posX[i] >> cloud[i]->in_position();
-        _spread[i] >> cloud[i]->in_position_jitter();
-        _in_length[i] >> cloud[i]->in_length();
-        _in_density[i] >> cloud[i]->in_density();
-        _in_distance_jitter[i] >> cloud[i]->in_distance_jitter();
-        _in_pitch_jitter[i] >> cloud[i]->in_pitch_jitter();
-        _grainDirection[i] >> cloud[i]->in_direction();
-        _in_pitch[i] >> cloud[i]->in_pitch();
+        _posX[i] >> slots[i].cloud->in_position();
+        _spread[i] >> slots[i].cloud->in_position_jitter();
+        _in_length[i] >> slots[i].cloud->in_length();
+        _in_density[i] >> slots[i].cloud->in_density();
+        _in_distance_jitter[i] >> slots[i].cloud->in_distance_jitter();
+        _in_pitch_jitter[i] >> slots[i].cloud->in_pitch_jitter();
+        _grainDirection[i] >> slots[i].cloud->in_direction();
+        _in_pitch[i] >> slots[i].cloud->in_pitch();
         
         if (firstRun) {
             // we onyl need to setup the audio engine when we start
-            ampControl[i]->channels(2);
-            //ampControl[i]->enableSmoothing(50.0f);
-            ampControl[i]->set(0.0f);
+            slots[i].ampControl->channels(2);
+            //slots[i].ampControl->enableSmoothing(50.0f);
+            slots[i].ampControl->set(0.0f);
             
             //outputAmp[i]->channels(2);
             
             
             
-            //                cloud[i]->ch(0) >> (*ampControl[i])[0]  >> engine.audio_out(0);
-            //                cloud[i]->ch(1) >> (*ampControl[i])[1]  >> engine.audio_out(1);
+            //                slots[i].cloud->ch(0) >> (*slots[i].ampControl)[0]  >> engine.audio_out(0);
+            //                slots[i].cloud->ch(1) >> (*slots[i].ampControl)[1]  >> engine.audio_out(1);
 #ifndef HAS_ADC
             // create the sizes and positions of the waveform displays and interaction areas of the granulars
             //ui values-------------------------------
@@ -3220,7 +3217,7 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 #ifndef HAS_ADC
         // setup the waveform preview and the position of the GUI modules
         drawGrains[i] = false;
-        waveformGraphics[i]->setWaveform(*sampleData[i], 0, ofColor(0, 100, 100, 255), uiWidth[i], uiHeigth[i]);
+        waveformGraphics[i]->setWaveform(*slots[i].sampleData, 0, ofColor(0, 100, 100, 255), uiWidth[i], uiHeigth[i]);
         samplePanels[i]->setPosition(uiX[i], uiMaxY[i] + 10);
         effectsPanels[i]->setPosition(uiX[i], uiMaxY[i] + 10);
         
@@ -3320,43 +3317,43 @@ void ofApp::onWindowTypeChanged(int & windowType){
     for (int i =0; i<numberOfSlots; i++) {
         switch (_window_type_id[i]) {
             case 0:
-                cloud[i]->setWindowType(pdsp::Rectangular);
+                slots[i].cloud->setWindowType(pdsp::Rectangular);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Rectangular" << endl;
                 break;
             case 1:
-                cloud[i]->setWindowType(pdsp::Triangular);
+                slots[i].cloud->setWindowType(pdsp::Triangular);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Triangular" << endl;
                 break;
             case 2:
-                cloud[i]->setWindowType(pdsp::Hann);
+                slots[i].cloud->setWindowType(pdsp::Hann);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Hann" << endl;
                 break;
             case 3:
-                cloud[i]->setWindowType(pdsp::Hamming);
+                slots[i].cloud->setWindowType(pdsp::Hamming);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Hamming" << endl;
                 break;
             case 4:
-                cloud[i]->setWindowType(pdsp::Blackman);
+                slots[i].cloud->setWindowType(pdsp::Blackman);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Blackman" << endl;
                 break;
             case 5:
-                cloud[i]->setWindowType(pdsp::BlackmanHarris);
+                slots[i].cloud->setWindowType(pdsp::BlackmanHarris);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: BlackmanHarris" << endl;
                 break;
             case 6:
-                cloud[i]->setWindowType(pdsp::SineWindow);
+                slots[i].cloud->setWindowType(pdsp::SineWindow);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: SineWindow" << endl;
                 break;
             case 7:
-                cloud[i]->setWindowType(pdsp::Welch);
+                slots[i].cloud->setWindowType(pdsp::Welch);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Welch" << endl;
                 break;
             case 8:
-                cloud[i]->setWindowType(pdsp::Gaussian);
+                slots[i].cloud->setWindowType(pdsp::Gaussian);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Gaussian" << endl;
                 break;
             case 9:
-                cloud[i]->setWindowType(pdsp::Tukey);
+                slots[i].cloud->setWindowType(pdsp::Tukey);
                 ofLogNotice() << "Slot " + ofToString(i +1) + " using window type: Tukey" << endl;
                 break;
         }
@@ -3380,31 +3377,13 @@ void ofApp::populateVectors()
         waveformGraphics.push_back(tmp_waveformGraphics);
 #endif
         
-        int                    tmp_grainVoices;
-        grainVoices.push_back(tmp_grainVoices);
-        
-        pdsp::SampleBuffer* tmp_sampleData = new pdsp::SampleBuffer();
-        sampleData.push_back(tmp_sampleData);
-        
-        pdsp::GrainCloud* tmp_cloud = new pdsp::GrainCloud();
-        cloud.push_back(tmp_cloud);
-        
-        pdsp::ParameterAmp* tmp_ampControl = new pdsp::ParameterAmp();
-        ampControl.push_back(tmp_ampControl);
-        
-        pdsp::Amp* tmp_outputAmpL = new pdsp::Amp();
-        outputAmpL.push_back(tmp_outputAmpL);
-        
-        pdsp::Amp* tmp_outputAmpR = new pdsp::Amp();
-        outputAmpR.push_back(tmp_outputAmpR);
-        
-        pdsp::PatchNode* tmp_posX = new pdsp::PatchNode();
-        posX.push_back(tmp_posX);
-        
-        pdsp::PatchNode* tmp_jitY = new pdsp::PatchNode();
-        jitY.push_back(tmp_jitY);
-        
-        
+        // sampleData/cloud/ampControl/outputAmpL/outputAmpR (plus the 12
+        // effect objects, allocated below by populateEffectVectors() calling
+        // Slot::resetEffects()) all live in one Slot per slot now -- see
+        // src/Slot.h. (posX/jitY used to be allocated here too but were
+        // never read anywhere after that -- dropped, not carried over.)
+        slots.emplace_back();
+
         bool                tmp_drawGrains;
         drawGrains.push_back(tmp_drawGrains);
         int                    tmp_uiWidth;
@@ -3627,104 +3606,37 @@ void ofApp::populateVectors()
     
 }
 void ofApp::populateEffectVectors(){
+    // the 12 pdsp effect objects per slot are (re)allocated by
+    // Slot::resetEffects() -- RAII, so this replaces the old vector<T*>
+    // .clear() + `new`-and-push_back dance (which leaked the discarded
+    // objects on every non-first call, i.e. every preset switch -- see
+    // ofApp::loadEffectPatchSettings()) with no behavior change beyond that
+    // leak going away. What's left here is just the GUI-facing effect
+    // parameter structs, not yet folded into Slot.
     for(int i =0; i<numberOfSlots; i++){
-        //------------bitcrusher
-        pdsp::Bitcruncher* tmp_BitcrusherL = new pdsp::Bitcruncher();
-        bitCrusherLs.push_back(tmp_BitcrusherL);
-        pdsp::Bitcruncher* tmp_BitcrusherR = new pdsp::Bitcruncher();
-        bitCrusherRs.push_back(tmp_BitcrusherR);
-        
+        slots[i].resetEffects();
+
         EFFBitCrushUnit temp_effBitCrushersParams;
         effBitCrushersParams.push_back(temp_effBitCrushersParams);
-        
-        
-        //------------decimator
-        pdsp::Decimator* tmp_decimatorL = new pdsp::Decimator();
-        decimatorLs.push_back(tmp_decimatorL);
-        pdsp::Decimator* tmp_decimatorR= new pdsp::Decimator();
-        decimatorRs.push_back(tmp_decimatorR);
-        
+
         EFFDecimatorUnit tempeffDecimatorsParams;
         effDecimatorsParams.push_back(tempeffDecimatorsParams);
-        
-        
-        //------------delay
-        pdsp::Delay* tmp_delayL = new pdsp::Delay();
-        delayLs.push_back(tmp_delayL);
-        pdsp::Delay* tmp_delayR= new pdsp::Delay();
-        delayRs.push_back(tmp_delayR);
-        pdsp::Amp* tmp_delaySend= new pdsp::Amp();
-        delaySends.push_back(tmp_delaySend);
-        
+
         EFFDelayUnit tempeffDelaysParams;
         effDelaysParams.push_back(tempeffDelaysParams);
-        
-        
-        //------------Filter
-        pdsp::MultiLadder4* tmp_multiLadderFilterL = new pdsp::MultiLadder4();
-        multiLadderFilterLs.push_back(tmp_multiLadderFilterL);
-        pdsp::MultiLadder4* tmp_multiLadderFilterR= new pdsp::MultiLadder4();
-        multiLadderFilterRs.push_back(tmp_multiLadderFilterR);
-        
+
         EFFFilterUnit tempeffFiltersParams;
         effFiltersParams.push_back(tempeffFiltersParams);
-        
-        
-        //------------chorus
-        pdsp::DimensionChorus* tmp_chorus = new pdsp::DimensionChorus();
-        
-        choruss.push_back(tmp_chorus);
-        
+
         EFFChorusUnit tempeffChorus;
         effChorussParams.push_back(tempeffChorus);
-        
-        
-        //------------reverb
-        pdsp::BasiVerb* tmp_reverb = new pdsp::BasiVerb();
-        reverbs.push_back(tmp_reverb);
-        pdsp::Amp* tmp_reverbSend = new pdsp::Amp();
-        reverbSends.push_back(tmp_reverbSend);
-        
+
         EFFReverbUnit tempeffReverbsParams;
         effReverbsParams.push_back(tempeffReverbsParams);
-        
-        
-        //------------compressor
-        pdsp::Compressor* tmp_compressor = new pdsp::Compressor();
-        compressors.push_back(tmp_compressor);
-        
+
         EFFCompressorUnit tempeffCompressorsParams;
         effCompressorsParams.push_back(tempeffCompressorsParams);
     }
-}
-void ofApp::clearEffectVectors(){
-    //------------bitcrusher
-    bitCrusherLs.clear();
-    bitCrusherRs.clear();
-    
-    //------------decimator
-    decimatorLs.clear();
-    decimatorRs.clear();
-    
-    //------------delay
-    delayLs.clear();
-    delayRs.clear();
-    delaySends.clear();
-    
-    //------------filter
-    multiLadderFilterLs.clear();
-    multiLadderFilterRs.clear();
-    
-    //------------chorus
-    choruss.clear();
-    
-    //------------reverb
-    reverbs.clear();
-    reverbSends.clear();
-    
-    //------------compressor
-    compressors.clear();
-    
 }
 #ifdef HAS_ADC
 void ofApp::calibrateOnStart() {
@@ -4153,15 +4065,15 @@ void ofApp::resetValuesAfterChanges()
 {
     //resets all the granualars parameters as the should be, volume is at 0 and playhead position at 0
     for (int i = 0; i < numberOfSlots; i++) {
-        ampControl[i]->set(0.0f);
-        0.0 >> cloud[i]->in_position();
-        _in_length[i] >> cloud[i]->in_length();
-        _in_density[i] >> cloud[i]->in_density();
-        _in_distance_jitter[i] >> cloud[i]->in_distance_jitter();
-        _in_pitch_jitter[i] >> cloud[i]->in_pitch_jitter();
-        _grainDirection[i] >> cloud[i]->in_direction();
-        _in_pitch[i] >> cloud[i]->in_pitch();
-        _spread[i] >> cloud[i]->in_position_jitter();
+        slots[i].ampControl->set(0.0f);
+        0.0 >> slots[i].cloud->in_position();
+        _in_length[i] >> slots[i].cloud->in_length();
+        _in_density[i] >> slots[i].cloud->in_density();
+        _in_distance_jitter[i] >> slots[i].cloud->in_distance_jitter();
+        _in_pitch_jitter[i] >> slots[i].cloud->in_pitch_jitter();
+        _grainDirection[i] >> slots[i].cloud->in_direction();
+        _in_pitch[i] >> slots[i].cloud->in_pitch();
+        _spread[i] >> slots[i].cloud->in_position_jitter();
         drawGrains[i] = false;
     }
     
@@ -4279,7 +4191,7 @@ void ofApp::gotMessage(ofMessage msg){
 void ofApp::loadRoutine(int target) {
 #ifndef HAS_ADC
     // in the laptop mode you can load other audio files to preview
-    ampControl[target]->set(0.0f);
+    slots[target].ampControl->set(0.0f);
     drawGrains[target] = false;
     
     
@@ -4291,8 +4203,8 @@ void ofApp::loadRoutine(int target) {
         
         string path = openFileResult.getPath();
         
-        sampleData[target]->load(path);
-        waveformGraphics[target]->setWaveform(*sampleData[target], 0, ofColor(0, 100, 100, 255), uiWidth[target], uiHeigth[target]);
+        slots[target].sampleData->load(path);
+        waveformGraphics[target]->setWaveform(*slots[target].sampleData, 0, ofColor(0, 100, 100, 255), uiWidth[target], uiHeigth[target]);
         fileNamesSet[presetIndex][target] = openFileResult.getName();
         
         ofLogNotice("file loaded");

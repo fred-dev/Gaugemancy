@@ -5,6 +5,7 @@
 #include "HitGestureDetector.h"
 #include "ButtonClickClassifier.h"
 #include "AppSettings.h"
+#include "Slot.h"
 #include "ofxPDSP.h"
 #include "ofxGui.h"
 #include "ofxOsc.h"
@@ -360,27 +361,13 @@ class ofApp : public ofBaseApp{
 		void setupGraincloud(std::vector<string> paths, string presetPath);
 		void populateVectors();
         void populateEffectVectors();
-        void clearEffectVectors();
-	
+
 #ifndef HAS_ADC
         void onNarrWindowTypeChanged(int & windowType);
 
 		std::vector<ofxSampleBufferPlotter*>  waveformGraphics;
 #endif
-		std::vector<int>					grainVoices;
-		std::vector<pdsp::SampleBuffer*>		sampleData;
-		std::vector<pdsp::GrainCloud*>		cloud;
-		std::vector<pdsp::ParameterAmp*> ampControl;
-        std::vector<pdsp::Amp*> outputAmpL;
-        std::vector<pdsp::Amp*> outputAmpR;
-
-		std::vector<pdsp::PatchNode*> posX;
-
-		//std::vector<pdsp::PatchNode>		posX;
-		std::vector<pdsp::PatchNode*> jitY;
-
-		//std::vector<pdsp::PatchNode>		jitY;
-
+		std::vector<Slot> slots;
 
 		std::vector<bool>					drawGrains;
 		std::vector<int>					uiWidth;
@@ -506,28 +493,9 @@ class ofApp : public ofBaseApp{
     
     ofParameter<int> curveSelector;
 
-// effects
-    
-    std::vector<pdsp::Bitcruncher*> bitCrusherLs;
-    std::vector<pdsp::Bitcruncher*> bitCrusherRs;
-    
-    std::vector<pdsp::Compressor*> compressors;
-    
-    std::vector<pdsp::Decimator*> decimatorLs;
-    std::vector<pdsp::Decimator*> decimatorRs;
-    
-    std::vector<pdsp::Delay*> delayLs;
-    std::vector<pdsp::Delay*> delayRs;
-    std::vector<pdsp::Amp*>               delaySends;
-    
-    std::vector<pdsp::MultiLadder4*> multiLadderFilterLs;
-    std::vector<pdsp::MultiLadder4*> multiLadderFilterRs;
-    
-    std::vector<pdsp::DimensionChorus*> choruss;
-    
-    std::vector<pdsp::BasiVerb*> reverbs;
-    std::vector<pdsp::Amp*>               reverbSends;
-    
+// effects (the pdsp objects themselves live in Slot now; these are the
+// GUI-facing parameter structs, not yet folded into Slot)
+
     bool drawEffects;
     struct ChannelEffects {
         bool hasBitCrusher;
