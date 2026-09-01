@@ -15,15 +15,21 @@ mkdir -p "$BUILD_DIR"
 PURE_LOGIC_SOURCES=(
   "$SRC_DIR/HitGestureDetector.cpp"
   "$SRC_DIR/ButtonClickClassifier.cpp"
+  "$SRC_DIR/AppSettings.cpp"
 )
+
+# nlohmann::json is vendored inside openFrameworks' own libs/ -- reuse it
+# rather than vendoring a second copy just for the pure-logic tests.
+OF_JSON_INCLUDE="$SRC_DIR/../../../../libs/json/include"
 
 TEST_SOURCES=("$DIR"/test_*.cpp)
 
 echo "Building tests..."
 clang++ -std=c++17 -Wall -Wextra \
-  -I "$DIR/thirdparty" -I "$SRC_DIR" \
+  -I "$DIR/thirdparty" -I "$SRC_DIR" -I "$OF_JSON_INCLUDE" \
   "${PURE_LOGIC_SOURCES[@]}" "${TEST_SOURCES[@]}" \
   -o "$BUILD_DIR/run_tests"
 
 echo "Running tests..."
+cd "$DIR/.." # so tests reading bin/data/... resolve regardless of caller's cwd
 "$BUILD_DIR/run_tests" "$@"

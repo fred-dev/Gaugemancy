@@ -4,6 +4,7 @@
 #include "ofFileUtils.h"
 #include "HitGestureDetector.h"
 #include "ButtonClickClassifier.h"
+#include "AppSettings.h"
 #include "ofxPDSP.h"
 #include "ofxGui.h"
 #include "ofxOsc.h"

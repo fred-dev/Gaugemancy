@@ -1945,7 +1945,7 @@ void ofApp::setupParamsFromSettings()
         ofLogNotice() << "Username settings loaded" << endl;
     }
 
-    unitID = usernameJson.value("USERNAME", "NO_UNIT_ID");
+    unitID = loadUnitId(usernameJson);
     ofLogNotice() << "UNIT_ID = " + ofToString(unitID) << endl;
     filePathPrefix = filePathPrefix + unitID + "/";
     ofLogNotice()<< "Root user data path is " + filePathPrefix <<endl;
@@ -1959,8 +1959,17 @@ void ofApp::setupParamsFromSettings()
     else {
         ofLogNotice() << "App settings loaded" << endl;
     }
+
+    // every field below is read (with its default) by AppSettings::loadFrom
+    // -- see src/AppSettings.h/cpp. What's here is applying those values to
+    // ofApp's own members/objects and the side effects that go with them
+    // (log level, derived slot/mode counts, the two extracted state
+    // machines' configs, OSC setup, network commands) -- none of which is
+    // "read a field with a default," so none of it moved into the loader.
+    AppSettings settings = AppSettings::loadFrom(appSettingsJson);
+
     // I can change log levels to give me different kinds of feedback from the system when I am debugging (via ssh or VNC)
-    logLevel = appSettingsJson.value("LOG_LEVEL", 1);
+    logLevel = settings.logLevel;
     switch (logLevel)
     {
         case 0:
@@ -1975,79 +1984,79 @@ void ofApp::setupParamsFromSettings()
         case 3:
             ofSetLogLevel(OF_LOG_SILENT);
             break;
-            
+
     }
-    
+
     //do we have a narration file
-    hasNarration = appSettingsJson.value("HAS_NARRATION", 0);
+    hasNarration = settings.hasNarration;
     ofLogNotice() << "HAS_NARRATION = " + ofToString(hasNarration) << endl;
-    
+
     //what volume to we play the narration at
-    narrationVolume = appSettingsJson.value("NARRATION_VOLUME", 1.0);
+    narrationVolume = settings.narrationVolume;
     ofLogNotice() << "NARRATION_VOLUME = " + ofToString(narrationVolume) << endl;
-    
+
     // sensor input threshold for moving between narration play and narration granular
-    narrationGlitchThreshold = appSettingsJson.value("NARRATION_GLITCH_THRESH", 0.025);
+    narrationGlitchThreshold = settings.narrationGlitchThreshold;
     ofLogNotice() << "NARRATION_GLITCH_THRESH = " + ofToString(narrationGlitchThreshold) << endl;
-    
+
     // when the sensor data is used to manipulate the narration granular how far should it move the playhead
-    narrationGlitchStrand = appSettingsJson.value("NARRATION_GLITCH_STRAND", 0.0025);
+    narrationGlitchStrand = settings.narrationGlitchStrand;
     ofLogNotice() << "NARRATION_GLITCH_STRAND = " + ofToString(narrationGlitchStrand) << endl;
-    
+
     // if the unit has narration we have an option of how it is started, it can run automatically after some time, or it can be triggered by pushing the sensor
-    narrationUsesSensor = appSettingsJson.value("NARR_PLAY_WITH_SENSOR", false);
+    narrationUsesSensor = settings.narrationUsesSensor;
     ofLogNotice() << "NARR_PLAY_WITH_SENSOR = " + ofToString(narrationUsesSensor) << endl;
-    
+
     // what is the maximum value we think a performer can get to, we will use this for the top end of the value scaling
-    maxSensorValue = appSettingsJson.value("MAX_SENSOR_VALUE", 520);
+    maxSensorValue = settings.maxSensorValue;
     ofLogNotice() << "MAX_SENSOR_VALUE = " + ofToString(maxSensorValue) << endl;
-    
+
     // sensor input threshold for engaging interaction (otherise the units will make random sounds from noise in the ADC
-    normalisedA2DValuesMin = appSettingsJson.value("ACTIVE_THRESHOLD", 0.0025);
+    normalisedA2DValuesMin = settings.normalisedA2DValuesMin;
     ofLogNotice() << "ACTIVE_THRESHOLD = " + ofToString(normalisedA2DValuesMin) << endl;
-    
+
     // chose a curve to transform incoming sensor or simulation data
-    curveSelector = appSettingsJson.value("EASING_SELECTOR", 0);
+    curveSelector = settings.curveSelector;
     ofLogNotice() << "EASING_SELECTOR = " + ofToString(curveSelector) << endl;
-    
+
     // accumulated or multi mode uses the combination of all sensor input to move the plahead of the granular objects. So the full postion is only reached by pressing all the balls in at once. The performers cannot push all in at once so instead of dividing the aggregated sensor data by 6 I divide it by this (it was 4 as that is how many sensors they can engage at once, but it was still too hard to for them to reach the end point so here it is a shitty hack
-    accumulationDenominator = appSettingsJson.value("ACCUMULATION_DENOMINATOR", 4);
+    accumulationDenominator = settings.accumulationDenominator;
     ofLogNotice() << "ACCUMULATION_DENOMINATOR = " + ofToString(accumulationDenominator) << endl;
-    
+
     // On some systems I can reduce the latency by reducing the audio buffer size
-    engineBufferSize = appSettingsJson.value("BUFFER_SIZE", 512);
+    engineBufferSize = settings.engineBufferSize;
     ofLogNotice() << "BUFFER_SIZE = " + ofToString(engineBufferSize) << endl;
-    
+
     // On some systems I can reduce the latency by reducing the number of buffers
-    numberOfBuffers = appSettingsJson.value("NUMBER_OF_BUFFERS", 3);
+    numberOfBuffers = settings.numberOfBuffers;
     ofLogNotice() << "NUMBER_OF_BUFFERS = " + ofToString(numberOfBuffers) << endl;
-    
+
     // Here we can change the audio device for different soundcards
-    audioDeviceId = appSettingsJson.value("AUDIO_DEVICE_ID", 1);
+    audioDeviceId = settings.audioDeviceId;
     ofLogNotice() << "AUDIO_DEVICE_ID = " + ofToString(audioDeviceId) << endl;
-    
-    
+
+
     // this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between letting of the push and the next push
-    useHitGesture = appSettingsJson.value("HIT_TO_CHANGE_PRESETS", false);
+    useHitGesture = settings.useHitGesture;
     ofLogNotice() << "HIT_TO_CHANGE_PRESETS = " + ofToString(useHitGesture) << endl;
     // this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between letting of the push and the next push
-    maxTroughDuration = appSettingsJson.value("MAX_TROUGH_DURATION", 250);
+    maxTroughDuration = settings.maxTroughDuration;
     ofLogNotice() << "MAX_TROUGH_DURATION = " + ofToString(maxTroughDuration) << endl;
-    
+
     // this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between a push and the letting off the push
-    maxPeakDuration = appSettingsJson.value("MAX_PEAK_DURATION", 80);
+    maxPeakDuration = settings.maxPeakDuration;
     ofLogNotice() << "MAX_PEAK_DURATION = " + ofToString(maxPeakDuration) << endl;
-    
+
     // this is for a gestural input, where the performers squeeze several sensors rapidly, number of pushes need to trigger an action
-    requiredHits = appSettingsJson.value("REQUIRED_HITS", 8);
+    requiredHits = settings.requiredHits;
     ofLogNotice() << "REQUIRED_HITS = " + ofToString(requiredHits) << endl;
-    
+
     // this is for a gestural input, where the performers squeeze several sensors rapidly, how hard does a press have to be
-    hitThreshHold = appSettingsJson.value("HIT_THRESHOLD", 0.085);
+    hitThreshHold = settings.hitThreshHold;
     ofLogNotice() << "HIT_THRESHOLD = " + ofToString(hitThreshHold) << endl;
-    
+
     // this is for a gestural input, where the performers squeeze several sensors rapidly, how soft does a non press have to be
-    troughThreshold = appSettingsJson.value("TROUGH_THRESHOLD", 0.025);
+    troughThreshold = settings.troughThreshold;
     ofLogNotice() << "TROUGH_THRESHOLD = " + ofToString(troughThreshold) << endl;
 
     HitGestureDetector::Config hitGestureConfig;
@@ -2059,16 +2068,16 @@ void ofApp::setupParamsFromSettings()
     hitGestureDetector = HitGestureDetector(hitGestureConfig);
 
     // in accumulated pressure we go to single grain mode
-    useAccumulatedPressure = appSettingsJson.value("ACCUMULATED_PRESSURE", false);
+    useAccumulatedPressure = settings.useAccumulatedPressure;
     ofLogNotice() << "ACCUMULATED_PRESSURE = " + ofToString(useAccumulatedPressure) << endl;
-    
+
     for(int i = 0; i < NUMBER_OF_PRESETS; i++){
-        timeAdvanceInterval[i] = appSettingsJson.value("TIME_ADVANCE_INTERVAL_" + ofToString(i+1), 0.0002);
+        timeAdvanceInterval[i] = settings.timeAdvanceInterval[i];
         ofLogNotice() << "TIME_ADVANCE_INTERVAL = " + ofToString(timeAdvanceInterval[i]) << endl;
     }
-    
-    
-    
+
+
+
     // change the number of slots and the simulation and grain modes depending on the accumulated pressure setting
     if (useAccumulatedPressure)
     {
@@ -2081,48 +2090,48 @@ void ofApp::setupParamsFromSettings()
     {
         numberOfSlots = 6;
         ofLogNotice() << "Using 6 slots and mappable pressure pressure" << endl;
-        
+
         grainOperationModeTranslate = OP_MODE_MULTI_GRAIN_MODE;
         simulationOperationModeTranslate = OP_MODE_SIMULATION_MULTI;
     }
-    
-    
-    
+
+
+
     //not implemented yet, but if the systems need to on a network and talking to me or each other should I set the IP
-    setLocalIp = appSettingsJson.value("SET_LOCAL_IP", false);
+    setLocalIp = settings.setLocalIp;
     ofLogNotice() << "SET_LOCAL_IP = " + ofToString(setLocalIp) << endl;
-    
+
     //not implemented yet, but if the systems need to on a network and talking to me and I should set the IP what should I set it to
-    localIpFromXML = appSettingsJson.value("LOCAL_IP", "192.168.1.15");
+    localIpFromXML = settings.localIp;
     ofLogNotice() << "LOCAL_IP = " + ofToString(localIpFromXML) << endl;
-    
+
     //not implemented yet, but if the systems need to on a network and talking to me should I set the IP to DHCP
-    setLocalToDHCP = appSettingsJson.value("SET_DHCP", false);
+    setLocalToDHCP = settings.setLocalToDHCP;
     ofLogNotice() << "SET_DHCP = " + ofToString(setLocalToDHCP) << endl;
-    
+
     //not implemented yet, but if the systems need to on a network and talking to me I use OSC, which is packaged UDP messages, this is the local port
-    localOSCPport = appSettingsJson.value("LOCAL_OSC_PORT", 1234);
+    localOSCPport = settings.localOSCPport;
     ofLogNotice() << "LOCAL_OSC_PORT = " + ofToString(localOSCPport) << endl;
-    
+
     //This is implemented, I can send OSC data (for now debug data), this is the remote port
-    remoteOSCPort = appSettingsJson.value("REMOTE_OSC_PORT", 1235);
+    remoteOSCPort = settings.remoteOSCPort;
     ofLogNotice() << "REMOTE_OSC_PORT = " + ofToString(remoteOSCPort) << endl;
-    
+
     //This is implemented, I can send OSC data (for now debug data), this is the remote IP
-    remoteOSCIp = appSettingsJson.value("REMOTE_OSC_IP", "192.168.178.236");
+    remoteOSCIp = settings.remoteOSCIp;
     ofLogNotice() << "REMOTE_OSC_IP = " + ofToString(remoteOSCIp) << endl;
-    
+
     //If OSC debug is on, it will send OSC messages as well as console debug messages
-    oscDebug = appSettingsJson.value("OSC_DEBUG", false);
+    oscDebug = settings.oscDebug;
     ofLogNotice() << "OSC_DEBUG = " + ofToString(oscDebug) << endl;
-    
+
     //not implemented if OSC live is on, it will send OSC messages to allow me to duplicate the interaction on a laptop in real time when the room is too big for the built in speakers
-    oscLive = appSettingsJson.value("OSC_LIVE", false);
+    oscLive = settings.oscLive;
     ofLogNotice() << "OSC_LIVE =" + ofToString(oscLive) << endl;
-    
+
 #ifdef HAS_ADC
     //device only if we are counting double or trupple presses on the soft button, how long to wait before we reset counting
-    buttonPressTimeOut = appSettingsJson.value("BUTTON_PRESS_MAX_WAIT", 220);
+    buttonPressTimeOut = settings.buttonPressTimeOut;
     ofLogNotice() << "BUTTON_PRESS_MAX_WAIT = " + ofToString(buttonPressTimeOut) << endl;
 
     ButtonClickClassifier::Config buttonClickConfig;
@@ -2130,14 +2139,14 @@ void ofApp::setupParamsFromSettings()
     buttonClickClassifier = ButtonClickClassifier(buttonClickConfig);
 
     // should the application close from a button interaction
-    shutdownPress = appSettingsJson.value("SH_P", false);
+    shutdownPress = settings.shutdownPress;
     ofLogNotice() << "SH_P = " + ofToString(shutdownPress) << endl;
-    
+
     // should the application closing shut town the raspberry pi
-    doShutdown = appSettingsJson.value("D_SH", false);
+    doShutdown = settings.doShutdown;
     ofLogNotice() << "D_SH = " + ofToString(doShutdown) << endl;
 #endif
-    
+
     // if we have OSCdebug on setup the packet sender and then send the data below
     if (oscDebug) {
         sender.setup(remoteOSCIp, remoteOSCPort);
