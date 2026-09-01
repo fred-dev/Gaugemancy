@@ -636,10 +636,6 @@ void ofApp::initParameters()
 {
     //gettting some simple stuff ready for running
     firstRun = true;
-#ifdef HAS_ADC
-    clicks = 0;
-    waitingForClick = true;
-#endif
     presetIndex = 1;
     narrationIsPlaying = false;
     presetSwitchTimer = ofGetElapsedTimeMillis();
@@ -2128,7 +2124,11 @@ void ofApp::setupParamsFromSettings()
     //device only if we are counting double or trupple presses on the soft button, how long to wait before we reset counting
     buttonPressTimeOut = appSettingsJson.value("BUTTON_PRESS_MAX_WAIT", 220);
     ofLogNotice() << "BUTTON_PRESS_MAX_WAIT = " + ofToString(buttonPressTimeOut) << endl;
-    
+
+    ButtonClickClassifier::Config buttonClickConfig;
+    buttonClickConfig.clickWindowMs = buttonPressTimeOut;
+    buttonClickClassifier = ButtonClickClassifier(buttonClickConfig);
+
     // should the application close from a button interaction
     shutdownPress = appSettingsJson.value("SH_P", false);
     ofLogNotice() << "SH_P = " + ofToString(shutdownPress) << endl;
@@ -4342,18 +4342,17 @@ void ofApp::deviceOnlyUpdateRoutine()
 
 void ofApp::buttonStateMachine() {
     //crappy state machine for getting more interaction out of a single button, we have click, double click, triple click and medium press 3 seconds and long press 6 seconds, works ok
-    if (ofGetElapsedTimeMillis() > 5000)
+    //the click/double-click/triple-click/long-press timing logic itself lives in ButtonClickClassifier (src/ButtonClickClassifier.h); this just reacts to whichever event it reports
+    ButtonClickClassifier::Event event = buttonClickClassifier.update(state_button == 1, ofGetElapsedTimeMillis());
+
+    switch (event)
     {
-        if (clicks == 3 && ofGetElapsedTimeMillis() - click3Time > buttonPressTimeOut && waitingForClick)
+        case ButtonClickClassifier::Event::TripleClick:
         {
-            clicks = 0;
-            click1Time = 0;
-            click2Time = 0;
-            click3Time = 0;
             relayOut.setval_gpio("1");
             ofSleepMillis(400);
             relayOut.setval_gpio("0");
-            
+
             if (oscDebug) {
                 ofxOscMessage m;
                 m.setAddress("/" + ofToString(unitID) + "/button");
@@ -4361,7 +4360,7 @@ void ofApp::buttonStateMachine() {
                 sender.sendMessage(m, false);
             }
             ofLogNotice() << "triple click" << endl;
-            
+
             if (oscDebug) {
                 ofxOscMessage m;
                 m.setAddress("/" + ofToString(unitID) + "/speaker");
@@ -4369,36 +4368,30 @@ void ofApp::buttonStateMachine() {
                 sender.sendMessage(m, false);
             }
             ofLogNotice() << "Speaker Sync" << endl;
-            
+            break;
         }
-        
-        else if (clicks == 2 && ofGetElapsedTimeMillis() - click2Time > buttonPressTimeOut && waitingForClick)
+
+        case ButtonClickClassifier::Event::DoubleClick:
         {
-            clicks = 0;
-            click1Time = 0;
-            click2Time = 0;
             ofLogNotice() << "double click" << endl;
-            
+
             if (oscDebug) {
                 ofxOscMessage m;
                 m.setAddress("/" + ofToString(unitID) + "/button");
                 m.addIntArg(2);
                 sender.sendMessage(m, false);
             }
-            if(!hasNarration){
+            if (!hasNarration) {
                 goToMode(OP_MODE_SWITCH_PRESETS);
             }
-            if(hasNarration){
+            if (hasNarration) {
                 narration.stop();
                 narrationIsPlaying = false;
                 ofLogNotice() << "Narration is over setting up granulars" << endl;
                 narrAmpControl.set(0.0f);
                 hasNarration = false;
-#ifndef HAS_ADC
-                goToMode(grainOperationModeTranslate);
-#endif
-#ifdef HAS_ADC
-                if (presetIndex ==1) {
+
+                if (presetIndex == 1) {
                     blueLed.setval_gpio("1");
                     redLed.setval_gpio("0");
                 }
@@ -4406,26 +4399,22 @@ void ofApp::buttonStateMachine() {
                     blueLed.setval_gpio("1");
                     redLed.setval_gpio("1");
                 }
-                if (presetIndex ==3) {
+                if (presetIndex == 3) {
                     blueLed.setval_gpio("1");
                     redLed.setval_gpio("0");
                 }
-                if (presetIndex ==4) {
+                if (presetIndex == 4) {
                     blueLed.setval_gpio("1");
                     redLed.setval_gpio("1");
                 }
                 narration.disconnectAll();
                 goToMode(grainOperationModeTranslate);
-                
-#endif
             }
-            
+            break;
         }
-        
-        if (clicks == 1 && ofGetElapsedTimeMillis() - click1Time > buttonPressTimeOut && waitingForClick)
+
+        case ButtonClickClassifier::Event::SingleClick:
         {
-            clicks = 0;
-            click1Time = 0;
             ofLogNotice() << "single click" << endl;
             if (oscDebug) {
                 ofxOscMessage m;
@@ -4433,68 +4422,39 @@ void ofApp::buttonStateMachine() {
                 m.addIntArg(1);
                 sender.sendMessage(m, false);
             }
-            
+            break;
         }
-        
-        if (state_button == 1 && clicks == 0 && waitingForClick)
+
+        case ButtonClickClassifier::Event::SixSecondHold:
         {
-            clicks = 1;
-            click1Time = ofGetElapsedTimeMillis();
-        }
-        else if (state_button == 1 && clicks == 1 && ofGetElapsedTimeMillis() - click1Time < buttonPressTimeOut && waitingForClick)
-        {
-            clicks = 2;
-            click2Time = ofGetElapsedTimeMillis();
-        }
-        else if (state_button == 1 && clicks == 2 && ofGetElapsedTimeMillis() - click2Time < buttonPressTimeOut && waitingForClick)
-        {
-            clicks = 3;
-            click3Time = ofGetElapsedTimeMillis();
-        }
-        
-        if (state_button == 1)
-        {
-            waitingForClick = false;
-        }
-        if (state_button == 0)
-        {
-            waitingForClick = true;
-            if (clicks == 1)
-            {
-                clik1ReleaseTime = ofGetElapsedTimeMillis();
-                if (clik1ReleaseTime - click1Time > 6000)
-                {
-                    ofLogNotice() << "6 second click" << endl;
-                    click1Time = 0;
-                    clicks = 0;
-                    clik1ReleaseTime = 0;
-                    if (oscDebug) {
-                        ofxOscMessage m;
-                        m.setAddress("/" + ofToString(unitID) + "/button");
-                        m.addIntArg(6000);
-                        sender.sendMessage(m, false);
-                    }
-                    if (shutdownPress) {
-                        exit();
-                        
-                    }
-                }
-                
-                if (clik1ReleaseTime - click1Time > 3000)
-                {
-                    ofLogNotice() << "3 second click" << endl;
-                    click1Time = 0;
-                    clicks = 0;
-                    clik1ReleaseTime = 0;
-                    if (oscDebug) {
-                        ofxOscMessage m;
-                        m.setAddress("/" + ofToString(unitID) + "/button");
-                        m.addIntArg(3000);
-                        sender.sendMessage(m, false);
-                    }
-                }
+            ofLogNotice() << "6 second click" << endl;
+            if (oscDebug) {
+                ofxOscMessage m;
+                m.setAddress("/" + ofToString(unitID) + "/button");
+                m.addIntArg(6000);
+                sender.sendMessage(m, false);
             }
+            if (shutdownPress) {
+                exit();
+            }
+            break;
         }
+
+        case ButtonClickClassifier::Event::ThreeSecondHold:
+        {
+            ofLogNotice() << "3 second click" << endl;
+            if (oscDebug) {
+                ofxOscMessage m;
+                m.setAddress("/" + ofToString(unitID) + "/button");
+                m.addIntArg(3000);
+                sender.sendMessage(m, false);
+            }
+            break;
+        }
+
+        case ButtonClickClassifier::Event::None:
+        default:
+            break;
     }
 }
 #endif

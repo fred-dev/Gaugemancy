@@ -3,6 +3,7 @@
 #include "ofJson.h"
 #include "ofFileUtils.h"
 #include "HitGestureDetector.h"
+#include "ButtonClickClassifier.h"
 #include "ofxPDSP.h"
 #include "ofxGui.h"
 #include "ofxOsc.h"
@@ -229,12 +230,9 @@ class ofApp : public ofBaseApp{
 		void setupSpeakerControl();
 		void syncSpeaker();
 
-		bool buttonValue;
-		int clicks;
-		int click1Time, click2Time, click3Time, clik1ReleaseTime;
-		bool waitingForClick, clickReleased;
 		bool shutdownPress;
 		bool doShutdown;
+		ButtonClickClassifier buttonClickClassifier;
 #endif // HAS_ADC
 
 

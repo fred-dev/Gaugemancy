@@ -14,6 +14,7 @@ mkdir -p "$BUILD_DIR"
 # add to this list as more logic gets extracted out of ofApp.
 PURE_LOGIC_SOURCES=(
   "$SRC_DIR/HitGestureDetector.cpp"
+  "$SRC_DIR/ButtonClickClassifier.cpp"
 )
 
 TEST_SOURCES=("$DIR"/test_*.cpp)
