@@ -36,8 +36,18 @@
 
 
 # Folders
+obj/
 */obj/
 tests/build/
+bin/*
+!bin/data/
+
+# IDE/project files -- regenerate with the openFrameworks Project Generator
+# (or `projectGenerator` CLI) from addons.make; see README for the addon list.
+Gaugemancy.xcodeproj/
+Project.xcconfig
+.vscode/
+*.code-workspace
 
 # Different adding.make for different platforms so
 addons.make
