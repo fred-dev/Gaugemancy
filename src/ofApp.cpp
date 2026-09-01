@@ -19,15 +19,15 @@ void ofApp::setup(){
     // init parameters we need
     initParameters();
     
-    // read settings from XML, user, all user settings and
-    setupParamsFromXML();
-    
-    // based on the XML settings populate the vectors with blanks
+    // read settings from JSON, user, all user settings and
+    setupParamsFromSettings();
+
+    // based on the settings populate the vectors with blanks
     populateVectors();
-    
+
     populateEffectVectors();
-    
-    // read the audio file paths from the XML so we know what to load
+
+    // read the audio file paths from the settings so we know what to load
     setupFilePaths();
     
     // create the granualr objects we need and setup thier parameters from the ofParameter class
@@ -399,7 +399,7 @@ void ofApp::drawCurvesDisplaySimulationMulti(int x, int y, int width, int height
 
 void ofApp::loadEffectPatchSettings()
 {
-    // read effects settings from XML adn see whcih effects each slot needs, each slot has an effects settins struct to hod the data
+    // read effects settings from JSON adn see whcih effects each slot needs, each slot has an effects settins struct to hod the data
     if (!firstRun) {
         for (int i = 0; i < numberOfSlots; i++)
         {
@@ -449,31 +449,35 @@ void ofApp::loadEffectPatchSettings()
     if (firstRun) {
         for (int j = 0; j < NUMBER_OF_PRESETS; j++)
         {
-            if (!effectsPatchXML.load(filePathPrefix + unitID + "_effectSettings_preset_" + ofToString(j+1)+".xml")) {
+            ofFile effectSettingsFile(filePathPrefix + unitID + "_effectSettings_preset_" + ofToString(j+1)+".json");
+            if (!effectSettingsFile.exists()) {
                 ofLogNotice() << "Effect settings preset " + ofToString(j+1) + " not loaded" << endl;
             }
             else {
+                ofJson effectsPatchJson = ofLoadJson(effectSettingsFile.getAbsolutePath());
                 ofLogNotice() << "Effect settings preset " + ofToString(j+1) + " loaded" << endl;
-                
+
                 for (int i = 0; i < numberOfSlots; i++)
                 {
-                    effectsPatching[j][i].hasBitCrusher = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":BIT_CRUSH", 0);
-                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":BIT_CRUSH " + ofToString(effectsPatching[j][i].hasBitCrusher) << endl;
-                    
-                    effectsPatching[j][i].hasDecimator = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":DECIMATOR", 0);
-                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":DECIMATOR " + ofToString(effectsPatching[j][i].hasDecimator) << endl;
-                    
-                    effectsPatching[j][i].hasChorus = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":CHORUS", 0);
-                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":CHORUS " + ofToString(effectsPatching[j][i].hasChorus) << endl;
-                    
-                    effectsPatching[j][i].hasFilter = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":FILTER", 0);
-                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":FILTER " + ofToString(effectsPatching[j][i].hasFilter) << endl;
-                    
-                    effectsPatching[j][i].hasDelay = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":DELAY", 0);
-                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":DELAY " + ofToString(effectsPatching[j][i].hasDelay) << endl;
-                    
-                    effectsPatching[j][i].hasReverb = effectsPatchXML.getValue("SLOTS:SLOT_" + ofToString(i + 1) + ":REVERB", 0);
-                    ofLogNotice() << "SLOTS:SLOT_" + ofToString(i + 1) + ":REVERB " + ofToString(effectsPatching[j][i].hasReverb) << endl;
+                    ofJson slot = effectsPatchJson.value("SLOT_" + ofToString(i + 1), ofJson::object());
+
+                    effectsPatching[j][i].hasBitCrusher = slot.value("BIT_CRUSH", 0);
+                    ofLogNotice() << "SLOT_" + ofToString(i + 1) + ":BIT_CRUSH " + ofToString(effectsPatching[j][i].hasBitCrusher) << endl;
+
+                    effectsPatching[j][i].hasDecimator = slot.value("DECIMATOR", 0);
+                    ofLogNotice() << "SLOT_" + ofToString(i + 1) + ":DECIMATOR " + ofToString(effectsPatching[j][i].hasDecimator) << endl;
+
+                    effectsPatching[j][i].hasChorus = slot.value("CHORUS", 0);
+                    ofLogNotice() << "SLOT_" + ofToString(i + 1) + ":CHORUS " + ofToString(effectsPatching[j][i].hasChorus) << endl;
+
+                    effectsPatching[j][i].hasFilter = slot.value("FILTER", 0);
+                    ofLogNotice() << "SLOT_" + ofToString(i + 1) + ":FILTER " + ofToString(effectsPatching[j][i].hasFilter) << endl;
+
+                    effectsPatching[j][i].hasDelay = slot.value("DELAY", 0);
+                    ofLogNotice() << "SLOT_" + ofToString(i + 1) + ":DELAY " + ofToString(effectsPatching[j][i].hasDelay) << endl;
+
+                    effectsPatching[j][i].hasReverb = slot.value("REVERB", 0);
+                    ofLogNotice() << "SLOT_" + ofToString(i + 1) + ":REVERB " + ofToString(effectsPatching[j][i].hasReverb) << endl;
                 }
             }
         }
@@ -540,581 +544,57 @@ void ofApp::loadEffectPatchSettings()
         
     }
     
-    // this is a stupid bit of code, the effects I can use need to be patched into each other in a single chain in one line, there is no way to insert them, so I need to take care of every possible combination of effects and patch the whole chain together at once.
+    // Each insert effect (bitcrush/decimator/chorus/filter) is a Patchable
+    // ofxPDSP unit, and Patchable >> Patchable works generically for any of
+    // them, so instead of hand patching every possible combination of six
+    // on/off flags (previously ~30 near-duplicate if/else branches, several
+    // with copy/paste channel bugs) we walk the enabled inserts in a fixed
+    // order and build the graph for each slot/channel from that.
     for (int e = 0; e < numberOfSlots; e++)
     {
-        if (!effectsPatching[presetIndex-1][e].hasBitCrusher &&  !effectsPatching[presetIndex-1][e].hasDecimator &&  !effectsPatching[presetIndex-1][e].hasChorus &&  !effectsPatching[presetIndex-1][e].hasFilter &&  !effectsPatching[presetIndex-1][e].hasDelay && ! effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >>engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >>engine.audio_out(1);
-            ofLogNotice() << "Patching chain with no effects" << endl;
-        }
-        
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >>  *bitCrusherLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >>  *bitCrusherRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0)>> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1)>> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasReverb)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDelay)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasFilter)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasChorus)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasDecimator)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
-        }
-        else if (effectsPatching[presetIndex-1][e].hasBitCrusher)
-        {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> outputAmpL[e]->out_signal() >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> outputAmpR[e]->out_signal() >> compressors[e]->ch(1) >> engine.audio_out(1);
-            ofLogNotice() << "Patching chain with effects" << endl;
+        const ChannelEffects & fx = effectsPatching[presetIndex-1][e];
+        bool hasAnyEffect = fx.hasBitCrusher || fx.hasDecimator || fx.hasChorus || fx.hasFilter || fx.hasDelay || fx.hasReverb;
+        ofLogNotice() << "Patching chain " + string(hasAnyEffect ? "with effects" : "with no effects") << endl;
+
+        for (int ch = 0; ch < 2; ch++)
+        {
+            pdsp::Amp * outputAmp = (ch == 0) ? outputAmpL[e] : outputAmpR[e];
+
+            // fixed insert order: bitcrush -> decimator -> chorus -> filter
+            pdsp::Patchable * node = &(cloud[e]->ch(ch) >> ampControl[e]->ch(ch));
+
+            if (fx.hasBitCrusher) {
+                pdsp::Bitcruncher * bitCrusher = (ch == 0) ? bitCrusherLs[e] : bitCrusherRs[e];
+                *node >> *bitCrusher;
+                node = bitCrusher;
+            }
+            if (fx.hasDecimator) {
+                pdsp::Decimator * decimator = (ch == 0) ? decimatorLs[e] : decimatorRs[e];
+                *node >> *decimator;
+                node = decimator;
+            }
+            if (fx.hasChorus) {
+                pdsp::Patchable & chorus = choruss[e]->ch(ch);
+                *node >> chorus;
+                node = &chorus;
+            }
+            if (fx.hasFilter) {
+                pdsp::MultiLadder4 * filter = (ch == 0) ? multiLadderFilterLs[e] : multiLadderFilterRs[e];
+                *node >> *filter;
+                node = filter;
+            }
+
+            // dry path is always connected, delay/reverb are parallel sends off the same insert-chain output
+            *node >> outputAmp->out_signal() >> compressors[e]->ch(ch) >> engine.audio_out(ch);
+
+            if (fx.hasDelay) {
+                pdsp::Delay * delay = (ch == 0) ? delayLs[e] : delayRs[e];
+                *node >> *delaySends[e] >> *delay >> outputAmp->out_signal() >> compressors[e]->ch(ch) >> engine.audio_out(ch);
+            }
+            if (fx.hasReverb) {
+                *node >> *reverbSends[e] >> reverbs[e]->ch(ch) >> outputAmp->out_signal() >> compressors[e]->ch(ch) >> engine.audio_out(ch);
+            }
         }
-        
     }
 }
 
@@ -2458,33 +1938,35 @@ void ofApp::exitAnyMode()
 }
 
 
-void ofApp::setupParamsFromXML()
+void ofApp::setupParamsFromSettings()
 {
-    // partty!! this is where I read all the settings for the system. To make in manageable the settings are named with the performers names as a prefix, the user profile is set in the username.xml. This is then used to decide which settings to use. becuase the system runs on a raspberry pi and that pie is stuck deep inside the unit, and I dont want thme to have to log in, conect to wife etc, I just map a USP stick to a fixed path on the PI. the settings and audio files are altered day to day by replacing them or adding them to the USB stick and starting the device.
+    // partty!! this is where I read all the settings for the system. To make in manageable the settings are named with the performers names as a prefix, the user profile is set in the username.json. This is then used to decide which settings to use. becuase the system runs on a raspberry pi and that pie is stuck deep inside the unit, and I dont want thme to have to log in, conect to wife etc, I just map a USP stick to a fixed path on the PI. the settings and audio files are altered day to day by replacing them or adding them to the USB stick and starting the device.
     // get the username
-    if (!usernameXML.load(filePathPrefix + "username.xml")) {
+    ofJson usernameJson = ofLoadJson(filePathPrefix + "username.json");
+    if (usernameJson.empty()) {
         ofLogNotice() << "Username settings not loaded" << endl;
-        
+
     }
     else {
         ofLogNotice() << "Username settings loaded" << endl;
     }
-    
-    unitID = usernameXML.getValue("NAMES:USERNAME", "NO_UNIT_ID");
+
+    unitID = usernameJson.value("USERNAME", "NO_UNIT_ID");
     ofLogNotice() << "UNIT_ID = " + ofToString(unitID) << endl;
     filePathPrefix = filePathPrefix + unitID + "/";
     ofLogNotice()<< "Root user data path is " + filePathPrefix <<endl;
-    
+
     // based on the username load that app settings profile
-    if (!appSettingsXML.load(filePathPrefix  + unitID + "_appSettings.xml")) {
+    ofJson appSettingsJson = ofLoadJson(filePathPrefix  + unitID + "_appSettings.json");
+    if (appSettingsJson.empty()) {
         ofLogNotice() << "App settings not loaded" << endl;
-        
+
     }
     else {
         ofLogNotice() << "App settings loaded" << endl;
     }
     // I can change log levels to give me different kinds of feedback from the system when I am debugging (via ssh or VNC)
-    logLevel = appSettingsXML.getValue("SETTINGS:LOG_LEVEL", 1);
+    logLevel = appSettingsJson.value("LOG_LEVEL", 1);
     switch (logLevel)
     {
         case 0:
@@ -2503,83 +1985,83 @@ void ofApp::setupParamsFromXML()
     }
     
     //do we have a narration file
-    hasNarration = appSettingsXML.getValue("SETTINGS:HAS_NARRATION", 0);
+    hasNarration = appSettingsJson.value("HAS_NARRATION", 0);
     ofLogNotice() << "HAS_NARRATION = " + ofToString(hasNarration) << endl;
     
     //what volume to we play the narration at
-    narrationVolume = appSettingsXML.getValue("SETTINGS:NARRATION_VOLUME", 1.0);
+    narrationVolume = appSettingsJson.value("NARRATION_VOLUME", 1.0);
     ofLogNotice() << "NARRATION_VOLUME = " + ofToString(narrationVolume) << endl;
     
     // sensor input threshold for moving between narration play and narration granular
-    narrationGlitchThreshold = appSettingsXML.getValue("SETTINGS:NARRATION_GLITCH_THRESH", 0.025);
+    narrationGlitchThreshold = appSettingsJson.value("NARRATION_GLITCH_THRESH", 0.025);
     ofLogNotice() << "NARRATION_GLITCH_THRESH = " + ofToString(narrationGlitchThreshold) << endl;
     
     // when the sensor data is used to manipulate the narration granular how far should it move the playhead
-    narrationGlitchStrand = appSettingsXML.getValue("SETTINGS:NARRATION_GLITCH_STRAND", 0.0025);
+    narrationGlitchStrand = appSettingsJson.value("NARRATION_GLITCH_STRAND", 0.0025);
     ofLogNotice() << "NARRATION_GLITCH_STRAND = " + ofToString(narrationGlitchStrand) << endl;
     
     // if the unit has narration we have an option of how it is started, it can run automatically after some time, or it can be triggered by pushing the sensor
-    narrationUsesSensor = appSettingsXML.getValue("SETTINGS:NARR_PLAY_WITH_SENSOR", false);
+    narrationUsesSensor = appSettingsJson.value("NARR_PLAY_WITH_SENSOR", false);
     ofLogNotice() << "NARR_PLAY_WITH_SENSOR = " + ofToString(narrationUsesSensor) << endl;
     
     // what is the maximum value we think a performer can get to, we will use this for the top end of the value scaling
-    maxSensorValue = appSettingsXML.getValue("SETTINGS:MAX_SENSOR_VALUE", 520);
+    maxSensorValue = appSettingsJson.value("MAX_SENSOR_VALUE", 520);
     ofLogNotice() << "MAX_SENSOR_VALUE = " + ofToString(maxSensorValue) << endl;
     
     // sensor input threshold for engaging interaction (otherise the units will make random sounds from noise in the ADC
-    normalisedA2DValuesMin = appSettingsXML.getValue("SETTINGS:ACTIVE_THRESHOLD", 0.0025);
+    normalisedA2DValuesMin = appSettingsJson.value("ACTIVE_THRESHOLD", 0.0025);
     ofLogNotice() << "ACTIVE_THRESHOLD = " + ofToString(normalisedA2DValuesMin) << endl;
     
     // chose a curve to transform incoming sensor or simulation data
-    curveSelector = appSettingsXML.getValue("SETTINGS:EASING_SELECTOR", 0);
+    curveSelector = appSettingsJson.value("EASING_SELECTOR", 0);
     ofLogNotice() << "EASING_SELECTOR = " + ofToString(curveSelector) << endl;
     
     // accumulated or multi mode uses the combination of all sensor input to move the plahead of the granular objects. So the full postion is only reached by pressing all the balls in at once. The performers cannot push all in at once so instead of dividing the aggregated sensor data by 6 I divide it by this (it was 4 as that is how many sensors they can engage at once, but it was still too hard to for them to reach the end point so here it is a shitty hack
-    accumulationDenominator = appSettingsXML.getValue("SETTINGS:ACCUMULATION_DENOMINATOR", 4);
+    accumulationDenominator = appSettingsJson.value("ACCUMULATION_DENOMINATOR", 4);
     ofLogNotice() << "ACCUMULATION_DENOMINATOR = " + ofToString(accumulationDenominator) << endl;
     
     // On some systems I can reduce the latency by reducing the audio buffer size
-    engineBufferSize = appSettingsXML.getValue("SETTINGS:BUFFER_SIZE", 512);
+    engineBufferSize = appSettingsJson.value("BUFFER_SIZE", 512);
     ofLogNotice() << "BUFFER_SIZE = " + ofToString(engineBufferSize) << endl;
     
     // On some systems I can reduce the latency by reducing the number of buffers
-    numberOfBuffers = appSettingsXML.getValue("SETTINGS:NUMBER_OF_BUFFERS", 3);
+    numberOfBuffers = appSettingsJson.value("NUMBER_OF_BUFFERS", 3);
     ofLogNotice() << "NUMBER_OF_BUFFERS = " + ofToString(numberOfBuffers) << endl;
     
     // Here we can change the audio device for different soundcards
-    audioDeviceId = appSettingsXML.getValue("SETTINGS:AUDIO_DEVICE_ID", 1);
+    audioDeviceId = appSettingsJson.value("AUDIO_DEVICE_ID", 1);
     ofLogNotice() << "AUDIO_DEVICE_ID = " + ofToString(audioDeviceId) << endl;
     
     
     // this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between letting of the push and the next push
-    useHitGesture = appSettingsXML.getValue("SETTINGS:HIT_TO_CHANGE_PRESETS", false);
+    useHitGesture = appSettingsJson.value("HIT_TO_CHANGE_PRESETS", false);
     ofLogNotice() << "HIT_TO_CHANGE_PRESETS = " + ofToString(useHitGesture) << endl;
     // this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between letting of the push and the next push
-    maxTroughDuration = appSettingsXML.getValue("SETTINGS:MAX_TROUGH_DURATION", 250);
+    maxTroughDuration = appSettingsJson.value("MAX_TROUGH_DURATION", 250);
     ofLogNotice() << "MAX_TROUGH_DURATION = " + ofToString(maxTroughDuration) << endl;
     
     // this is for a gestural input, where the performers squeeze several sensors rapidly, this is the timeout period between a push and the letting off the push
-    maxPeakDuration = appSettingsXML.getValue("SETTINGS:MAX_PEAK_DURATION", 80);
+    maxPeakDuration = appSettingsJson.value("MAX_PEAK_DURATION", 80);
     ofLogNotice() << "MAX_PEAK_DURATION = " + ofToString(maxPeakDuration) << endl;
     
     // this is for a gestural input, where the performers squeeze several sensors rapidly, number of pushes need to trigger an action
-    requiredHits = appSettingsXML.getValue("SETTINGS:REQUIRED_HITS", 8);
+    requiredHits = appSettingsJson.value("REQUIRED_HITS", 8);
     ofLogNotice() << "REQUIRED_HITS = " + ofToString(requiredHits) << endl;
     
     // this is for a gestural input, where the performers squeeze several sensors rapidly, how hard does a press have to be
-    hitThreshHold = appSettingsXML.getValue("SETTINGS:HIT_THRESHOLD", 0.085);
+    hitThreshHold = appSettingsJson.value("HIT_THRESHOLD", 0.085);
     ofLogNotice() << "HIT_THRESHOLD = " + ofToString(hitThreshHold) << endl;
     
     // this is for a gestural input, where the performers squeeze several sensors rapidly, how soft does a non press have to be
-    troughThreshold = appSettingsXML.getValue("SETTINGS:TROUGH_THRESHOLD", 0.025);
+    troughThreshold = appSettingsJson.value("TROUGH_THRESHOLD", 0.025);
     ofLogNotice() << "TROUGH_THRESHOLD = " + ofToString(troughThreshold) << endl;
     
     // in accumulated pressure we go to single grain mode
-    useAccumulatedPressure = appSettingsXML.getValue("SETTINGS:ACCUMULATED_PRESSURE", false);
+    useAccumulatedPressure = appSettingsJson.value("ACCUMULATED_PRESSURE", false);
     ofLogNotice() << "ACCUMULATED_PRESSURE = " + ofToString(useAccumulatedPressure) << endl;
     
     for(int i = 0; i < NUMBER_OF_PRESETS; i++){
-        timeAdvanceInterval[i] = appSettingsXML.getValue("SETTINGS:TIME_ADVANCE_INTERVAL_" + ofToString(i+1), 0.0002);
+        timeAdvanceInterval[i] = appSettingsJson.value("TIME_ADVANCE_INTERVAL_" + ofToString(i+1), 0.0002);
         ofLogNotice() << "TIME_ADVANCE_INTERVAL = " + ofToString(timeAdvanceInterval[i]) << endl;
     }
     
@@ -2605,48 +2087,48 @@ void ofApp::setupParamsFromXML()
     
     
     //not implemented yet, but if the systems need to on a network and talking to me or each other should I set the IP
-    setLocalIp = appSettingsXML.getValue("SETTINGS:SET_LOCAL_IP", false);
+    setLocalIp = appSettingsJson.value("SET_LOCAL_IP", false);
     ofLogNotice() << "SET_LOCAL_IP = " + ofToString(setLocalIp) << endl;
     
     //not implemented yet, but if the systems need to on a network and talking to me and I should set the IP what should I set it to
-    localIpFromXML = appSettingsXML.getValue("SETTINGS:XML_IP", "192.168.1.15");
-    ofLogNotice() << "XML_IP = " + ofToString(localIpFromXML) << endl;
+    localIpFromXML = appSettingsJson.value("LOCAL_IP", "192.168.1.15");
+    ofLogNotice() << "LOCAL_IP = " + ofToString(localIpFromXML) << endl;
     
     //not implemented yet, but if the systems need to on a network and talking to me should I set the IP to DHCP
-    setLocalToDHCP = appSettingsXML.getValue("SETTINGS:SET_DHCP", false);
+    setLocalToDHCP = appSettingsJson.value("SET_DHCP", false);
     ofLogNotice() << "SET_DHCP = " + ofToString(setLocalToDHCP) << endl;
     
     //not implemented yet, but if the systems need to on a network and talking to me I use OSC, which is packaged UDP messages, this is the local port
-    localOSCPport = appSettingsXML.getValue("SETTINGS:LOCAL_OSC_PORT", 1234);
+    localOSCPport = appSettingsJson.value("LOCAL_OSC_PORT", 1234);
     ofLogNotice() << "LOCAL_OSC_PORT = " + ofToString(localOSCPport) << endl;
     
     //This is implemented, I can send OSC data (for now debug data), this is the remote port
-    remoteOSCPort = appSettingsXML.getValue("SETTINGS:REMOTE_OSC_PORT", 1235);
+    remoteOSCPort = appSettingsJson.value("REMOTE_OSC_PORT", 1235);
     ofLogNotice() << "REMOTE_OSC_PORT = " + ofToString(remoteOSCPort) << endl;
     
     //This is implemented, I can send OSC data (for now debug data), this is the remote IP
-    remoteOSCIp = appSettingsXML.getValue("SETTINGS:REMOTE_OSC_IP", "192.168.178.236");
+    remoteOSCIp = appSettingsJson.value("REMOTE_OSC_IP", "192.168.178.236");
     ofLogNotice() << "REMOTE_OSC_IP = " + ofToString(remoteOSCIp) << endl;
     
     //If OSC debug is on, it will send OSC messages as well as console debug messages
-    oscDebug = appSettingsXML.getValue("SETTINGS:OSC_DEBUG", false);
+    oscDebug = appSettingsJson.value("OSC_DEBUG", false);
     ofLogNotice() << "OSC_DEBUG = " + ofToString(oscDebug) << endl;
     
     //not implemented if OSC live is on, it will send OSC messages to allow me to duplicate the interaction on a laptop in real time when the room is too big for the built in speakers
-    oscLive = appSettingsXML.getValue("SETTINGS:OSC_LIVE", false);
+    oscLive = appSettingsJson.value("OSC_LIVE", false);
     ofLogNotice() << "OSC_LIVE =" + ofToString(oscLive) << endl;
     
 #ifdef HAS_ADC
     //device only if we are counting double or trupple presses on the soft button, how long to wait before we reset counting
-    buttonPressTimeOut = appSettingsXML.getValue("SETTINGS:BUTTON_PRESS_MAX_WAIT", 220);
+    buttonPressTimeOut = appSettingsJson.value("BUTTON_PRESS_MAX_WAIT", 220);
     ofLogNotice() << "BUTTON_PRESS_MAX_WAIT = " + ofToString(buttonPressTimeOut) << endl;
     
     // should the application close from a button interaction
-    shutdownPress = appSettingsXML.getValue("SETTINGS:SH_P", false);
+    shutdownPress = appSettingsJson.value("SH_P", false);
     ofLogNotice() << "SH_P = " + ofToString(shutdownPress) << endl;
     
     // should the application closing shut town the raspberry pi
-    doShutdown = appSettingsXML.getValue("SETTINGS:D_SH", false);
+    doShutdown = appSettingsJson.value("D_SH", false);
     ofLogNotice() << "D_SH = " + ofToString(doShutdown) << endl;
 #endif
     
@@ -2704,17 +2186,18 @@ void ofApp::setupParamsFromXML()
 void ofApp::setupFilePaths()
 {
     // reads the file paths of the audio files we need for te preset
-    if (fileSettingsXML.load(filePathPrefix + unitID + "_fileSettings.xml")) {
+    ofJson fileSettingsJson = ofLoadJson(filePathPrefix + unitID + "_fileSettings.json");
+    if (!fileSettingsJson.empty()) {
         ofLogNotice() << "File settings loaded" << endl;
         for (int i = 0; i < numberOfSlots; i++) {
             ofLogNotice() << "Getting audio file paths from " + unitID +  "_fileSettings: Slot " + ofToString(i + 1)<< endl;
-            
+
             for (int j=0; j < NUMBER_OF_PRESETS; j++) {
-                filePathsSet[j][i] = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "_" + ofToString(j+1), "Grain_" + ofToString(i + 1) + ".mp3");
+                filePathsSet[j][i] = filePathPrefix + "audio/" + fileSettingsJson.value("FILE_" + ofToString(i + 1) + "_" + ofToString(j+1), "Grain_" + ofToString(i + 1) + ".mp3");
                 ofLogNotice() << "Preset " +ofToString(j)+ " File path slot " + ofToString(i + 1) + " = " + filePathsSet[j][i] << endl;
-                fileNamesSet[j][i] = fileSettingsXML.getValue("PATHS:FILE_" + ofToString(i + 1) + "_" + ofToString(j+1), "Grain_" + ofToString(i + 1) + ".mp3");
+                fileNamesSet[j][i] = fileSettingsJson.value("FILE_" + ofToString(i + 1) + "_" + ofToString(j+1), "Grain_" + ofToString(i + 1) + ".mp3");
                 ofLogNotice() << "Preset " +ofToString(j)+ " File name slot " + ofToString(i + 1) + " = " + fileNamesSet[j][i] << endl;
-                
+
                 if (oscDebug) {
                     // if we are using OSC debug send the names
                     recyclingMessage.clear();
@@ -2729,8 +2212,8 @@ void ofApp::setupFilePaths()
     }
     else
         ofLogNotice() << "File settings not loaded" << endl;
-    
-    narrationFilePath = filePathPrefix + "audio/" + fileSettingsXML.getValue("PATHS:NARRATION_FILE", "Mono_20hz_-20db_netV.wav");
+
+    narrationFilePath = filePathPrefix + "audio/" + fileSettingsJson.value("NARRATION_FILE", "Mono_20hz_-20db_netV.wav");
 }
 
 #ifdef HAS_ADC

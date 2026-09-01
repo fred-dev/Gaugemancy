@@ -1,0 +1,50 @@
+{
+  "SLOT_1": {
+    "BIT_CRUSH": 1,
+    "DECIMATOR": 0,
+    "CHORUS": 0,
+    "FILTER": 0,
+    "DELAY": 0,
+    "REVERB": 0
+  },
+  "SLOT_2": {
+    "BIT_CRUSH": 1,
+    "DECIMATOR": 0,
+    "CHORUS": 0,
+    "FILTER": 0,
+    "DELAY": 0,
+    "REVERB": 0
+  },
+  "SLOT_3": {
+    "BIT_CRUSH": 1,
+    "DECIMATOR": 0,
+    "CHORUS": 0,
+    "FILTER": 0,
+    "DELAY": 0,
+    "REVERB": 0
+  },
+  "SLOT_4": {
+    "BIT_CRUSH": 1,
+    "DECIMATOR": 0,
+    "CHORUS": 0,
+    "FILTER": 0,
+    "DELAY": 0,
+    "REVERB": 0
+  },
+  "SLOT_5": {
+    "BIT_CRUSH": 1,
+    "DECIMATOR": 0,
+    "CHORUS": 0,
+    "FILTER": 0,
+    "DELAY": 0,
+    "REVERB": 0
+  },
+  "SLOT_6": {
+    "BIT_CRUSH": 1,
+    "DECIMATOR": 0,
+    "CHORUS": 0,
+    "FILTER": 0,
+    "DELAY": 0,
+    "REVERB": 0
+  }
+}

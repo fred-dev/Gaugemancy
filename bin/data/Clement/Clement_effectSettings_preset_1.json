@@ -1,0 +1,10 @@
+{
+  "SLOT_1": {
+    "BIT_CRUSH": 0,
+    "DECIMATOR": 0,
+    "CHORUS": 0,
+    "FILTER": 1,
+    "DELAY": 1,
+    "REVERB": 1
+  }
+}

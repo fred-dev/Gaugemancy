@@ -1,8 +1,9 @@
 #pragma once
 
+#include "ofJson.h"
+#include "ofFileUtils.h"
 #include "ofxPDSP.h"
 #include "ofxGui.h"
-#include "ofxXmlSettings.h"
 #include "ofxOsc.h"
 #include "AudioPlayer.h"
 
@@ -45,7 +46,7 @@
 // these are the different modes or scenes, these defines are used to make things easier to read, they are used to set the operationMode variable
 
 #define OP_MODE_SETUP 0                     // so far unsued, I want to make the setup interactive on the laptop version
-#define OP_MODE_WAIT_FOR_NARRATION 1        // if the unit has narration (option set from XML) it loads it and then waits for input
+#define OP_MODE_WAIT_FOR_NARRATION 1        // if the unit has narration (option set from settings JSON) it loads it and then waits for input
 #define OP_MODE_PLAY_NARRATION 2            // mdoe that plays a narration file
 #define OP_MODE_NARRATION_GUI 6             // mode for setting parameters for the narration granular sampler mode
 #define OP_MODE_NARRATION_GLITCH 9          // narration granular sampler mode, it pauses the narration and switches to a granualar synth
@@ -215,7 +216,7 @@ class ofApp : public ofBaseApp{
 
 
 		//OP_MODE_SETUP
-		void setupParamsFromXML();
+		void setupParamsFromSettings();
 		void setupFilePaths();
 #ifdef HAS_ADC
         void setupLIS3DH();
@@ -265,12 +266,6 @@ class ofApp : public ofBaseApp{
 		string remoteOSCIp;
 		bool oscDebug, oscLive;
 		ofxOscSender sender;
-
-
-		ofxXmlSettings fileSettingsXML;
-		ofxXmlSettings appSettingsXML;
-		ofxXmlSettings usernameXML;
-		ofxXmlSettings effectsPatchXML;
 
         std::vector<string> filePathsSet[NUMBER_OF_PRESETS];
         std::vector<string> fileNamesSet[NUMBER_OF_PRESETS];
