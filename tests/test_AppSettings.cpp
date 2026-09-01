@@ -56,7 +56,7 @@ TEST_CASE("Fred's real appSettings.json loads correctly")
     CHECK(s.useAccumulatedPressure == false);
     CHECK(s.engineBufferSize == 1024);
     CHECK(s.numberOfBuffers == 2);
-    CHECK(s.audioDeviceId == 5);
+    CHECK(s.audioDeviceId == 4);
     CHECK(s.logLevel == 2);
     CHECK(s.narrationUsesSensor == true);
     CHECK(s.hitThreshHold == doctest::Approx(0.25));

@@ -103,10 +103,41 @@ void ofApp::setup(){
     }
     
     //-----------------init and start audio subsystem-------------
-    engine.listDevices();
+    std::vector<ofSoundDevice> availableAudioDevices = engine.listDevices();
+
+    // AUDIO_DEVICE_ID must be one of the ofSoundDevice::deviceID values
+    // printed just above by listDevices() (format "[API: deviceID] name").
+    // On this build (RtAudio >= 6) those IDs come straight from
+    // RtAudio::getDeviceIds(), which on macOS/CoreAudio are opaque handles
+    // assigned per-machine (not small sequential 0/1/2/... indices) -- so a
+    // value tuned on one machine/OS install will very likely not match on
+    // another. This block exists to make that mismatch obvious instead of
+    // silently falling back to whatever device RtAudio picks.
+    ofLogNotice() << "Requested AUDIO_DEVICE_ID = " + ofToString(audioDeviceId);
+    bool audioDeviceIdMatched = false;
+    for (const auto & dev : availableAudioDevices) {
+        if (dev.deviceID == audioDeviceId) {
+            audioDeviceIdMatched = true;
+            ofLogNotice() << "  -> matches \"" + dev.name + "\" (in:" + ofToString(dev.inputChannels) + " out:" + ofToString(dev.outputChannels) + ")"
+                + (dev.isDefaultOutput ? " [default out]" : "");
+            if (dev.outputChannels < 2) {
+                ofLogError() << "  -> this device only has " + ofToString(dev.outputChannels) + " output channel(s) but the engine requests 2 (stereo) -- audio will fail to start on it.";
+            }
+        }
+    }
+    if (!audioDeviceIdMatched) {
+        ofLogError() << "AUDIO_DEVICE_ID " + ofToString(audioDeviceId) + " does not match any audio device on this machine. Update it in " + unitID + "_appSettings.json. Output-capable devices found here:";
+        for (const auto & dev : availableAudioDevices) {
+            if (dev.outputChannels >= 2) {
+                ofLogError() << "  ID " + ofToString(dev.deviceID) + ": \"" + dev.name + "\" (out:" + ofToString(dev.outputChannels) + ")"
+                    + (dev.isDefaultOutput ? " [default out]" : "");
+            }
+        }
+    }
+
     engine.setChannels(0,2);
-    
-    engine.setDeviceID(audioDeviceId); // REMEMBER TO SET THIS AT THE RIGHT INDEX!!!!
+
+    engine.setDeviceID(audioDeviceId); // see AUDIO_DEVICE_ID diagnostic above
     engine.setup(44100, engineBufferSize, numberOfBuffers);
 }
 
