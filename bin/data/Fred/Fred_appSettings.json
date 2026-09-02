@@ -19,7 +19,7 @@
   "MAX_TROUGH_DURATION": 200,
   "MAX_PEAK_DURATION": 200,
   "REQUIRED_HITS": 6,
-  "LOG_LEVEL": 2,
+  "LOG_LEVEL": 0,
   "SH_P": false,
   "D_SH": false,
   "SET_LOCAL_IP": false,

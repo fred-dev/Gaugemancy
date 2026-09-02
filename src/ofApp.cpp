@@ -997,8 +997,9 @@ void ofApp::updateSwitchPresetsMode()
 #ifndef HAS_ADC
 void ofApp::drawSwitchPresetsMode()
 {
+	ofLog(OF_LOG_VERBOSE) << "Draw switch Presets mode start";
     drawModeButtons(switchPresetsButtons, totalButtonsModSwitchPresets);
-    
+	ofLog(OF_LOG_VERBOSE) << "Draw switch Presets mode end";
 }
 #endif
 
@@ -1174,12 +1175,17 @@ void ofApp::generateSimulatedData()
 
 void ofApp::drawMultiGrainMode()
 {
+	ofLog(OF_LOG_VERBOSE) << "Draw drawMultiGrainMode mode start";
     // we can either draw the curve preview or a simulation of the sensor data
     if(simulationNotCurve){
+		ofLog(OF_LOG_VERBOSE) << "Draw Simulation bars ";
+
         drawSimulationBars();
         
     }
     else {
+		ofLog(OF_LOG_VERBOSE) << "Draw drawCurvesDisplay";
+
         drawCurvesDisplay(simulationArea.x,simulationArea.y,simulationArea.width,simulationArea.height);
         
     }
@@ -1203,9 +1209,13 @@ void ofApp::drawMessages()
 void ofApp::drawGrainClouds()
 {
     //this draws each granular module, with a waveform and display of the individual grains
+	ofLog(OF_LOG_VERBOSE) << "Draw drawGrainClouds start";
+
     ofPushView();
     ofSetLineWidth(1.0f);
     for (int j = 0; j < numberOfSlots; ++j) {
+		ofLog(OF_LOG_VERBOSE) << "Draw drawGrainClouds per slot";
+
         ofPushStyle();
         ofSetColor(ofColor(0, 255, 255));
         ofNoFill();
@@ -1219,6 +1229,8 @@ void ofApp::drawGrainClouds()
         
         
         if (drawGrains[j]) {
+			ofLog(OF_LOG_VERBOSE) << "Draw draw Grain  per slot";
+
             //draw position crossdraw grains
             
             ofDrawLine(ofMap(positionFromTime, 0, 1, uiX[j], uiMaxX[j]), uiY[j], ofMap(positionFromTime, 0, 1, uiX[j], uiMaxX[j]), uiMaxY[j]);
@@ -1227,6 +1239,7 @@ void ofApp::drawGrainClouds()
             ofSetRectMode(OF_RECTMODE_CENTER);
             int grainsY = uiY[j] + uiHeigth[j] / 2;
             for (int k = 0; k < slots[j].grainVoices; ++k) {
+				ofLog(OF_LOG_VERBOSE) << "Draw draw Grain voices per slot";
                 float xpos = uiX[j] + (uiWidth[j] * slots[j].cloud->meter_position(k));
                 float dimensionX = slots[j].cloud->meter_env(k) * 10;
                 float dimensionY = slots[j].cloud->meter_env(k) * 50;
@@ -1237,15 +1250,19 @@ void ofApp::drawGrainClouds()
         ofDrawBitmapString("Slot " + ofToString(j + 1), uiX[j] + 5, uiHeigth[j] + uiY[j] - 10);
         ofPopStyle();
         if(drawEffects){
+			ofLog(OF_LOG_VERBOSE) << "Draw draw effects  per slot";
             effectsPanels[j]->draw();
             
         }
         if(!drawEffects){
+			ofLog(OF_LOG_VERBOSE) << "Draw sample panels per slot";
             samplePanels[j]->draw();
             
         }
     }
     ofPopView();
+	ofLog(OF_LOG_VERBOSE) << "Draw drawGrainClouds end";
+
 }
 
 void ofApp::drawSimulationBars()
