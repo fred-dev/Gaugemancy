@@ -387,7 +387,7 @@ void ofApp::loadEffectPatchSettings()
             effReverbsParams[i].DoClear();
             effCompressorsParams[i].DoClear();
             
-            cloud[i]->disconnectAll();
+            audioFilePlayer[i].disconnectAll();
             ampControl[i]->disconnectAll();
             
             cout<< "Removing bitcrusher from slot " + ofToString(i+1) << endl;
@@ -521,573 +521,573 @@ void ofApp::loadEffectPatchSettings()
     {
         if (!effectsPatching[presetIndex-1][e].hasBitCrusher &&  !effectsPatching[presetIndex-1][e].hasDecimator &&  !effectsPatching[presetIndex-1][e].hasChorus &&  !effectsPatching[presetIndex-1][e].hasFilter &&  !effectsPatching[presetIndex-1][e].hasDelay && ! effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> compressors[e]->ch(0) >>engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> compressors[e]->ch(1) >>engine.audio_out(1);
+            audioFilePlayer[e] >>  engine.audio_out(0);
+            audioFilePlayer[e] >>  engine.audio_out(1);
             cout << "Patching chain with no effects" << endl;
         }
         
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e]>> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e]>> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0)  >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1)  >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0)  >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1)  >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0)  >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1)  >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0)  >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1)  >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0)  >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1)  >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >>  *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >>  *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >>  *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >>  *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0)>> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1)>> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> choruss[e]->ch(0)>> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> choruss[e]->ch(1)>> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDelay &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator &&  effectsPatching[presetIndex-1][e].hasChorus)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasChorus)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher &&  effectsPatching[presetIndex-1][e].hasDecimator)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasReverb)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *reverbSends[e] >> reverbs[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *reverbSends[e] >> reverbs[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDelay)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >>  compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >>  compressors[e]->ch(1) >> engine.audio_out(1);
             
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *delaySends[e] >> *delayLs[e] >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *delaySends[e] >> *delayRs[e] >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasFilter)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *multiLadderFilterLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *multiLadderFilterRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasChorus)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> choruss[e]->ch(0) >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> choruss[e]->ch(1) >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasDecimator)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *decimatorLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *decimatorRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
         else if (effectsPatching[presetIndex-1][e].hasBitCrusher)
         {
-            cloud[e]->ch(0) >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
-            cloud[e]->ch(1) >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
+           audioFilePlayer[e] >> ampControl[e]->ch(0) >> *bitCrusherLs[e] >> compressors[e]->ch(0) >> engine.audio_out(0);
+           audioFilePlayer[e] >> ampControl[e]->ch(1) >> *bitCrusherRs[e] >> compressors[e]->ch(1) >> engine.audio_out(1);
             cout << "Patching chain with effects" << endl;
         }
     }
@@ -1098,7 +1098,7 @@ void ofApp::exit() {
 
 // this is called when the app exits, we unload the audio files
 	for (int i = 0; i < numberOfSlots; i++) {
-		grainVoices[i] = cloud[i]->getVoicesNum();
+		//grainVoices[i] =audioFilePlayer[i]->getVoicesNum();
 		if (sampleData[i]->loaded())
 		{
 			ampControl[i]->setv(0.0f);
@@ -1323,8 +1323,6 @@ goToMode(grainOperationModeTranslate);
 #endif
 #ifdef HAS_ADC
         narration.disconnectAll();
-        engine.audio_out(0).disconnectAll();
-        engine.audio_out(1).disconnectAll();
         goToMode(grainOperationModeTranslate);
 
 #endif
@@ -1550,14 +1548,14 @@ void ofApp::mapSimulatedDataSingle()
 	{
 		controlX[s] = ofMap(accumulatedPressureNormalised, 0.0, 1.0, uiX[s], uiMaxX[s], true);
 		controlY[s] = ofMap(_volume[s], 0.0, 1.0, uiMaxY[s], uiY[s]);
-		accumulatedPressureNormalised >> cloud[s]->in_position();
-		_spread[s] >> cloud[s]->in_position_jitter();
-		_in_length[s] >> cloud[s]->in_length();
-		_in_density[s] >> cloud[s]->in_density();
-		_in_distance_jitter[s] >> cloud[s]->in_distance_jitter();
-		_in_pitch_jitter[s] >> cloud[s]->in_pitch_jitter();
-		_grainDirection[s] >> cloud[s]->in_direction();
-		_in_pitch[s] >> cloud[s]->in_pitch();
+//		accumulatedPressureNormalised >>audioFilePlayer[s]->in_position();
+//		_spread[s] >>audioFilePlayer[s]->in_position_jitter();
+//		_in_length[s] >>audioFilePlayer[s]->in_length();
+//		_in_density[s] >>audioFilePlayer[s]->in_density();
+//		_in_distance_jitter[s] >>audioFilePlayer[s]->in_distance_jitter();
+//		_in_pitch_jitter[s] >>audioFilePlayer[s]->in_pitch_jitter();
+//		_grainDirection[s] >>audioFilePlayer[s]->in_direction();
+//		_in_pitch[s] >>audioFilePlayer[s]->in_pitch();
 	}
 }
 
@@ -1589,16 +1587,16 @@ void ofApp::mapSimulatedDataMulti()
 
 	for (int s = 0; s < numberOfSlots; s++)
 	{
-		controlX[s] = ofMap(_posX[s], 0.0, 1.0, uiX[s], uiMaxX[s]);
-		controlY[s] = ofMap(_volume[s], 0.0, 1.0, uiMaxY[s], uiY[s]);
-		_posX[s] >> cloud[s]->in_position();
-		_spread[s] >> cloud[s]->in_position_jitter();
-		_in_length[s] >> cloud[s]->in_length();
-		_in_density[s] >> cloud[s]->in_density();
-		_in_distance_jitter[s] >> cloud[s]->in_distance_jitter();
-		_in_pitch_jitter[s] >> cloud[s]->in_pitch_jitter();
-		_grainDirection[s] >> cloud[s]->in_direction();
-		_in_pitch[s] >> cloud[s]->in_pitch();
+		//controlX[s] = ofMap(_posX[s], 0.0, 1.0, uiX[s], uiMaxX[s]);
+		//controlY[s] = ofMap(_volume[s], 0.0, 1.0, uiMaxY[s], uiY[s]);
+//		_posX[s] >>audioFilePlayer[s]->in_position();
+//		_spread[s] >>audioFilePlayer[s]->in_position_jitter();
+//		_in_length[s] >>audioFilePlayer[s]->in_length();
+//		_in_density[s] >>audioFilePlayer[s]->in_density();
+//		_in_distance_jitter[s] >>audioFilePlayer[s]->in_distance_jitter();
+//		_in_pitch_jitter[s] >>audioFilePlayer[s]->in_pitch_jitter();
+		//_grainDirection[s] >>audioFilePlayer[s]->in_direction();
+		//_in_pitch[s] >>audioFilePlayer[s]->pitchControl();
 		
 	}
 }
@@ -1677,18 +1675,19 @@ void ofApp::drawGrainClouds()
 			ofDrawBitmapString(fileNamesSet2[j], uiX[j] + 5, uiY[j] + 15);
 		}
 		if (drawGrains[j]) {
-			//draw position crossdraw grains 
-			ofDrawLine(controlX[j], uiY[j], controlX[j], uiMaxY[j]);
-			ofDrawLine(uiX[j], controlY[j], uiMaxX[j], controlY[j]);
-			//draw grains
-			ofSetRectMode(OF_RECTMODE_CENTER);
-			int grainsY = uiY[j] + uiHeigth[j] / 2;
-			for (int k = 0; k < grainVoices[j]; ++k) {
-				float xpos = uiX[j] + (uiWidth[j] * cloud[j]->meter_position(k));
-				float dimensionX = cloud[j]->meter_env(k) * 10;
-				float dimensionY = cloud[j]->meter_env(k) * 50;
-				ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
-			}
+//			//draw position crossdraw grains
+            
+            ofDrawLine(ofMap(audioFilePlayer[j].getPosition(), 0, 1,uiX[j], uiMaxX[j]), uiY[j], ofMap(audioFilePlayer[j].getPosition(), 0, 1,uiX[j], uiMaxX[j]), uiMaxY[j]);
+//			ofDrawLine(uiX[j], controlY[j], uiMaxX[j], controlY[j]);
+//			//draw grains
+//			ofSetRectMode(OF_RECTMODE_CENTER);
+//			int grainsY = uiY[j] + uiHeigth[j] / 2;
+//			for (int k = 0; k < grainVoices[j]; ++k) {
+//				float xpos = uiX[j] + (uiWidth[j] audioFilePlayer[j]->meter_position(k));
+//				float dimensionX =audioFilePlayer[j]->meter_env(k) * 10;
+//				float dimensionY =audioFilePlayer[j]->meter_env(k) * 50;
+//				ofDrawRectangle(xpos, grainsY, dimensionX, dimensionY);
+//			}
 		}
 		ofSetColor(255);
 		ofDrawBitmapString("Slot " + ofToString(j + 1), uiX[j] + 5, uiHeigth[j] + uiY[j] - 10);
@@ -2771,13 +2770,13 @@ void ofApp::updateParametersFromValuesSingle()
     // go through the parameters of all the granular objects, if a parameters is connected to incoming sensor data, map that data appropriately, can also come from the simulator
 	for (int k = 0; k < numberOfSlots; k++) {
 		for (int v = 0; v < NUMBER_OF_SENSORS; v++) {				
-			applyDynamicValuesToParameters(k, in_length_connect, v, _in_length, _in_lengthMin, _in_lengthMax, "grain length");
-			applyDynamicValuesToParameters(k, in_density_connect, v, _in_density, _in_densityMin, _in_densityMax, "density" );
-			applyDynamicValuesToParameters(k, in_distJit_connect, v, _in_distance_jitter, _in_distance_jitterMin, _in_distance_jitterMax, "distance jitter");
-			applyDynamicValuesToParameters(k, in_pitch_connect, v, _in_pitch, _in_pitchMin, _in_pitchMax, "pitch");
-			applyDynamicValuesToParameters(k, in_pitchJit_connect, v, _in_pitch_jitter, _in_pitch_jitterMin, _in_pitch_jitterMax, "pitch jitter");
-			applyDynamicValuesToParameters(k, _volume_connect, v, _volume, _volumeMin, _volumeMax, "volume");
-            applyDynamicValuesToParameters(k, _spread_connect, v, _spread, _spreadMin, _spreadMax, "spread");
+			//applyDynamicValuesToParameters(k, in_length_connect, v, _in_length, _in_lengthMin, _in_lengthMax, "grain length");
+			//applyDynamicValuesToParameters(k, in_density_connect, v, _in_density, _in_densityMin, _in_densityMax, "density" );
+			//applyDynamicValuesToParameters(k, in_distJit_connect, v, _in_distance_jitter, _in_distance_jitterMin, _in_distance_jitterMax, "distance jitter");
+			//applyDynamicValuesToParameters(k, in_pitch_connect, v, _in_pitch, _in_pitchMin, _in_pitchMax, "pitch");
+			//applyDynamicValuesToParameters(k, in_pitchJit_connect, v, _in_pitch_jitter, _in_pitch_jitterMin, _in_pitch_jitterMax, "pitch jitter");
+			//applyDynamicValuesToParameters(k, _volume_connect, v, _volume, _volumeMin, _volumeMax, "volume");
+            //applyDynamicValuesToParameters(k, _spread_connect, v, _spread, _spreadMin, _spreadMax, "spread");
 
             
 		}
@@ -2790,14 +2789,14 @@ void ofApp::updateParametersFromValuesMulti()
     // go through the parameters of all the granular objects, if a parameters is connected to incoming sensor data, map that data appropriately, can also come from the simulator
 	for (int k = 0; k < numberOfSlots; k++) {
 		for (int v = 0; v < NUMBER_OF_SENSORS; v++) {
-            applyDynamicValuesToParameters(k, in_length_connect, v, _in_length, _in_lengthMin, _in_lengthMax, "grain length");
-            applyDynamicValuesToParameters(k, in_density_connect, v, _in_density, _in_densityMin, _in_densityMax, "density" );
-            applyDynamicValuesToParameters(k, in_distJit_connect, v, _in_distance_jitter, _in_distance_jitterMin, _in_distance_jitterMax, "distance jitter");
+           // applyDynamicValuesToParameters(k, in_length_connect, v, _in_length, _in_lengthMin, _in_lengthMax, "grain length");
+           // applyDynamicValuesToParameters(k, in_density_connect, v, _in_density, _in_densityMin, _in_densityMax, "density" );
+           // applyDynamicValuesToParameters(k, in_distJit_connect, v, _in_distance_jitter, _in_distance_jitterMin, _in_distance_jitterMax, "distance jitter");
             applyDynamicValuesToParameters(k, in_pitch_connect, v, _in_pitch, _in_pitchMin, _in_pitchMax, "pitch");
-            applyDynamicValuesToParameters(k, in_pitchJit_connect, v, _in_pitch_jitter, _in_pitch_jitterMin, _in_pitch_jitterMax, "pitch jitter");
+           /// applyDynamicValuesToParameters(k, in_pitchJit_connect, v, _in_pitch_jitter, _in_pitch_jitterMin, _in_pitch_jitterMax, "pitch jitter");
             applyDynamicValuesToParameters(k, _volume_connect, v, _volume, _volumeMin, _volumeMax, "volume");
-            applyDynamicValuesToParameters(k, _spread_connect, v, _spread, _spreadMin, _spreadMax, "spread");
-			applyDynamicValuesToParameters(k, _posX_connect, v, _posX, _posXMin, _posXMax, "position");
+           // applyDynamicValuesToParameters(k, _spread_connect, v, _spread, _spreadMin, _spreadMax, "spread");
+			//applyDynamicValuesToParameters(k, _posX_connect, v, _posX, _posXMin, _posXMax, "position");
 
 		}
 	}
@@ -2840,14 +2839,28 @@ void ofApp::getAccumulatedPressure()
             }
     
     //then apply the curved data to the granular and set the volume as it should be (could be mapped to a sensor)
-			accumulatedPressureNormalised >> cloud[0]->in_position();
-			ampControl[0]->setv(_volume[0]);
+			//accumulatedPressureNormalised >>audioFilePlayer[0].in_position();
+			//ampControl[0]->setv(_volume[0]);
+            if(audioFilePlayer[0].getIsPaused()){
+                audioFilePlayer[0].pause(false);
+
+            }
+            if(!audioFilePlayer[0].getIsPaused()){
+                audioFilePlayer[0].play();
+                cout<<"we should be playing now"<<endl;
+                
+            }
+            audioFilePlayer[0].setVolume(1.0);
+            ampControl[0]->setv(0.0);
 			ofLogVerbose() << "Accumulated pressure is " + ofToString(accumulatedPressureNormalised) << endl;
 
 		}
     // of it does not pass the threshold then reset the volume and playhead position
 		else if (accumulatedPressureNormalised<normalisedA2DValuesMin) {
-			0.0 >> cloud[0]->in_position();
+			//0.0 >>audioFilePlayer[0].in_position();
+            if(!audioFilePlayer[0].getIsPaused()){
+                audioFilePlayer[0].pause(true);
+            }
 			ampControl[0]->setv(0.0);
 		}
 	
@@ -3225,8 +3238,8 @@ void ofApp::setupNarrationGrain()
 	narrAmpControl.enableSmoothing(50.0f);
 	narrAmpControl.setv(0.0f);
 
-	narrCloud.ch(0) >> narrAmpControl[0]  >> engine.audio_out(0);
-	narrCloud.ch(1) >> narrAmpControl[1]  >> engine.audio_out(1);
+	narrCloud.ch(0) >> narrAmpControl.ch(0)  >> engine.audio_out(0);
+	narrCloud.ch(1) >> narrAmpControl.ch(1)  >> engine.audio_out(1);
 }
 
 #ifndef HAS_ADC
@@ -3300,7 +3313,7 @@ void ofApp::controlOn(int x, int y) {
 
     for (int z = 0; z < numberOfSlots; z++) {
         if (x > uiX[z] && x<uiMaxX[z] && y>uiY[z] && y < uiMaxY[z]) {
-            ofMap(x, uiX[z], uiMaxX[z], 0.0f, 1.0f, true) >> cloud[z]->in_position();
+           // ofMap(x, uiX[z], uiMaxX[z], 0.0f, 1.0f, true) >>audioFilePlayer[z]->in_position();
             
             currentTarget = z;
             ampControl[z]->setv(_volume[z]);
@@ -3346,9 +3359,9 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 	//--------GRAINCLOUD-----------------------
 	for (int i = 0; i < numberOfSlots; i++) {
 
-		grainVoices[i] = cloud[i]->getVoicesNum();
+		//grainVoices[i] =audioFilePlayer[i]->getVoicesNum();
 // if we have samples unload them
-		if (sampleData[i]->loaded())
+		if (audioFilePlayer[i].isLoaded())
 		{
 			ampControl[i]->setv(0.0f);
 			sampleData[i]->unLoad();
@@ -3356,46 +3369,47 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
 
 		sampleData[i]->setVerbose(true);
 		sampleData[i]->load(paths[i]);
-        cloud[i]->setSample(sampleData[i]); // give to the pdsp::GrainCloud the pointer to the sample
+        audioFilePlayer[i].load(paths[i]);
+      // audioFilePlayer[i]->setSample(sampleData[i]); // give to the pdsp::GrainCloud the pointer to the sample
 
         if (firstRun) {
             samplePanels[i].setup("Slot " + ofToString(i + 1), filePathPrefix + presetPath); //we have a GUI panel for each granular
             //the parameters are split into groups to make it easier to see, each group has value, a min, a max, and connect to to connect it to the sensor
-            _windowTypeGroup_group[i].add(_window_type_id[i].set("Window type " + ofToString(i + 1), 0, 0, 9));
-#ifndef HAS_ADC
-            _window_type_id[i].addListener(this, &ofApp::onWindowTypeChanged);
-            _windowTypeGroup_group[i].add(_window_type_name[i].set("Windowing "+ ofToString(i + 1), "default"));
-            _windowTypeGroup_group[i].setName("Window Type slot " + ofToString(i + 1));
-#endif
-            samplePanels[i].add(_windowTypeGroup_group[i]);
-            
-            _in_length_group[i].add(_in_length[i].set("in length " + ofToString(i + 1), 500, 10, 3000));
-            _in_length_group[i].add(_in_lengthMin[i].set("in length Min " + ofToString(i + 1), 100, 10, 3000));
-            _in_length_group[i].add(_in_lengthMax[i].set("in length Max " + ofToString(i + 1), 3000, 10, 3000));
-            _in_length_group[i].add(in_length_connect[i].set("IL Connect to " + ofToString(i + 1), 0, 0, 6));
-            _in_length_group[i].setName("In Length");
-            samplePanels[i].add(_in_length_group[i]);
-            
-            _in_density_group[i].add(_in_density[i].set("in density " + ofToString(i + 1), 0.9, 0.1, 1.0));
-            _in_density_group[i].add(_in_densityMin[i].set("in density Min " + ofToString(i + 1), 0.1, 0.1, 1.0));
-            _in_density_group[i].add(_in_densityMax[i].set("in density Max " + ofToString(i + 1), 5.0, 0.1, 1.0));
-            _in_density_group[i].add(in_density_connect[i].set("ID Connect to " + ofToString(i + 1), 0, 0, 6));
-            _in_density_group[i].setName("density");
-            samplePanels[i].add(_in_density_group[i]);
-            
-            _in_distance_jitter_group[i].add(_in_distance_jitter[i].set("distance jitter " + ofToString(i + 1), 20.0, 0.0, 1000.0));
-            _in_distance_jitter_group[i].add(_in_distance_jitterMin[i].set("distance jitter min " + ofToString(i + 1), 0.0, 0.0, 1000.0));
-            _in_distance_jitter_group[i].add(_in_distance_jitterMax[i].set("distance jitter max " + ofToString(i + 1), 1000.0, 0.0, 1000.0));
-            _in_distance_jitter_group[i].add(in_distJit_connect[i].set("DJ Connect to " + ofToString(i + 1), 0, 0, 6));
-            _in_distance_jitter_group[i].setName("Distance Jitter");
-            samplePanels[i].add(_in_distance_jitter_group[i]);
-            
-            _in_pitch_jitter_group[i].add(_in_pitch_jitter[i].set("pitch jitter " + ofToString(i + 1), 0.0, -200.0, 200.0));
-            _in_pitch_jitter_group[i].add(_in_pitch_jitterMin[i].set("pitch jitter min " + ofToString(i + 1), -200.0, -200.0, 200.0));
-            _in_pitch_jitter_group[i].add(_in_pitch_jitterMax[i].set("pitch jitter max " + ofToString(i + 1), 200.0, -200.0, 200.0));
-            _in_pitch_jitter_group[i].add(in_pitchJit_connect[i].set("PJ Connect to " + ofToString(i + 1), 0, 0, 6));
-            _in_pitch_jitter_group[i].setName("Pitch Jitter");
-            samplePanels[i].add(_in_pitch_jitter_group[i]);
+//            _windowTypeGroup_group[i].add(_window_type_id[i].set("Window type " + ofToString(i + 1), 0, 0, 9));
+//#ifndef HAS_ADC
+//            _window_type_id[i].addListener(this, &ofApp::onWindowTypeChanged);
+//            _windowTypeGroup_group[i].add(_window_type_name[i].set("Windowing "+ ofToString(i + 1), "default"));
+//            _windowTypeGroup_group[i].setName("Window Type slot " + ofToString(i + 1));
+//#endif
+//            samplePanels[i].add(_windowTypeGroup_group[i]);
+//            
+//            _in_length_group[i].add(_in_length[i].set("in length " + ofToString(i + 1), 500, 10, 3000));
+//            _in_length_group[i].add(_in_lengthMin[i].set("in length Min " + ofToString(i + 1), 100, 10, 3000));
+//            _in_length_group[i].add(_in_lengthMax[i].set("in length Max " + ofToString(i + 1), 3000, 10, 3000));
+//            _in_length_group[i].add(in_length_connect[i].set("IL Connect to " + ofToString(i + 1), 0, 0, 6));
+//            _in_length_group[i].setName("In Length");
+//            samplePanels[i].add(_in_length_group[i]);
+//            
+//            _in_density_group[i].add(_in_density[i].set("in density " + ofToString(i + 1), 0.9, 0.1, 1.0));
+//            _in_density_group[i].add(_in_densityMin[i].set("in density Min " + ofToString(i + 1), 0.1, 0.1, 1.0));
+//            _in_density_group[i].add(_in_densityMax[i].set("in density Max " + ofToString(i + 1), 5.0, 0.1, 1.0));
+//            _in_density_group[i].add(in_density_connect[i].set("ID Connect to " + ofToString(i + 1), 0, 0, 6));
+//            _in_density_group[i].setName("density");
+//            samplePanels[i].add(_in_density_group[i]);
+//            
+//            _in_distance_jitter_group[i].add(_in_distance_jitter[i].set("distance jitter " + ofToString(i + 1), 20.0, 0.0, 1000.0));
+//            _in_distance_jitter_group[i].add(_in_distance_jitterMin[i].set("distance jitter min " + ofToString(i + 1), 0.0, 0.0, 1000.0));
+//            _in_distance_jitter_group[i].add(_in_distance_jitterMax[i].set("distance jitter max " + ofToString(i + 1), 1000.0, 0.0, 1000.0));
+//            _in_distance_jitter_group[i].add(in_distJit_connect[i].set("DJ Connect to " + ofToString(i + 1), 0, 0, 6));
+//            _in_distance_jitter_group[i].setName("Distance Jitter");
+//            samplePanels[i].add(_in_distance_jitter_group[i]);
+//            
+//            _in_pitch_jitter_group[i].add(_in_pitch_jitter[i].set("pitch jitter " + ofToString(i + 1), 0.0, -200.0, 200.0));
+//            _in_pitch_jitter_group[i].add(_in_pitch_jitterMin[i].set("pitch jitter min " + ofToString(i + 1), -200.0, -200.0, 200.0));
+//            _in_pitch_jitter_group[i].add(_in_pitch_jitterMax[i].set("pitch jitter max " + ofToString(i + 1), 200.0, -200.0, 200.0));
+//            _in_pitch_jitter_group[i].add(in_pitchJit_connect[i].set("PJ Connect to " + ofToString(i + 1), 0, 0, 6));
+//            _in_pitch_jitter_group[i].setName("Pitch Jitter");
+//            samplePanels[i].add(_in_pitch_jitter_group[i]);
             
             _in_pitch_group[i].add(_in_pitch[i].set("pitch " + ofToString(i + 1), 0.0, -20.0, 20.0));
             _in_pitch_group[i].add(_in_pitchMin[i].set("pitch min " + ofToString(i + 1), -20.0, -20.0, 20.0));
@@ -3404,12 +3418,12 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
             _in_pitch_group[i].setName("Pitch");
             samplePanels[i].add(_in_pitch_group[i]);
             
-            _spread_group[i].add(_spread[i].set("_spread " + ofToString(i + 1), 0.0, 0.0, 1.0));
-            _spread_group[i].add(_spreadMin[i].set("_spread min " + ofToString(i + 1), 0.0, 0.0, 1.0));
-            _spread_group[i].add(_spreadMax[i].set("_spread max " + ofToString(i + 1), 1.0, 0.0, 1.0));
-            _spread_group[i].add(_spread_connect[i].set("S Connect to " + ofToString(i + 1), 0, 0, 6));
-            _spread_group[i].setName("Spread");
-            samplePanels[i].add(_spread_group[i]);
+//            _spread_group[i].add(_spread[i].set("_spread " + ofToString(i + 1), 0.0, 0.0, 1.0));
+//            _spread_group[i].add(_spreadMin[i].set("_spread min " + ofToString(i + 1), 0.0, 0.0, 1.0));
+//            _spread_group[i].add(_spreadMax[i].set("_spread max " + ofToString(i + 1), 1.0, 0.0, 1.0));
+//            _spread_group[i].add(_spread_connect[i].set("S Connect to " + ofToString(i + 1), 0, 0, 6));
+//            _spread_group[i].setName("Spread");
+//            samplePanels[i].add(_spread_group[i]);
             
             _volume_group[i].add(_volume[i].set("Volume " + ofToString(i + 1), 0.5, 0.0, 1.0));
             _volume_group[i].add(_volumeMin[i].set("Volume min " + ofToString(i + 1), 0.0, 0.0, 1.0));
@@ -3425,12 +3439,12 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
             if (!useAccumulatedPressure)
             {
                 // in accumulated pressure mode (single granualr) the posX value is taken automatically from all sensors together so we only need this for the multi modes
-                _posX_group[i].add(_posX[i].set("Play Position " + ofToString(i + 1), 0.5, 0.0, 1.0));
-                _posX_group[i].add(_posXMin[i].set("Play Position min " + ofToString(i + 1), 0.0, 0.0, 1.0));
-                _posX_group[i].add(_posXMax[i].set("Play Position max " + ofToString(i + 1), 1.0, 0.0, 1.0));
-                _posX_group[i].add(_posX_connect[i].set("P Connect to " + ofToString(i + 1), 0, 0, 6));
-                _posX_group[i].setName("Position");
-                samplePanels[i].add(_posX_group[i]);
+                //_posX_group[i].add(_posX[i].set("Play Position " + ofToString(i + 1), 0.5, 0.0, 1.0));
+                //_posX_group[i].add(_posXMin[i].set("Play Position min " + ofToString(i + 1), 0.0, 0.0, 1.0));
+                //_posX_group[i].add(_posXMax[i].set("Play Position max " + ofToString(i + 1), 1.0, 0.0, 1.0));
+                //_posX_group[i].add(_posX_connect[i].set("P Connect to " + ofToString(i + 1), 0, 0, 6));
+               // _posX_group[i].setName("Position");
+               // samplePanels[i].add(_posX_group[i]);
             }
         }
         //load from the XML
@@ -3438,69 +3452,28 @@ void ofApp::setupGraincloud(std::vector<string> paths, string presetPath)
         //set the XML path manually so the native save and recal settings buttons work properly with our settings
         samplePanels[i].setFileName(filePathPrefix + presetPath);
 
-        switch (_window_type_id[i]) {
-            case 0:
-                cloud[i]->setWindowType(pdsp::Rectangular);
-                cout << "Slot " + ofToString(i +1) + " using window type: Rectangular" << endl;
-                break;
-            case 1:
-                cloud[i]->setWindowType(pdsp::Triangular);
-                cout << "Slot " + ofToString(i +1) + " using window type: Triangular" << endl;
-                break;
-            case 2:
-                cloud[i]->setWindowType(pdsp::Hann);
-                cout << "Slot " + ofToString(i +1) + " using window type: Hann" << endl;
-                break;
-            case 3:
-                cloud[i]->setWindowType(pdsp::Hamming);
-                cout << "Slot " + ofToString(i +1) + " using window type: Hamming" << endl;
-                break;
-            case 4:
-                cloud[i]->setWindowType(pdsp::Blackman);
-                cout << "Slot " + ofToString(i +1) + " using window type: Blackman" << endl;
-                break;
-            case 5:
-                cloud[i]->setWindowType(pdsp::BlackmanHarris);
-                cout << "Slot " + ofToString(i +1) + " using window type: BlackmanHarris" << endl;
-                break;
-            case 6:
-                cloud[i]->setWindowType(pdsp::SineWindow);
-                cout << "Slot " + ofToString(i +1) + " using window type: SineWindow" << endl;
-                break;
-            case 7:
-                cloud[i]->setWindowType(pdsp::Welch);
-                cout << "Slot " + ofToString(i +1) + " using window type: Welch" << endl;
-                break;
-            case 8:
-                cloud[i]->setWindowType(pdsp::Gaussian);
-                cout << "Slot " + ofToString(i +1) + " using window type: Gaussian" << endl;
-                break;
-            case 9:
-                cloud[i]->setWindowType(pdsp::Tukey);
-                cout << "Slot " + ofToString(i +1) + " using window type: Tukey" << endl;
-                break;
-        }
+       
 
-#ifndef HAS_ADC
-        _window_type_name[i] = windowTypeNames[_window_type_id[i]];
-#endif
+//#ifndef HAS_ADC
+//        _window_type_name[i] = windowTypeNames[_window_type_id[i]];
+//#endif
 
 
         // apply all base settings to the grainular objects
-			0.00f >> (*posX[i]) >> cloud[i]->in_position();
-			_spread[i] >> cloud[i]->in_position_jitter();
-			_in_length[i] >> cloud[i]->in_length();
-			_in_density[i] >> cloud[i]->in_density();
-			_in_distance_jitter[i] >> cloud[i]->in_distance_jitter();
-			_in_pitch_jitter[i] >> cloud[i]->in_pitch_jitter();
-			_grainDirection[i] >> cloud[i]->in_direction();
-			_in_pitch[i] >> cloud[i]->in_pitch();
+//			0.00f >> (*posX[i]) >>audioFilePlayer[i]->in_position();
+//			_spread[i] >>audioFilePlayer[i]->in_position_jitter();
+//			_in_length[i] >>audioFilePlayer[i]->in_length();
+//			_in_density[i] >>audioFilePlayer[i]->in_density();
+//			_in_distance_jitter[i] >>audioFilePlayer[i]->in_distance_jitter();
+//			_in_pitch_jitter[i] >>audioFilePlayer[i]->in_pitch_jitter();
+//			_grainDirection[i] >>audioFilePlayer[i]->in_direction();
+//			_in_pitch[i] >>audioFilePlayer[i]->in_pitch();
 
 			if (firstRun) {
             // we onyl need to setup the audio engine when we start
 				ampControl[i]->channels(2);
 				//ampControl[i]->enableSmoothing(50.0f);
-				ampControl[i]->setv(0.0f);
+				ampControl[i]->setv(1.0f);
 
 //				cloud[i]->ch(0) >> (*ampControl[i])[0]  >> engine.audio_out(0);
 //				cloud[i]->ch(1) >> (*ampControl[i])[1]  >> engine.audio_out(1);
@@ -3619,52 +3592,52 @@ void ofApp::onNarrWindowTypeChanged(int & windowType){
 }
 
 void ofApp::onWindowTypeChanged(int & windowType){
-    for (int i =0; i<numberOfSlots; i++) {
-        switch (_window_type_id[i]) {
-            case 0:
-                cloud[i]->setWindowType(pdsp::Rectangular);
-                cout << "Slot " + ofToString(i +1) + " using window type: Rectangular" << endl;
-                break;
-            case 1:
-                cloud[i]->setWindowType(pdsp::Triangular);
-                cout << "Slot " + ofToString(i +1) + " using window type: Triangular" << endl;
-                break;
-            case 2:
-                cloud[i]->setWindowType(pdsp::Hann);
-                cout << "Slot " + ofToString(i +1) + " using window type: Hann" << endl;
-                break;
-            case 3:
-                cloud[i]->setWindowType(pdsp::Hamming);
-                cout << "Slot " + ofToString(i +1) + " using window type: Hamming" << endl;
-                break;
-            case 4:
-                cloud[i]->setWindowType(pdsp::Blackman);
-                cout << "Slot " + ofToString(i +1) + " using window type: Blackman" << endl;
-                break;
-            case 5:
-                cloud[i]->setWindowType(pdsp::BlackmanHarris);
-                cout << "Slot " + ofToString(i +1) + " using window type: BlackmanHarris" << endl;
-                break;
-            case 6:
-                cloud[i]->setWindowType(pdsp::SineWindow);
-                cout << "Slot " + ofToString(i +1) + " using window type: SineWindow" << endl;
-                break;
-            case 7:
-                cloud[i]->setWindowType(pdsp::Welch);
-                cout << "Slot " + ofToString(i +1) + " using window type: Welch" << endl;
-                break;
-            case 8:
-                cloud[i]->setWindowType(pdsp::Gaussian);
-                cout << "Slot " + ofToString(i +1) + " using window type: Gaussian" << endl;
-                break;
-            case 9:
-                cloud[i]->setWindowType(pdsp::Tukey);
-                cout << "Slot " + ofToString(i +1) + " using window type: Tukey" << endl;
-                break;
-        }
-
-        _window_type_name[i] = windowTypeNames[_window_type_id[i]];
-    }
+//    for (int i =0; i<numberOfSlots; i++) {
+//        switch (_window_type_id[i]) {
+//            case 0:
+//               audioFilePlayer[i]->setWindowType(pdsp::Rectangular);
+//                cout << "Slot " + ofToString(i +1) + " using window type: Rectangular" << endl;
+//                break;
+//            case 1:
+//               audioFilePlayer[i]->setWindowType(pdsp::Triangular);
+//                cout << "Slot " + ofToString(i +1) + " using window type: Triangular" << endl;
+//                break;
+//            case 2:
+//               audioFilePlayer[i]->setWindowType(pdsp::Hann);
+//                cout << "Slot " + ofToString(i +1) + " using window type: Hann" << endl;
+//                break;
+//            case 3:
+//               audioFilePlayer[i]->setWindowType(pdsp::Hamming);
+//                cout << "Slot " + ofToString(i +1) + " using window type: Hamming" << endl;
+//                break;
+//            case 4:
+//               audioFilePlayer[i]->setWindowType(pdsp::Blackman);
+//                cout << "Slot " + ofToString(i +1) + " using window type: Blackman" << endl;
+//                break;
+//            case 5:
+//               audioFilePlayer[i]->setWindowType(pdsp::BlackmanHarris);
+//                cout << "Slot " + ofToString(i +1) + " using window type: BlackmanHarris" << endl;
+//                break;
+//            case 6:
+//               audioFilePlayer[i]->setWindowType(pdsp::SineWindow);
+//                cout << "Slot " + ofToString(i +1) + " using window type: SineWindow" << endl;
+//                break;
+//            case 7:
+//               audioFilePlayer[i]->setWindowType(pdsp::Welch);
+//                cout << "Slot " + ofToString(i +1) + " using window type: Welch" << endl;
+//                break;
+//            case 8:
+//               audioFilePlayer[i]->setWindowType(pdsp::Gaussian);
+//                cout << "Slot " + ofToString(i +1) + " using window type: Gaussian" << endl;
+//                break;
+//            case 9:
+//               audioFilePlayer[i]->setWindowType(pdsp::Tukey);
+//                cout << "Slot " + ofToString(i +1) + " using window type: Tukey" << endl;
+//                break;
+//        }
+//
+//        _window_type_name[i] = windowTypeNames[_window_type_id[i]];
+//    }
 }
 
 #endif
@@ -3688,8 +3661,8 @@ void ofApp::populateVectors()
 		pdsp::SampleBuffer* tmp_sampleData = new pdsp::SampleBuffer();
 		sampleData.push_back(tmp_sampleData);
 
-		pdsp::GrainCloud* tmp_cloud = new pdsp::GrainCloud();
-		cloud.push_back(tmp_cloud);
+		AudioPlayer tmp_player;
+		audioFilePlayer.push_back(tmp_player);
 
 		pdsp::ParameterAmp* tmp_ampControl = new pdsp::ParameterAmp();
 		ampControl.push_back(tmp_ampControl);
@@ -3723,48 +3696,48 @@ void ofApp::populateVectors()
 		ofxPanel				tmp_samplePanels;
 		samplePanels.push_back(tmp_samplePanels);
         
-        ofParameter<int>		tmp__window_type_id;
-        _window_type_id.push_back(tmp__window_type_id);
-        
-#ifndef HAS_ADC
-        ofParameter<string>        _temp_window_type_name;
-        _window_type_name.push_back(_temp_window_type_name);
-#endif
-		ofParameter<float>		tmp__in_length;
-		_in_length.push_back(tmp__in_length);
-		ofParameter<float>		tmp__in_lengthMin;
-		_in_lengthMin.push_back(tmp__in_lengthMin);
-		ofParameter<float>		tmp__in_lengthMax;
-		_in_lengthMax.push_back(tmp__in_lengthMax);
-		ofParameter<int>		tmp_in_length_connect;
-		in_length_connect.push_back(tmp_in_length_connect);
-
-		ofParameter<float>		tmp__in_density;
-		_in_density.push_back(tmp__in_density);
-		ofParameter<float>		tmp__in_densityMin;
-		_in_densityMin.push_back(tmp__in_densityMin);
-		ofParameter<float>		tmp__in_densityMax;
-		_in_densityMax.push_back(tmp__in_densityMax);
-		ofParameter<int>		tmp_in_density_connect;
-		in_density_connect.push_back(tmp_in_density_connect);
-
-		ofParameter<float>		tmp__in_distance_jitter;
-		_in_distance_jitter.push_back(tmp__in_distance_jitter);
-		ofParameter<float>		tmp__in_distance_jitterMin;
-		_in_distance_jitterMin.push_back(tmp__in_distance_jitterMin);
-		ofParameter<float>		tmp__in_distance_jitterMax;
-		_in_distance_jitterMax.push_back(tmp__in_distance_jitterMax);
-		ofParameter<int>		tmp_in_distJit_connect;
-		in_distJit_connect.push_back(tmp_in_distJit_connect);
-
-		ofParameter<float>		tmp__in_pitch_jitter;
-		_in_pitch_jitter.push_back(tmp__in_pitch_jitter);
-		ofParameter<float>		tmp__in_pitch_jitterMin;
-		_in_pitch_jitterMin.push_back(tmp__in_pitch_jitterMin);
-		ofParameter<float>		tmp__in_pitch_jitterMax;
-		_in_pitch_jitterMax.push_back(tmp__in_pitch_jitterMax);
-		ofParameter<int>		tmp_in_pitchJit_connect;
-		in_pitchJit_connect.push_back(tmp_in_pitchJit_connect);
+//        ofParameter<int>		tmp__window_type_id;
+//        _window_type_id.push_back(tmp__window_type_id);
+//        
+//#ifndef HAS_ADC
+//        ofParameter<string>        _temp_window_type_name;
+//        _window_type_name.push_back(_temp_window_type_name);
+//#endif
+//		ofParameter<float>		tmp__in_length;
+//		_in_length.push_back(tmp__in_length);
+//		ofParameter<float>		tmp__in_lengthMin;
+//		_in_lengthMin.push_back(tmp__in_lengthMin);
+//		ofParameter<float>		tmp__in_lengthMax;
+//		_in_lengthMax.push_back(tmp__in_lengthMax);
+//		ofParameter<int>		tmp_in_length_connect;
+//		in_length_connect.push_back(tmp_in_length_connect);
+//
+//		ofParameter<float>		tmp__in_density;
+//		_in_density.push_back(tmp__in_density);
+//		ofParameter<float>		tmp__in_densityMin;
+//		_in_densityMin.push_back(tmp__in_densityMin);
+//		ofParameter<float>		tmp__in_densityMax;
+//		_in_densityMax.push_back(tmp__in_densityMax);
+//		ofParameter<int>		tmp_in_density_connect;
+//		in_density_connect.push_back(tmp_in_density_connect);
+//
+//		ofParameter<float>		tmp__in_distance_jitter;
+//		_in_distance_jitter.push_back(tmp__in_distance_jitter);
+//		ofParameter<float>		tmp__in_distance_jitterMin;
+//		_in_distance_jitterMin.push_back(tmp__in_distance_jitterMin);
+//		ofParameter<float>		tmp__in_distance_jitterMax;
+//		_in_distance_jitterMax.push_back(tmp__in_distance_jitterMax);
+//		ofParameter<int>		tmp_in_distJit_connect;
+//		in_distJit_connect.push_back(tmp_in_distJit_connect);
+//
+//		ofParameter<float>		tmp__in_pitch_jitter;
+//		_in_pitch_jitter.push_back(tmp__in_pitch_jitter);
+//		ofParameter<float>		tmp__in_pitch_jitterMin;
+//		_in_pitch_jitterMin.push_back(tmp__in_pitch_jitterMin);
+//		ofParameter<float>		tmp__in_pitch_jitterMax;
+//		_in_pitch_jitterMax.push_back(tmp__in_pitch_jitterMax);
+//		ofParameter<int>		tmp_in_pitchJit_connect;
+//		in_pitchJit_connect.push_back(tmp_in_pitchJit_connect);
 
 		ofParameter<float>		tmp__in_pitch;
 		_in_pitch.push_back(tmp__in_pitch);
@@ -3775,23 +3748,23 @@ void ofApp::populateVectors()
 		ofParameter<int>		tmp_in_pitch_connect;
 		in_pitch_connect.push_back(tmp_in_pitch_connect);
 
-		ofParameter<float>		tmp__spread;
-		_spread.push_back(tmp__spread);
-		ofParameter<float>		tmp__spreadMin;
-		_spreadMin.push_back(tmp__spreadMin);
-		ofParameter<float>		tmp__spreadMax;
-		_spreadMax.push_back(tmp__spreadMax);
-		ofParameter<int>		tmp__spread_connect;
-		_spread_connect.push_back(tmp__spread_connect);
-
-		ofParameter<float>		tmp__posX;
-		_posX.push_back(tmp__posX);
-		ofParameter<float>		tmp__posXMin;
-		_posXMin.push_back(tmp__posXMin);
-		ofParameter<float>		tmp__posXMax;
-		_posXMax.push_back(tmp__posXMax);
-		ofParameter<int>		tmp__posX_connect;
-		_posX_connect.push_back(tmp__posX_connect);
+//		ofParameter<float>		tmp__spread;
+//		_spread.push_back(tmp__spread);
+//		ofParameter<float>		tmp__spreadMin;
+//		_spreadMin.push_back(tmp__spreadMin);
+//		ofParameter<float>		tmp__spreadMax;
+//		_spreadMax.push_back(tmp__spreadMax);
+//		ofParameter<int>		tmp__spread_connect;
+//		_spread_connect.push_back(tmp__spread_connect);
+//
+//		ofParameter<float>		tmp__posX;
+//		_posX.push_back(tmp__posX);
+//		ofParameter<float>		tmp__posXMin;
+//		_posXMin.push_back(tmp__posXMin);
+//		ofParameter<float>		tmp__posXMax;
+//		_posXMax.push_back(tmp__posXMax);
+//		ofParameter<int>		tmp__posX_connect;
+//		_posX_connect.push_back(tmp__posX_connect);
 
 		ofParameter<float>		tmp__volume;
 		_volume.push_back(tmp__volume);
@@ -3829,29 +3802,29 @@ void ofApp::populateVectors()
         tempChannelEffects2.push_back(thisEffectSet2);
         
         
-        ofParameterGroup	_windowTypeGroup_group_temp;
-        _windowTypeGroup_group.push_back(_windowTypeGroup_group_temp);
-
-		ofParameterGroup	_in_length_group_temp;
-		_in_length_group.push_back(_in_length_group_temp);
-			
-		ofParameterGroup		_in_density_group_temp;
-		_in_density_group.push_back(_in_density_group_temp);
-
-		ofParameterGroup	_in_distance_jitter_group_temp;
-		_in_distance_jitter_group.push_back(_in_distance_jitter_group_temp);
-
-		ofParameterGroup		_in_pitch_jitter_group_temp;
-		_in_pitch_jitter_group.push_back(_in_pitch_jitter_group_temp);
+//        ofParameterGroup	_windowTypeGroup_group_temp;
+//        _windowTypeGroup_group.push_back(_windowTypeGroup_group_temp);
+//
+//		ofParameterGroup	_in_length_group_temp;
+//		_in_length_group.push_back(_in_length_group_temp);
+//			
+//		ofParameterGroup		_in_density_group_temp;
+//		_in_density_group.push_back(_in_density_group_temp);
+//
+//		ofParameterGroup	_in_distance_jitter_group_temp;
+//		_in_distance_jitter_group.push_back(_in_distance_jitter_group_temp);
+//
+//		ofParameterGroup		_in_pitch_jitter_group_temp;
+//		_in_pitch_jitter_group.push_back(_in_pitch_jitter_group_temp);
 
 		ofParameterGroup	_in_pitch_group_temp;
 		_in_pitch_group.push_back(_in_pitch_group_temp);
 
-		ofParameterGroup		_spread_group_temp;
-		_spread_group.push_back(_spread_group_temp);
-
-		ofParameterGroup		_posX_group_temp;
-		_posX_group.push_back(_posX_group_temp);
+//		ofParameterGroup		_spread_group_temp;
+//		_spread_group.push_back(_spread_group_temp);
+//
+//		ofParameterGroup		_posX_group_temp;
+//		_posX_group.push_back(_posX_group_temp);
 
 		ofParameterGroup	_volume_group_temp;
 		_volume_group.push_back(_volume_group_temp);
@@ -4596,15 +4569,15 @@ void ofApp::resetValuesAfterChanges()
     //resets all the granualars parameters as the should be, volume is at 0 and playhead position at 0
 	for (int i = 0; i < numberOfSlots; i++) {
 		ampControl[i]->setv(0.0f);
-		0.0 >> cloud[i]->in_position();
-		_in_length[i] >> cloud[i]->in_length();
-		_in_density[i] >> cloud[i]->in_density();
-		_in_distance_jitter[i] >> cloud[i]->in_distance_jitter();
-		_in_pitch_jitter[i] >> cloud[i]->in_pitch_jitter();
-		_grainDirection[i] >> cloud[i]->in_direction();
-		_in_pitch[i] >> cloud[i]->in_pitch();
-		_spread[i] >> cloud[i]->in_position_jitter();
-		drawGrains[i] = false;
+//		0.0 >>audioFilePlayer[i]->in_position();
+//		_in_length[i] >>audioFilePlayer[i]->in_length();
+//		_in_density[i] >>audioFilePlayer[i]->in_density();
+//		_in_distance_jitter[i] >>audioFilePlayer[i]->in_distance_jitter();
+//		_in_pitch_jitter[i] >>audioFilePlayer[i]->in_pitch_jitter();
+//		_grainDirection[i] >>audioFilePlayer[i]->in_direction();
+//		_in_pitch[i] >>audioFilePlayer[i]->in_pitch();
+//		_spread[i] >>audioFilePlayer[i]->in_position_jitter();
+//		drawGrains[i] = false;
 	}
 
 }

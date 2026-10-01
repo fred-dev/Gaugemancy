@@ -360,7 +360,7 @@ class ofApp : public ofBaseApp{
 #endif
 		std::vector<int>					grainVoices;
 		std::vector<pdsp::SampleBuffer*>		sampleData;
-		std::vector<pdsp::GrainCloud*>		cloud;
+		std::vector<AudioPlayer>		audioFilePlayer;
 		std::vector<pdsp::ParameterAmp*> ampControl;
 
 
@@ -384,34 +384,34 @@ class ofApp : public ofBaseApp{
 
 		std::vector<ofxPanel>				samplePanels;
     
-        std::vector<ofParameterGroup>		_windowTypeGroup_group;
-        std::vector<ofParameter<int>>       _window_type_id;
-    
-
-		std::vector<ofParameterGroup>		_in_length_group;
-		std::vector<ofParameter<float>>		_in_length;
-		std::vector<ofParameter<float>>		_in_lengthMin;
-		std::vector<ofParameter<float>>		_in_lengthMax;
-		std::vector<ofParameter<int>>		in_length_connect;
-
-		std::vector<ofParameterGroup>		_in_density_group;
-
-		std::vector<ofParameter<float>>		_in_density;
-		std::vector<ofParameter<float>>		_in_densityMin;
-		std::vector<ofParameter<float>>		_in_densityMax;
-		std::vector<ofParameter<int>>		in_density_connect;
-
-		std::vector<ofParameterGroup>		_in_distance_jitter_group;
-		std::vector<ofParameter<float>>		_in_distance_jitter;
-		std::vector<ofParameter<float>>		_in_distance_jitterMin;
-		std::vector<ofParameter<float>>		_in_distance_jitterMax;
-		std::vector<ofParameter<int>>		in_distJit_connect;
-
-		std::vector<ofParameterGroup>		_in_pitch_jitter_group;
-		std::vector<ofParameter<float>>		_in_pitch_jitter;
-		std::vector<ofParameter<float>>		_in_pitch_jitterMin;
-		std::vector<ofParameter<float>>		_in_pitch_jitterMax;
-		std::vector<ofParameter<int>>		in_pitchJit_connect;
+//        std::vector<ofParameterGroup>		_windowTypeGroup_group;
+//        std::vector<ofParameter<int>>       _window_type_id;
+//    
+//
+//		std::vector<ofParameterGroup>		_in_length_group;
+//		std::vector<ofParameter<float>>		_in_length;
+//		std::vector<ofParameter<float>>		_in_lengthMin;
+//		std::vector<ofParameter<float>>		_in_lengthMax;
+//		std::vector<ofParameter<int>>		in_length_connect;
+//
+//		std::vector<ofParameterGroup>		_in_density_group;
+//
+//		std::vector<ofParameter<float>>		_in_density;
+//		std::vector<ofParameter<float>>		_in_densityMin;
+//		std::vector<ofParameter<float>>		_in_densityMax;
+//		std::vector<ofParameter<int>>		in_density_connect;
+//
+//		std::vector<ofParameterGroup>		_in_distance_jitter_group;
+//		std::vector<ofParameter<float>>		_in_distance_jitter;
+//		std::vector<ofParameter<float>>		_in_distance_jitterMin;
+//		std::vector<ofParameter<float>>		_in_distance_jitterMax;
+//		std::vector<ofParameter<int>>		in_distJit_connect;
+//
+//		std::vector<ofParameterGroup>		_in_pitch_jitter_group;
+//		std::vector<ofParameter<float>>		_in_pitch_jitter;
+//		std::vector<ofParameter<float>>		_in_pitch_jitterMin;
+//		std::vector<ofParameter<float>>		_in_pitch_jitterMax;
+//		std::vector<ofParameter<int>>		in_pitchJit_connect;
 
 		std::vector<ofParameterGroup>		_in_pitch_group;
 		std::vector<ofParameter<float>>		_in_pitch;
@@ -419,17 +419,17 @@ class ofApp : public ofBaseApp{
 		std::vector<ofParameter<float>>		_in_pitchMax;
 		std::vector<ofParameter<int>>		in_pitch_connect;
 
-		std::vector<ofParameterGroup>		_spread_group;
-		std::vector<ofParameter<float>>		_spread;
-		std::vector<ofParameter<float>>		_spreadMin;
-		std::vector<ofParameter<float>>		_spreadMax;
-		std::vector<ofParameter<int>>		_spread_connect;
-
-		std::vector<ofParameterGroup>		_posX_group;
-		std::vector<ofParameter<float>>		_posX;
-		std::vector<ofParameter<float>>		_posXMin;
-		std::vector<ofParameter<float>>		_posXMax;
-		std::vector<ofParameter<int>>		_posX_connect;
+//		std::vector<ofParameterGroup>		_spread_group;
+//		std::vector<ofParameter<float>>		_spread;
+//		std::vector<ofParameter<float>>		_spreadMin;
+//		std::vector<ofParameter<float>>		_spreadMax;
+//		std::vector<ofParameter<int>>		_spread_connect;
+//
+//		std::vector<ofParameterGroup>		_posX_group;
+//		std::vector<ofParameter<float>>		_posX;
+//		std::vector<ofParameter<float>>		_posXMin;
+//		std::vector<ofParameter<float>>		_posXMax;
+//		std::vector<ofParameter<int>>		_posX_connect;
 
 		std::vector<ofParameterGroup>		_volume_group;
 		std::vector<ofParameter<float>>		_volume;

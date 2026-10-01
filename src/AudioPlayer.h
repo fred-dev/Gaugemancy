@@ -27,7 +27,6 @@ public:
 	bool loaded;
 	void setPosition(float pos);
 	bool getIsPaused();
-    
 private:
     void patch ();
 
@@ -44,6 +43,7 @@ private:
     pdsp::Parameter     faderControl;    
 
     pdsp::Parameter     pitchControl;
+
     pdsp::Parameter     smoothControl;
 
     pdsp::SampleBuffer  sample;    
