@@ -57,3 +57,34 @@ Gaugemancy.xcodeproj/xcshareddata/xcschemes/Gaugemancy Debug.xcscheme
 Gaugemancy.xcodeproj/xcshareddata/xcschemes/Gaugemancy Release.xcscheme
 Makefile
 Project.xcconfig
+
+# openFrameworks: commit src/, bin/data/ and addons.make only.
+# Regenerate IDE projects with projectGenerator.
+*.xcodeproj/
+*.xcworkspace/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.cbp
+xcuserdata/
+/Makefile
+/config.make
+/Project.xcconfig
+/openFrameworks-Info.plist
+/of.entitlements
+/icon.rc
+
+# Build output (bin/data is kept)
+/bin/*
+!/bin/data/
+obj/
+*.app/
+*.pdb
+*.ilk
+*.exp
+!config.make
+
+# OS / editor
+._*
+Desktop.ini
