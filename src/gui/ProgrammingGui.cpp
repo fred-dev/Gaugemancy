@@ -259,6 +259,7 @@ void ProgrammingGui::buildSlotEditor(SlotSettings & slot, int index) {
 void ProgrammingGui::buildNarrationEditor(NarrationSettings & n) {
 	ofxGuiGroup & g = *editorBuilder_.group("Narration");
 	editorBuilder_.toggle(g, "enabled", n.enabled, [this]() { reloadNarration_ = true; });
+	editorBuilder_.toggle(g, "skip (sticks: starts straight in granular)", n.skip, [this]() { reloadNarration_ = true; });
 	editorBuilder_.pathField(g, "file", n.file, audioDir(), [this]() { reloadNarration_ = true; });
 	editorBuilder_.floatSlider(g, "volume", n.volume, 0.0f, 4.0f);
 	editorBuilder_.toggle(g, "start when a ball is squeezed", n.startWithSensor);
@@ -502,7 +503,15 @@ void ProgrammingGui::drawNarration() {
 	};
 	bool glitch = instrument_.mode() == Mode::NarrationGlitch;
 	float head = glitch ? instrument_.glitchPosition() : n.position();
-	std::string title = "narration: " + (instrument_.profile().narration.enabled ? instrument_.profile().narration.file : std::string("(disabled)"));
+	const NarrationSettings & settings = instrument_.profile().narration;
+	std::string title = "narration: ";
+	if (!settings.enabled) {
+		title += "(this profile has no narration)";
+	} else if (settings.skip) {
+		title += "(no narration - skipped)";
+	} else {
+		title += settings.file;
+	}
 	narrationView_.draw(n.sample(), title, meter, head, 1.0f, target_ == Target::Narration, glitch);
 }
 

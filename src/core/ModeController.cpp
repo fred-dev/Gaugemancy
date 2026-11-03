@@ -39,7 +39,7 @@ int ModeController::firstSensorAbove(const ControlInputs & inputs, float thresho
 void ModeController::start(const NarrationSettings & settings, bool narrationLoaded, uint64_t nowMs) {
 	settings_ = settings;
 	nowMs_ = nowMs;
-	enter(settings.enabled && narrationLoaded ? Mode::WaitForNarration : Mode::Granular);
+	enter(settings.enabled && !settings.skip && narrationLoaded ? Mode::WaitForNarration : Mode::Granular);
 }
 
 void ModeController::skipNarration() {

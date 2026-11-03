@@ -179,6 +179,18 @@ void Instrument::nextPreset(bool respectMinInterval) {
 }
 
 void Instrument::skipNarration() {
+	// Sticks: once skipped, this profile starts straight in Granular mode
+	// from now on (including after a restart), the way some performers'
+	// devices always went straight to the grains and never played narration.
+	// Saved immediately (not on the next explicit save) since the hardware
+	// button that triggers this has no other way to persist anything.
+	if (!loaded_.profile.narration.skip) {
+		loaded_.profile.narration.skip = true;
+		std::string error;
+		if (!store_.saveProfile(loaded_.profile, error)) {
+			note("could not save narration skip: " + error, true);
+		}
+	}
 	modes_.skipNarration();
 }
 

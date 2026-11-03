@@ -168,6 +168,7 @@ Json toJson(const PresetSettings & preset) {
 Json toJson(const NarrationSettings & n) {
 	Json j;
 	j["enabled"] = n.enabled;
+	j["skip"] = n.skip;
 	j["file"] = n.file;
 	j["volume"] = n.volume;
 	j["startWithSensor"] = n.startWithSensor;
@@ -399,6 +400,7 @@ NarrationSettings narrationFromJson(const Json & json, const std::string & path,
 	NarrationSettings n;
 	Reader r(json, path, warnings);
 	r.read("enabled", n.enabled);
+	r.read("skip", n.skip);
 	r.read("file", n.file);
 	r.read("volume", n.volume, 0.0f, 4.0f);
 	r.read("startWithSensor", n.startWithSensor);

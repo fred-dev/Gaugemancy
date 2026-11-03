@@ -125,7 +125,10 @@ struct PresetSettings {
 // --------------------------------------------------------------- narration --
 
 struct NarrationSettings {
-	bool enabled = false;
+	bool enabled = false;           ///< false: this profile has no narration at all
+	bool skip = false;              ///< true: narration exists but is permanently
+	                                 ///< skipped for this profile (sticks across
+	                                 ///< restarts, unlike a one-off runtime skip)
 	std::string file;               ///< relative to the profile audio folder
 	float volume = 1.0f;
 	bool startWithSensor = true;    ///< else starts automatically after autoStartDelayMs

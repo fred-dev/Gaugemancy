@@ -169,6 +169,29 @@ Cloud-session tricks: no sound card or GPIO in the container, so use
   squeeze via `SensorSimulator::RampSettings`) produces real non-zero audio
   (checked peak amplitude with temporary instrumentation, since removed) —
   confirming the bug was entirely in the output device stream, not the DSP.
+- Narration skip now sticks across restarts. Added `NarrationSettings::skip`
+  (separate from `enabled`): `enabled=false` means "this profile has no
+  narration at all"; `enabled=true, skip=true` means "narration exists but
+  is permanently skipped for this profile" (what some performers' original
+  devices did — one had narration, the rest always went straight to
+  granular). `ModeController::start()` checks both. `Instrument::skipNarration()`
+  (hardware double-click / `/gm/narration/skip`) now sets `skip=true` and
+  calls `store_.saveProfile()` immediately, since the hardware button has no
+  other way to persist anything (no GUI "save" on a headless Pi). The GUI
+  also has a `skip` toggle next to `enabled` in the Narration panel; that one
+  follows the existing convention of needing an explicit save (F12). Verified
+  headless over OSC (`gm-ctl.py skip`): mode flips to granular immediately,
+  `profile.json` gets `"skip": true`, and a fresh relaunch starts straight in
+  granular without re-entering "wait for narration".
+- Gotcha hit while testing this: an `xcodebuild build` can report
+  `BUILD SUCCEEDED` without actually relinking the binary (observed: the
+  binary's mtime/size did not change across two separate builds after
+  editing `.cpp`/`.h` files, even though the `.o` wasn't recompiled either) —
+  in this Dropbox-synced folder, Xcode's build system occasionally seems to
+  miss that a source file changed. A `clean` can't delete `bin/` here either
+  ("not created by the build system"). If a change does not seem to take
+  effect, check whether the binary's mtime actually moved after the build;
+  rerunning `build` again (no clean needed) was enough to get a real relink.
 
 ## Done since the first handoff
 
