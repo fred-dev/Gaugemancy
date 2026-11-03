@@ -218,6 +218,12 @@ Json toJson(const ProfileSettings & p) {
 		{ "deviceName", p.audio.deviceName },
 		{ "deviceId", p.audio.deviceId },
 		{ "masterGain", p.audio.masterGain },
+		{ "pi", {
+			{ "enabled", p.audio.pi.enabled },
+			{ "api", p.audio.pi.api },
+			{ "deviceName", p.audio.pi.deviceName },
+			{ "deviceId", p.audio.pi.deviceId },
+		} },
 	};
 	j["gestures"] = {
 		{ "hitToChangePreset", p.gestures.hitToChangePreset },
@@ -467,6 +473,13 @@ ProfileSettings profileFromJson(const Json & json, Warnings & warnings) {
 	a.read("deviceName", p.audio.deviceName);
 	a.read("deviceId", p.audio.deviceId, -1, 1000);
 	a.read("masterGain", p.audio.masterGain, 0.0f, 4.0f);
+	if (a.has("pi")) {
+		Reader pi(a.raw("pi"), "audio.pi", warnings);
+		pi.read("enabled", p.audio.pi.enabled);
+		pi.read("api", p.audio.pi.api);
+		pi.read("deviceName", p.audio.pi.deviceName);
+		pi.read("deviceId", p.audio.pi.deviceId, -1, 1000);
+	}
 
 	Reader g(r.raw("gestures"), "gestures", warnings);
 	g.read("hitToChangePreset", p.gestures.hitToChangePreset);

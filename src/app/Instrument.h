@@ -121,6 +121,10 @@ private:
 
 	/// True on a Raspberry Pi build, where missing GPIO/ADC is worth a warning.
 	static bool hardwareExpected();
+	/// settings.pi, applied in place of api/deviceName/deviceId, when enabled
+	/// and hardwareExpected() - so one profile file works unmodified on both
+	/// a laptop and the Pi's USB sound card.
+	static AudioSettings resolveAudioSettings(const AudioSettings & settings);
 	void applyLogLevel(const std::string & level);
 	void openSensors(SensorMode mode, const std::string & replayFile);
 	void loadCurrentPreset();

@@ -81,7 +81,7 @@ bool Instrument::setup(const Options & options, const std::string & dataRoot) {
 	// 4. Audio.
 	if (!options.noAudio) {
 		std::string report;
-		audioOpen_ = audio_.startDevice(loaded_.profile.audio, report);
+		audioOpen_ = audio_.startDevice(resolveAudioSettings(loaded_.profile.audio), report);
 		note(report, !audioOpen_);
 	}
 	for (const std::string & problem : audio_.loadNarration(loaded_.profile.narration, audioResolver())) {
@@ -106,6 +106,17 @@ bool Instrument::hardwareExpected() {
 #else
 	return false;
 #endif
+}
+
+AudioSettings Instrument::resolveAudioSettings(const AudioSettings & settings) {
+	if (!hardwareExpected() || !settings.pi.enabled) {
+		return settings;
+	}
+	AudioSettings resolved = settings;
+	resolved.api = settings.pi.api;
+	resolved.deviceName = settings.pi.deviceName;
+	resolved.deviceId = settings.pi.deviceId;
+	return resolved;
 }
 
 void Instrument::openSensors(SensorMode mode, const std::string & replayFile) {
@@ -250,7 +261,7 @@ void Instrument::reloadNarration() {
 bool Instrument::restartAudio() {
 	audio_.stop();
 	std::string report;
-	audioOpen_ = audio_.startDevice(loaded_.profile.audio, report);
+	audioOpen_ = audio_.startDevice(resolveAudioSettings(loaded_.profile.audio), report);
 	note(report, !audioOpen_);
 	return audioOpen_;
 }

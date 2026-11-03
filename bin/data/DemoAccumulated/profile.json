@@ -34,7 +34,13 @@
     "api": "default",
     "deviceName": "",
     "deviceId": -1,
-    "masterGain": 0.8
+    "masterGain": 0.8,
+    "pi": {
+      "enabled": false,
+      "api": "default",
+      "deviceName": "",
+      "deviceId": -1
+    }
   },
   "gestures": {
     "hitToChangePreset": true,

@@ -13,6 +13,7 @@
 #include <chrono>
 #include <cstdio>
 #include <thread>
+#include <vector>
 
 namespace gm {
 
@@ -151,6 +152,32 @@ void checkAdc(Report & r, const ProfileSettings & profile) {
 	}
 }
 
+void checkI2cBus(Report & r, const HardwareSettings & hw) {
+	r.section("I2C bus scan (" + hw.i2cBus + ")");
+	if (!ofxgpio::hasHardwareSupport()) return;
+	std::vector<int> found;
+	// 0x03..0x77: the address range i2cdetect scans; everything outside it
+	// is reserved. Reading register 0 is a reasonable presence probe for
+	// typical sensor chips, even when that register is meaningless to them.
+	for (int addr = 0x03; addr <= 0x77; ++addr) {
+		ofxgpio::I2cDevice dev;
+		if (!dev.open(hw.i2cBus, static_cast<uint8_t>(addr))) continue;
+		if (dev.readRegister(0x00) >= 0) found.push_back(addr);
+	}
+	if (found.empty()) {
+		r.warn("nothing responded - check wiring/power before blaming the accelerometer");
+		return;
+	}
+	std::string list;
+	for (int addr : found) {
+		char hex[8];
+		std::snprintf(hex, sizeof(hex), "0x%02x", addr);
+		if (!list.empty()) list += ", ";
+		list += hex;
+	}
+	r.pass("responding: " + list + " (LIS3DH is usually 0x18 or 0x19)");
+}
+
 void checkAccelerometer(Report & r, const HardwareSettings & hw) {
 	r.section("Accelerometer (LIS3DH)");
 	if (!ofxgpio::hasHardwareSupport()) return;
@@ -201,6 +228,7 @@ int runSelfTest(const Options & options, const std::string & dataRoot) {
 	checkSamples(r, store, loaded);
 	checkGpio(r, loaded.profile.hardware);
 	checkAdc(r, loaded.profile);
+	checkI2cBus(r, loaded.profile.hardware);
 	checkAccelerometer(r, loaded.profile.hardware);
 	checkAudioDevices(r, loaded.profile.audio);
 	return r.finish();

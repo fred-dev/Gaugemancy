@@ -169,6 +169,18 @@ struct MotionSettings {
 	int calibrationFrames = 20;     ///< frames averaged for the startup reference
 };
 
+/// Which output device to open on the Pi instead of api/deviceName/deviceId
+/// below, so the same profile file works unmodified on both a laptop (the
+/// fields above, used whenever this is disabled or we're not on the Pi) and
+/// the real instrument (a USB sound card, selected here) - no settings edit
+/// needed when copying a profile between them. See Instrument::hardwareExpected().
+struct AudioDeviceOverride {
+	bool enabled = false;
+	std::string api = "default";
+	std::string deviceName;
+	int deviceId = -1;
+};
+
 struct AudioSettings {
 	int sampleRate = 44100;
 	int bufferSize = 512;
@@ -177,6 +189,7 @@ struct AudioSettings {
 	std::string deviceName;         ///< substring match on the output device name (preferred)
 	int deviceId = -1;              ///< used when deviceName is empty or not found; -1 = system default
 	float masterGain = 1.0f;
+	AudioDeviceOverride pi;
 };
 
 struct GestureSettings {

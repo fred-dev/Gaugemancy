@@ -389,6 +389,16 @@ void ProgrammingGui::buildProfile() {
 	}
 	profilePanel_.add(&a);
 
+	// Above is used as-is on a laptop. On the Pi (Instrument::hardwareExpected()),
+	// this overrides it instead - so the same profile file needs no editing when
+	// copied between the laptop and the instrument's USB sound card.
+	ofxGuiGroup & pa = *profileBuilder_.group("Audio device on the Pi (overrides above)", true);
+	profileBuilder_.toggle(pa, "use this on the Pi", p.audio.pi.enabled);
+	profileBuilder_.text(pa, "api", p.audio.pi.api);
+	profileBuilder_.text(pa, "device name contains", p.audio.pi.deviceName);
+	profileBuilder_.intSlider(pa, "device id (fallback)", p.audio.pi.deviceId, -1, 64);
+	profilePanel_.add(&pa);
+
 	ofxGuiGroup & h = *profileBuilder_.group("Raspberry Pi hardware", true);
 	profileBuilder_.text(h, "SPI device", p.hardware.spiDevice);
 	profileBuilder_.intSlider(h, "button pin (BCM)", p.hardware.buttonPin, 0, 27);
