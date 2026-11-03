@@ -18,6 +18,7 @@
 // Drop an audio file on a waveform to load it into that slot.
 // -----------------------------------------------------------------------------
 
+#include "DeviceView.h"
 #include "GuiBuilder.h"
 #include "Views.h"
 
@@ -82,6 +83,8 @@ private:
 	std::array<WaveformView, kMaxSlots> slotViews_;
 	WaveformView narrationView_;
 	SensorView sensorView_;
+	DeviceView deviceView_;
+	uint64_t lastUpdateMs_ = 0;
 	ofRectangle statusRect_;
 
 	Target target_ = Target::Slot;

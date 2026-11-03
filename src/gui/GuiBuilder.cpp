@@ -97,7 +97,8 @@ void GuiBuilder::choice(ofxGuiGroup & g, const std::string & label, int current,
 	auto & index = makeParam<int>();
 	index.set(label, current, 0, static_cast<int>(names.size()) - 1);
 	auto & shown = makeParam<std::string>();
-	shown.set("  =", names[std::clamp(current, 0, static_cast<int>(names.size()) - 1)]);
+	// Each label needs its own name: ofParameterGroup warns about duplicates.
+	shown.set("  " + label + " =", names[std::clamp(current, 0, static_cast<int>(names.size()) - 1)]);
 	listeners_.push(index.newListener([&shown, names, onPick](int & i) {
 		shown.set(names[std::clamp(i, 0, static_cast<int>(names.size()) - 1)]);
 		if (onPick) onPick(i);

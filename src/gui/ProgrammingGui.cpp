@@ -70,9 +70,13 @@ void ProgrammingGui::layout() {
 	float y = 40.0f + 2.0f * (slotH + kMargin);
 	narrationView_.setRect(ofRectangle(left, y, width, slotH * 0.7f));
 	y += slotH * 0.7f + kMargin;
-	sensorView_.setRect(ofRectangle(left, y, width, 160.0f));
-	y += 160.0f + kMargin;
-	statusRect_.set(left, y, width, std::max(h - y - kMargin, 60.0f));
+	// Bottom row: the 3D instrument on the left; sensor bars and messages right.
+	float deviceSize = std::max(std::min({ h - y - kMargin, width * 0.45f, 420.0f }), 200.0f);
+	deviceView_.setRect(ofRectangle(left, y, deviceSize, deviceSize));
+	float rightX = left + deviceSize + kMargin;
+	float rightW = std::max(width - deviceSize - kMargin, 200.0f);
+	sensorView_.setRect(ofRectangle(rightX, y, rightW, 150.0f));
+	statusRect_.set(rightX, y + 150.0f + kMargin, rightW, std::max(h - y - 150.0f - 2.0f * kMargin, 60.0f));
 }
 
 void ProgrammingGui::windowResized(int, int) {
@@ -413,6 +417,11 @@ void ProgrammingGui::buildProfile() {
 // ===================================================================== update
 
 void ProgrammingGui::update() {
+	uint64_t now = ofGetElapsedTimeMillis();
+	float dt = lastUpdateMs_ == 0 ? 0.0f : static_cast<float>(now - lastUpdateMs_) / 1000.0f;
+	lastUpdateMs_ = now;
+	bool simulating = instrument_.sensorSourceName() == "simulation";
+	deviceView_.update(dt, simulating, instrument_.simulator(), instrument_.lastAccel());
 	if (rebuildTransport_) {
 		rebuildTransport_ = false;
 		if (presetChoice_ != instrument_.presetIndex()) {
@@ -447,16 +456,18 @@ void ProgrammingGui::update() {
 void ProgrammingGui::draw() {
 	ofBackground(18);
 	ofSetColor(220);
-	ofDrawBitmapString("Gaugemancy   profile: " + instrument_.profile().name + "   preset " +
-		std::to_string(instrument_.presetIndex() + 1) + ": " + instrument_.preset().name + "   mode: " +
-		modeName(instrument_.mode()) + "   sensors: " + instrument_.sensorSourceName() +
-		(instrument_.isRecording() ? "   RECORDING" : ""),
-		slotViews_[0].rect().x, 24);
+	std::string header = instrument_.profile().name + " | preset " + std::to_string(instrument_.presetIndex() + 1) + ": " +
+		instrument_.preset().name + " | " + modeName(instrument_.mode()) + " | sensors: " + instrument_.sensorSourceName() +
+		(instrument_.isRecording() ? " | RECORDING" : "");
+	size_t headerChars = static_cast<size_t>(std::max(slotViews_[2].rect().getRight() - slotViews_[0].rect().x, 8.0f) / 8.0f);
+	if (header.size() > headerChars) header = header.substr(0, headerChars - 1) + "~";
+	ofDrawBitmapString(header, slotViews_[0].rect().x, 24);
 
 	drawSlots();
 	drawNarration();
 	const ProfileSettings & p = instrument_.profile();
 	sensorView_.draw(instrument_.inputs(), p.sensors.curve, p.sensors.activeThreshold);
+	deviceView_.draw(instrument_.inputs());
 	drawStatus();
 
 	transportPanel_.draw();
@@ -501,9 +512,11 @@ void ProgrammingGui::drawStatus() {
 	ofDrawRectangle(statusRect_);
 	ofSetColor(200);
 	float y = statusRect_.y + 16;
+	// Bitmap font: 8 px per character; long lines are cut to fit the box.
+	size_t maxChars = static_cast<size_t>(std::max(statusRect_.width - 12.0f, 8.0f) / 8.0f);
 	for (const std::string & line : instrument_.messages()) {
 		if (y > statusRect_.getBottom()) break;
-		ofDrawBitmapString(line, statusRect_.x + 6, y);
+		ofDrawBitmapString(line.size() > maxChars ? line.substr(0, maxChars - 1) + "~" : line, statusRect_.x + 6, y);
 		y += 14;
 	}
 	ofPopStyle();
@@ -533,6 +546,7 @@ void ProgrammingGui::keyPressed(int key) {
 void ProgrammingGui::mouseMoved(int, int) {}
 
 void ProgrammingGui::mousePressed(int x, int y, int) {
+	if (deviceView_.mousePressed(x, y)) return;
 	for (int i = 0; i < kMaxSlots; ++i) {
 		if (slotViews_[i].inside(x, y)) {
 			if (target_ != Target::Slot || selectedSlot_ != i) select(Target::Slot, i);
@@ -547,7 +561,8 @@ void ProgrammingGui::mousePressed(int x, int y, int) {
 	}
 }
 
-void ProgrammingGui::mouseDragged(int x, int, int) {
+void ProgrammingGui::mouseDragged(int x, int y, int) {
+	if (deviceView_.mouseDragged(x, y)) return;
 	if (auditionSlot_ >= 0) {
 		instrument_.setAudition(auditionSlot_, true, slotViews_[auditionSlot_].positionAt(x));
 	}
@@ -556,7 +571,8 @@ void ProgrammingGui::mouseDragged(int x, int, int) {
 	}
 }
 
-void ProgrammingGui::mouseReleased(int, int, int) {
+void ProgrammingGui::mouseReleased(int x, int y, int) {
+	if (deviceView_.mouseReleased(x, y)) return;
 	if (auditionSlot_ >= 0) {
 		instrument_.setAudition(auditionSlot_, false, 0.0f);
 		auditionSlot_ = -1;

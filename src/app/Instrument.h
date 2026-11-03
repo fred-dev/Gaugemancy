@@ -101,6 +101,8 @@ public:
 	SensorSimulator & simulator() { return simulator_; }
 	SettingsStore & store() { return store_; }
 	std::string sensorSourceName() const;
+	/// Latest accelerometer reading from the active sensor source.
+	const AccelSample & lastAccel() const { return lastAccel_; }
 	bool isRecording() const { return recorder_.isOpen(); }
 
 	/// Recent log lines (warnings and important events) for on-screen display.
@@ -143,6 +145,7 @@ private:
 	SensorSimulator simulator_;
 	SensorProcessor processor_;
 	ControlInputs inputs_;
+	AccelSample lastAccel_;
 	SensorRecorder recorder_;
 
 	ModeController modes_;

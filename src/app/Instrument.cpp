@@ -307,6 +307,7 @@ void Instrument::readSensors(uint64_t nowMs, float dt) {
 		return;
 	}
 	hadSensorError_ = false;
+	lastAccel_ = frame.accel;
 	if (frame.isRaw) {
 		if (recorder_.isOpen()) recorder_.write(nowMs, frame.raw, frame.accel);
 		inputs_ = processor_.process(frame.raw, frame.accel, dt);

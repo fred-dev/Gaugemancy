@@ -1,6 +1,7 @@
 #include "Views.h"
 
 #include <algorithm>
+#include <cstring>
 
 namespace gm {
 
@@ -90,8 +91,11 @@ void SensorView::draw(const ControlInputs & inputs, Curve curve, float threshold
 		ofSetColor(i < kNumSensors ? ofColor(0, 200, 120) : ofColor(200, 120, 0));
 		float h = bar.height * std::clamp(value, 0.0f, 1.0f);
 		ofDrawRectangle(bar.x, bar.getBottom() - h, bar.width, h);
-		ofSetColor(200);
-		ofDrawBitmapString(labels[i], bar.x + 2, rect_.getBottom());
+		// Labels only when they fit (bitmap font: 8 px per character).
+		if (barWidth + gap >= 8.0f * std::strlen(labels[i])) {
+			ofSetColor(200);
+			ofDrawBitmapString(labels[i], bar.x + 2, rect_.getBottom());
+		}
 	}
 	drawCurve(ofRectangle(rect_.getRight() - curveSize, rect_.y, curveSize, curveSize), curve, threshold);
 	ofPopStyle();
