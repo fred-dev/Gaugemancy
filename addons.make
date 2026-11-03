@@ -1,6 +1,4 @@
 ofxGui
 ofxOsc
-ofxAudioFile
-ofxMidi
-ofxPDSP
+ofxPd
 ofxGPIO

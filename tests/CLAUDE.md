@@ -6,6 +6,14 @@ one stopped. **Update it after every major milestone.**
 
 Last updated: 2026-11-03 (local Mac session: first macOS build/run).
 
+**Two branches now.** `ai-refactor` (this file, everything below) is the
+granular-synthesis-on-samples line, `ofxPDSP`-based. `ai-refactor-pd` is a
+separate, parallel line: same hardware and button/preset handling, but the
+sound is a Pure Data patch via `ofxPd`, MCP-authored, no narration. Working
+on `ai-refactor-pd`? Read `docs/PureData.md` instead of assuming anything
+below still applies to sound/presets - the hardware/sensor notes below
+(motion, layout, bugs found) still apply equally to both branches.
+
 ## Ground rules from the owner (Fred)
 
 - Work on the `ai-refactor` branch in every repo; commit and push there.
