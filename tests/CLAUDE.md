@@ -130,6 +130,45 @@ Cloud-session tricks: no sound card or GPIO in the container, so use
   Xcode's separate automatic signing. Workaround: build with
   `CODE_SIGNING_ALLOWED=NO` (command line), or in Xcode set the target's
   Signing & Capabilities to "None" for local runs.
+- **Real bug found and fixed: no audio output at all, on any device, in any
+  mode.** `pdsp::Engine::setup()` (in `ofxPDSP/src/ofx/Engine.cpp`) treated
+  `outputID`/`inputID` as an *index* into `outputStream.getDeviceList()`
+  (`devices[outputID]`), but `AudioEngine::startDevice()` correctly passes a
+  real `ofSoundDevice::deviceID` — on CoreAudio that is an arbitrary
+  OS-assigned AudioObjectID (we saw 132, not 0..12), not a small index. Two
+  symptoms from the one bug: (1) no explicit device match -> `outputID`
+  stayed at its old default of `0` -> `devices[0]` is just "whatever happens
+  to enumerate first", which on this Mac was an input-only/unusable device,
+  so `RtApiCore::probeDeviceOpen` rejected the channel count and the stream
+  silently never started (pdsp logged "engine started" regardless — it
+  doesn't check). (2) picking a device by name/id that resolves to a real
+  deviceID like 132 indexed 132 slots into a ~13-entry vector -> an
+  out-of-bounds `operator[]` -> `abort()` under libc++ hardening. Fixed by
+  matching on `ofSoundDevice::deviceID` (falling back to the device actually
+  flagged `isDefaultOutput`/`isDefaultInput`) instead of treating the ID as
+  an index; default `outputID`/`inputID` changed from `0` to `-1` ("no
+  explicit choice"). Verified headless with both the empty-device-name
+  default path and an explicit `"MacBook Pro Speakers"` match: both now open
+  cleanly with no RtAudio errors and no crash. This fix lives in the
+  `fred-dev/ofxPDSP` fork and needs a commit/push there, separate from the
+  Gaugemancy repo.
+- Also fixed: clicking/dragging a slot's waveform in the GUI ("audition") set
+  `SlotOverrides.overridePosition`/`overrideGate` but not volume, so a slot
+  whose volume is sensor-modulated (every slot, in all 5 real performer
+  presets) stayed silent during audition unless its physical sensor was
+  pressed at the same time. Added `overrideVolume`/`volume` to
+  `SlotOverrides` (`src/audio/GrainSlot.h`); `Instrument::setAudition` now
+  forces full volume while auditioning (`src/app/Instrument.cpp`).
+- Narration "skip" (one performer starts with narration, others go straight
+  to granular) is already fully preserved: `profile.narration.enabled` and
+  `startWithSensor` are per-profile JSON fields, and
+  `ModeController::start()` already enters `Mode::Granular` directly when
+  `enabled` is false. No code change needed; confirmed by inspection.
+- Verified end-to-end that the synthesis/effects pipeline itself was never
+  the problem: `Diagnostics::runBenchmark` (which drives a real simulated
+  squeeze via `SensorSimulator::RampSettings`) produces real non-zero audio
+  (checked peak amplitude with temporary instrumentation, since removed) —
+  confirming the bug was entirely in the output device stream, not the DSP.
 
 ## Done since the first handoff
 

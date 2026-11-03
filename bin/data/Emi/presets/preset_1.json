@@ -4,8 +4,8 @@
   "playheadSpeed": 0.012,
   "slots": [
     {
-      "enabled": false,
-      "file": "",
+      "enabled": true,
+      "file": "EDevice3Preset1A.wav",
       "window": "sine",
       "gate": "auto",
       "voices": 8,
@@ -111,8 +111,8 @@
       ]
     },
     {
-      "enabled": false,
-      "file": "",
+      "enabled": true,
+      "file": "EDevice3Preset1B.wav",
       "window": "sine",
       "gate": "auto",
       "voices": 8,
@@ -218,8 +218,8 @@
       ]
     },
     {
-      "enabled": false,
-      "file": "",
+      "enabled": true,
+      "file": "EDevice3Preset1C.wav",
       "window": "sine",
       "gate": "auto",
       "voices": 8,
@@ -325,8 +325,8 @@
       ]
     },
     {
-      "enabled": false,
-      "file": "",
+      "enabled": true,
+      "file": "EDevice3Preset1D.wav",
       "window": "sine",
       "gate": "auto",
       "voices": 8,
@@ -432,8 +432,8 @@
       ]
     },
     {
-      "enabled": false,
-      "file": "",
+      "enabled": true,
+      "file": "EDevice3Preset1E.wav",
       "window": "sine",
       "gate": "auto",
       "voices": 8,
@@ -539,8 +539,8 @@
       ]
     },
     {
-      "enabled": false,
-      "file": "",
+      "enabled": true,
+      "file": "EDevice3Preset1F.wav",
       "window": "sine",
       "gate": "auto",
       "voices": 8,

@@ -133,7 +133,8 @@ void GrainSlot::update(const SlotSettings & settings, const ControlInputs & inpu
 	position_.set(lastPosition_);
 
 	lastGate_ = overrides.overrideGate ? overrides.gateOpen : gateFor(settings, inputs);
-	lastVolume_ = (settings.enabled && lastGate_ && sample_) ? g.volume.resolve(inputs) : 0.0f;
+	float volume = overrides.overrideVolume ? overrides.volume : g.volume.resolve(inputs);
+	lastVolume_ = (settings.enabled && lastGate_ && sample_) ? volume : 0.0f;
 	volume_.set(lastVolume_);
 
 	chain_.apply(settings.effects, inputs);

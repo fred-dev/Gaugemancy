@@ -35,6 +35,8 @@ struct SlotOverrides {
 	float position = 0.0f;
 	bool overrideGate = false;
 	bool gateOpen = false;
+	bool overrideVolume = false; ///< auditioning: be heard even if volume is sensor-modulated
+	float volume = 1.0f;
 };
 
 class GrainSlot {

@@ -352,6 +352,11 @@ def convert_performer(root_dir, name, dry_run):
         if paths is None:
             return ""
         element = paths.find("FILE_%d_%d" % (slot, preset))
+        if element is None:
+            # Older files (Chandra, Emi, Miguel) used a letter per preset
+            # instead of an underscore and number: FILE_1A, FILE_1B, ...
+            letter = chr(ord("A") + preset - 1)
+            element = paths.find("FILE_%d%s" % (slot, letter))
         return element.text.strip() if element is not None and element.text else ""
 
     narration_file = ""

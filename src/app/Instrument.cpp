@@ -249,6 +249,10 @@ void Instrument::setAudition(int slot, bool active, float position) {
 	audition_[slot].position = position;
 	audition_[slot].overrideGate = active;
 	audition_[slot].gateOpen = active;
+	// Be heard while auditioning even if volume normally follows a sensor
+	// that is not currently pressed.
+	audition_[slot].overrideVolume = active;
+	audition_[slot].volume = 1.0f;
 }
 
 // =================================================================== recording

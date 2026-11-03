@@ -49,3 +49,7 @@ tests/test_core
 # Local test output
 bin/data/**/*.tmp
 recording*.csv
+bin/data/settings.xml
+
+# Local presets backups (not for version control)
+bin/data_backup_*/
