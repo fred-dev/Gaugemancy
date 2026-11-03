@@ -91,8 +91,11 @@ OF_ROOT = ../../..
 # explicitly. Confirmed needed on Raspberry Pi OS Trixie even with
 # libjack-jackd2-dev installed and pkg-config correctly finding it. Linux
 # only - there's no libjack on macOS, and this flag alone breaks that link
-# ("library 'jack' not found") if it's not guarded by platform.
-ifeq ($(PLATFORM_OS),Linux)
+# ("library 'jack' not found") if it's not guarded by platform. Checking
+# `uname -s` directly rather than OF's own PLATFORM_OS: the Makefile reads
+# this file before compile.project.mk sets PLATFORM_OS, so that variable is
+# still empty here and an ifeq against it is always false.
+ifeq ($(shell uname -s),Linux)
 	PROJECT_LDFLAGS += -ljack
 endif
 
