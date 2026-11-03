@@ -1,7 +1,7 @@
 {
   "version": 1,
   "name": "Clement",
-  "logLevel": "verbose",
+  "logLevel": "error",
   "playMode": "multi",
   "controlRateHz": 100,
   "presetSwitchMinIntervalMs": 4000,
@@ -28,9 +28,9 @@
     "deviceId": 2,
     "masterGain": 1.0,
     "pi": {
-      "enabled": false,
+      "enabled": true,
       "api": "default",
-      "deviceName": "",
+      "deviceName": "Sound Blaster",
       "deviceId": -1
     }
   },

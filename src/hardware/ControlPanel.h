@@ -5,7 +5,8 @@
 // one push button, a blue and a red status LED, and the relay that switches
 // the speaker (a pulse toggles it).
 //
-// Nothing here blocks: relay pulses and LED blinking are timed in update().
+// Nothing here blocks except pulseRelayBlocking() (startup/shutdown only):
+// relay pulses from the main loop and LED blinking are timed in update().
 // On a laptop open() fails cleanly and every method does nothing.
 // -----------------------------------------------------------------------------
 
@@ -38,6 +39,11 @@ public:
 
 	/// Start a relay pulse (toggles the speaker power).
 	void pulseRelay(uint64_t nowMs);
+
+	/// Toggle the speaker power and block until the pulse finishes. Only for
+	/// the one-shot startup/shutdown calls (turn the speaker on when the
+	/// instrument starts, off when it stops), never from the main loop.
+	void pulseRelayBlocking(int pulseMs);
 
 	/// Drive LED blinking and finish relay pulses. Call every frame.
 	void update(uint64_t nowMs);

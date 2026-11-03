@@ -96,6 +96,9 @@ bool Instrument::setup(const Options & options, const std::string & dataRoot) {
 	// 6. Start in the right mode.
 	startMs_ = lastUpdateMs_ = nowMs_ = ofGetElapsedTimeMillis();
 	modes_.start(loaded_.profile.narration, audio_.narration().isLoaded(), nowMs_);
+
+	// 7. Speaker on - last, once everything above is actually ready.
+	panel_.pulseRelayBlocking(loaded_.profile.hardware.relayPulseMs);
 	return true;
 }
 
@@ -492,6 +495,7 @@ void Instrument::modeChanged(Mode mode) {
 void Instrument::shutdown() {
 	stopRecording();
 	audio_.stop();
+	panel_.pulseRelayBlocking(loaded_.profile.hardware.relayPulseMs); // turn the speaker off
 	panel_.allOff();
 }
 

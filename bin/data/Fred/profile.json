@@ -1,7 +1,7 @@
 {
   "version": 1,
   "name": "Fred",
-  "logLevel": "notice",
+  "logLevel": "error",
   "playMode": "multi",
   "controlRateHz": 100,
   "presetSwitchMinIntervalMs": 4000,
@@ -28,9 +28,9 @@
     "deviceId": 5,
     "masterGain": 1.0,
     "pi": {
-      "enabled": false,
+      "enabled": true,
       "api": "default",
-      "deviceName": "",
+      "deviceName": "Sound Blaster",
       "deviceId": -1
     }
   },

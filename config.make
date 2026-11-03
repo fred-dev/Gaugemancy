@@ -89,8 +89,12 @@ OF_ROOT = ../../..
 # does not end up adding -ljack to this project's final link command, so
 # it fails with "undefined reference to jack_port_name" unless added here
 # explicitly. Confirmed needed on Raspberry Pi OS Trixie even with
-# libjack-jackd2-dev installed and pkg-config correctly finding it.
-PROJECT_LDFLAGS += -ljack
+# libjack-jackd2-dev installed and pkg-config correctly finding it. Linux
+# only - there's no libjack on macOS, and this flag alone breaks that link
+# ("library 'jack' not found") if it's not guarded by platform.
+ifeq ($(PLATFORM_OS),Linux)
+	PROJECT_LDFLAGS += -ljack
+endif
 
 ################################################################################
 # PROJECT DEFINES

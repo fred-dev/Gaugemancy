@@ -171,6 +171,67 @@ pgrep -fl 'make -j1'                # empty once it's done
 free -h                             # watch for available dropping toward 0
 ```
 
+## 6. Moving the SD card to the sensor hardware: what `install.sh` misses
+
+Section 1-5 above were all done on a Pi 3B+ with no sensor circuit attached,
+to get a clean build. Moving that SD card to the real sensor-equipped unit
+(a *different* Pi 3B) and running `bin/Gaugemancy --selftest` there surfaced
+four more real gaps, found 2026-11-04:
+
+**SPI never actually enabled, despite `install.sh` having been run.**
+`gauge`'s group memberships (`spi`, `i2c`, `gpio`, ...) were already correct,
+but `/dev/spidev0.0` didn't exist at all and `/boot/firmware/config.txt` still
+had `#dtparam=spi=on` / `#dtparam=i2c_arm=on` commented out. `install.sh`'s
+`raspi-config nonint do_spi 0` / `do_i2c 0` step had evidently never actually
+run on this SD card (only its group-setup step had, from a different occasion)
+- it just hadn't mattered before, since nothing was wired up to test with.
+**Fix:** re-run `scripts/pi/install.sh` on the real hardware, then
+`sudo reboot` - a `dtparam` change needs a reboot to create the device nodes,
+simply restarting the app isn't enough. After that, the I2C bus scan and all
+6 MCP3008 pressure-sensor channels passed `--selftest` cleanly.
+
+**Audio fell back to the wrong device.** `profile.json`'s `audio.pi` override
+(see `docs/RaspberryPi.md`'s "Two devices, one file") had been added to the
+settings schema but never actually filled in with a real value for any
+profile - `enabled: false` everywhere. On the Pi, that leaves the base
+`audio.deviceId` (a macOS-specific number) in effect, which doesn't exist on
+Linux, so RtAudio silently fell back to its own idea of "default" (the
+onboard `bcm2835 Headphones`, not the instrument's USB sound card). **Fix:**
+`bin/Gaugemancy --list-audio` on the Pi to get the card's exact name (here,
+"Sound Blaster Play! 3"), then set `audio.pi.enabled: true` and
+`audio.pi.deviceName` to (part of) that name, in every profile - it's the
+same physical card regardless of which performer's profile is active.
+
+**Volume resets to the USB DAC's power-on default every time Gaugemancy opens
+its audio stream** - *including* right after you've just set and
+`alsactl store`'d it. The system-wide `alsa-restore.service` runs too early
+in boot to restore a USB card's state anyway (it races the card's own
+enumeration and loses), but the real culprit is worse: opening the Sound
+Blaster's ALSA PCM stream itself resets its hardware gain, so even an
+`ExecStartPre` mixer command in the systemd service gets overwritten the
+moment the app's `ExecStart` opens the device a moment later. **Fix:** set it
+in `ExecStartPost` instead, with a few seconds' delay so it runs *after* that
+reset, not before it - see `scripts/pi/gaugemancy.service`. Address the card
+by name (`amixer -c S3 ...`, its ALSA card id), not by number, since USB card
+numbering can shift across boots.
+
+**`hardware.shutdownOnQuit` (long-press button -> power off) did nothing.**
+`src/ofApp.cpp`'s shutdown path runs `sudo -n systemctl poweroff`, which
+needs passwordless sudo - the code's own comment calls this "the default on
+Raspberry Pi OS", but that's only true for the stock `pi` user's
+`010_pi-nopasswd` sudoers entry, not for a custom user like `gauge`, whose
+sudo is fully password-protected (`sudo -l` just shows `(ALL : ALL) ALL`).
+It silently "worked" in manual testing only because of a cached sudo
+timestamp from an earlier interactive `ssh -t` session - the systemd service
+has no tty and no such cache, so it failed every time in practice. Confirmed
+with `sudo -K` (drop the cached ticket) then `sudo -n -l` before trusting any
+test of this. **Fix:** `scripts/pi/install.sh` now installs a minimal
+`/etc/sudoers.d/gaugemancy-poweroff` granting
+`NOPASSWD: /usr/bin/systemctl poweroff` and nothing else, validated with
+`visudo -cf` before it's put in place (see `scripts/pi/gaugemancy-poweroff.sudoers`).
+The triple-click relay toggle (speaker on/off) needs no sudo at all and
+always worked - don't let that fool you into thinking poweroff should too.
+
 ## Summary for next time
 
 - Expect the whole thing (deps + OF core + Gaugemancy + addons, first build)
@@ -194,3 +255,9 @@ free -h                             # watch for available dropping toward 0
   built and ran on this Pi 3B+ (no sensor circuit attached to it) -
   `--selftest` passed GPIO/LEDs/button, correctly reported SPI/I2C as
   unconnected, and found the onboard audio device.
+- Moving the SD card to real sensor hardware doesn't mean you're done: re-run
+  `install.sh` and reboot (SPI/I2C `dtparam`s need it), fill in each
+  profile's real `audio.pi` device name once you know it, and don't trust a
+  manual `sudo -n ...` test of the poweroff path without `sudo -K` first -
+  a cached ssh timestamp will lie to you about what the headless service can
+  actually do.

@@ -3,6 +3,9 @@
 #define OFXGPIO_NO_LEGACY
 #include "ofxGPIO.h"
 
+#include <chrono>
+#include <thread>
+
 namespace gm {
 
 struct ControlPanel::Pins {
@@ -67,6 +70,14 @@ void ControlPanel::pulseRelay(uint64_t nowMs) {
 	pins_->relay.write(true);
 	relayActive_ = true;
 	relayOffAtMs_ = nowMs + static_cast<uint64_t>(settings_.relayPulseMs);
+}
+
+void ControlPanel::pulseRelayBlocking(int pulseMs) {
+	if (!pins_->relay.isOpen()) return;
+	pins_->relay.write(true);
+	std::this_thread::sleep_for(std::chrono::milliseconds(pulseMs));
+	pins_->relay.write(false);
+	relayActive_ = false;
 }
 
 void ControlPanel::update(uint64_t nowMs) {

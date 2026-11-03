@@ -1,0 +1,7 @@
+# Lets the Gaugemancy instrument power off the Pi itself (long-press button
+# with hardware.shutdownOnQuit, see src/ofApp.cpp's "sudo -n systemctl
+# poweroff") without an interactive password - the systemd service has no
+# tty to type one into, and a cached sudo timestamp from an SSH session
+# doesn't carry over to it. Installed by scripts/pi/install.sh to
+# /etc/sudoers.d/gaugemancy-poweroff.
+@USER@ ALL=(ALL) NOPASSWD: /usr/bin/systemctl poweroff

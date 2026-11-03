@@ -1,19 +1,32 @@
-# Gaugemancy as a systemd USER service (runs inside the desktop session, so
-# PipeWire/PulseAudio audio is available). Installed by scripts/pi/install.sh to
+# Gaugemancy as a systemd USER service, so it still runs with the desktop GUI
+# disabled (multi-user.target) - talks to ALSA hardware devices directly, not
+# through PipeWire/PulseAudio. Installed by scripts/pi/install.sh to
 # ~/.config/systemd/user/gaugemancy.service
 #
 #   systemctl --user status gaugemancy      is it running?
-#   journalctl --user -u gaugemancy -f      follow the log
+#   journalctl --user -u gaugemancy -f      follow the log (see docs' note on
+#                                            this coming back empty on a
+#                                            linger-only headless session)
 #   systemctl --user restart gaugemancy     after changing settings or rebuilding
 
 [Unit]
 Description=Gaugemancy instrument
-After=pipewire.service pulseaudio.service sound.target
+After=sound.target
 
 [Service]
 Type=simple
 WorkingDirectory=@APP_DIR@
 ExecStart=@APP_DIR@/bin/Gaugemancy --headless
+# The system-wide alsa-restore.service runs too early in boot to restore a USB
+# sound card's mixer level - it races the card's own USB enumeration and loses
+# (see docs/RaspberryPi3BPlus.md). Setting it in ExecStartPre doesn't survive
+# either: opening the Sound Blaster's ALSA PCM stream (what Gaugemancy does
+# right at startup) resets its hardware gain back to its own default - this
+# has to run after that, hence ExecStartPost with a delay rather than Pre.
+# "-c S3" addresses it by name (the Sound Blaster Play! 3's ALSA card id), not
+# by number, since USB card numbering can shift across boots. The leading "-"
+# means a missing/renamed card logs a warning but doesn't stop the instrument.
+ExecStartPost=-/bin/sh -c 'sleep 3 && /usr/bin/amixer -c S3 sset Speaker 95%'
 Restart=on-failure
 RestartSec=3
 

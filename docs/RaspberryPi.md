@@ -161,6 +161,16 @@ read it top to bottom - it covers everything below in one pass:
 | Red LED | GPIO 6 |
 | Speaker relay | GPIO 13 (pulsed for 400 ms to toggle) |
 
+The speaker relay also pulses automatically: once at the very end of startup
+(after settings, hardware, sensors, audio and OSC are all ready - not before,
+so a slow audio device open can't leave the speaker on with nothing playing
+yet) and once during shutdown, before the LEDs are turned off. Both are a
+blocking pulse (`ControlPanel::pulseRelayBlocking`), unlike the main loop's
+button-triggered pulse - acceptable since each only runs once, outside the
+per-frame update. Since the relay is a plain toggle switch with no readable
+state, this relies on it actually being off when the instrument starts (same
+assumption the original pre-refactor app made).
+
 ## Button
 
 | Action | Effect |
@@ -169,6 +179,11 @@ read it top to bottom - it covers everything below in one pass:
 | triple click | toggle the speaker (relay pulse) |
 | hold 3 s | recalibrate: balls at rest and "level" (keep still) |
 | hold 6 s | quit (if `hardware.longPressQuits`), and power off if `shutdownOnQuit` |
+
+`shutdownOnQuit` runs `sudo -n systemctl poweroff` (`src/ofApp.cpp`), which
+needs the passwordless sudo grant `scripts/pi/install.sh` sets up in
+`/etc/sudoers.d/gaugemancy-poweroff` - see `docs/RaspberryPi3BPlus.md` if
+it's not working after moving to a new SD card or user account.
 
 LEDs: preset 1 blue, 2 blue+red, 3 blue blinking, 4 blue+red blinking;
 narration red.

@@ -45,6 +45,20 @@ for addon in ofxPDSP ofxAudioFile ofxMidi ofxGPIO; do
 done
 
 if [[ $INSTALL_SERVICE -eq 1 ]]; then
+	step "Let Gaugemancy power off the Pi itself (long-press button) without a password"
+	# hardware.shutdownOnQuit runs "sudo -n systemctl poweroff" (src/ofApp.cpp) -
+	# the systemd service has no tty to type a password into, and a cached sudo
+	# timestamp from an interactive SSH session doesn't carry over to it.
+	tmp_sudoers="$(mktemp)"
+	sed "s#@USER@#$USER#g" "$APP_DIR/scripts/pi/gaugemancy-poweroff.sudoers" > "$tmp_sudoers"
+	if sudo visudo -cf "$tmp_sudoers"; then
+		sudo install -m 440 "$tmp_sudoers" /etc/sudoers.d/gaugemancy-poweroff
+		echo "installed: systemctl poweroff needs no password for $USER"
+	else
+		echo "sudoers syntax check failed - not installed" >&2
+	fi
+	rm -f "$tmp_sudoers"
+
 	step "Install the systemd user service"
 	mkdir -p "$HOME/.config/systemd/user"
 	sed "s#@APP_DIR@#$APP_DIR#g" "$APP_DIR/scripts/pi/gaugemancy.service" > "$HOME/.config/systemd/user/gaugemancy.service"

@@ -26,9 +26,9 @@
     "deviceId": 1,
     "masterGain": 1.0,
     "pi": {
-      "enabled": false,
+      "enabled": true,
       "api": "default",
-      "deviceName": "",
+      "deviceName": "Sound Blaster",
       "deviceId": -1
     }
   },
