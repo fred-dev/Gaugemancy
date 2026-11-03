@@ -83,18 +83,20 @@ int main(int argc, char ** argv) {
 	std::signal(SIGTERM, onSignal);
 	setStopFlag(&stopRequested);
 
+	// The window must exist before the app is constructed: the audio engine
+	// registers openFrameworks events in its constructor.
 	bool window = wantWindow(options);
-	auto app = std::make_shared<ofApp>(options, dataRoot, window);
 	if (window) {
 		ofGLWindowSettings settings;
 		settings.setSize(1600, 900);
 		settings.windowMode = OF_WINDOW;
 		settings.title = "Gaugemancy";
 		auto win = ofCreateWindow(settings);
-		ofRunApp(win, app);
+		ofRunApp(win, std::make_shared<ofApp>(options, dataRoot, window));
 	} else {
 		auto win = std::make_shared<ofAppNoWindow>();
-		ofRunApp(win, app);
+		ofSetupOpenGL(win, 1024, 768, OF_WINDOW); // registers the (invisible) window
+		ofRunApp(win, std::make_shared<ofApp>(options, dataRoot, window));
 	}
 	return ofRunMainLoop();
 }

@@ -1,0 +1,653 @@
+{
+  "version": 1,
+  "name": "Preset 1",
+  "playheadSpeed": 0.012,
+  "slots": [
+    {
+      "enabled": false,
+      "file": "",
+      "window": "sine",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 604.805,
+          "min": 604.949,
+          "max": 193.061,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.490306,
+          "min": 0.1,
+          "max": 0.191837,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 51.0413,
+          "min": 51.0204,
+          "max": 158.163,
+          "source": "sensor1"
+        },
+        "pitchJitter": {
+          "value": 0.00136471,
+          "min": 0.0,
+          "max": 7.0,
+          "source": "sensor1"
+        },
+        "pitch": {
+          "value": -0.00136471,
+          "min": 0.0,
+          "max": -7.0,
+          "source": "sensor1"
+        },
+        "spread": {
+          "value": 4.1e-05,
+          "min": 0.0,
+          "max": 0.117347,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.433673,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor1"
+        },
+        "position": {
+          "value": 0.000194958,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor1"
+        },
+        "direction": {
+          "value": 0.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": 0.0,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": false,
+      "file": "",
+      "window": "sine",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 100.547,
+          "min": 100.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.1,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 61.2245,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.469388,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor2"
+        },
+        "position": {
+          "value": 0.000194958,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor2"
+        },
+        "direction": {
+          "value": 0.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": 0.0,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": false,
+      "file": "",
+      "window": "sine",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 100.547,
+          "min": 100.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.469388,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor3"
+        },
+        "position": {
+          "value": 0.000194958,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor3"
+        },
+        "direction": {
+          "value": 0.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": 0.0,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": false,
+      "file": "",
+      "window": "sine",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 100.547,
+          "min": 100.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.438776,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor4"
+        },
+        "position": {
+          "value": 0.000194958,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor4"
+        },
+        "direction": {
+          "value": 0.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": 0.0,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": false,
+      "file": "",
+      "window": "sine",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 100.547,
+          "min": 100.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.556122,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor5"
+        },
+        "position": {
+          "value": 0.000194958,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor5"
+        },
+        "direction": {
+          "value": 0.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": 0.0,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": false,
+      "file": "",
+      "window": "sine",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 100.547,
+          "min": 100.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor6"
+        },
+        "position": {
+          "value": 0.000194958,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor6"
+        },
+        "direction": {
+          "value": 0.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": 0.0,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "master": {
+    "gain": 1.0,
+    "effects": []
+  }
+}

@@ -26,8 +26,11 @@ void ofApp::setup() {
 	instrument_.setup(options_, dataRoot_);
 
 	// Sensors are read once per frame, so the frame rate is the control rate.
-	// Without a limit a headless app spins at 100% CPU and starves the audio.
-	ofSetFrameRate(instrument_.profile().controlRateHz);
+	// openFrameworks' own limiter is switched off (it busy-waits, see
+	// FramePacer.h) and the loop sleeps in update() instead.
+	ofSetFrameRate(0);
+	ofSetVerticalSync(false);
+	pacer_.setRate(instrument_.profile().controlRateHz);
 
 	if (withGui_) {
 		gui_ = std::make_unique<gm::ProgrammingGui>(instrument_);
@@ -36,6 +39,7 @@ void ofApp::setup() {
 }
 
 void ofApp::update() {
+	pacer_.wait();
 	if (stopRequestedFlag != nullptr && stopRequestedFlag->load()) {
 		ofExit(0);
 		return;

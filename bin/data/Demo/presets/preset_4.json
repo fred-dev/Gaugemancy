@@ -1,0 +1,395 @@
+{
+  "version": 1,
+  "name": "Tilt and total",
+  "playheadSpeed": 0.03,
+  "slots": [
+    {
+      "enabled": true,
+      "file": "tone_1.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 400,
+          "min": 80,
+          "max": 900,
+          "source": "sensor1"
+        },
+        "density": {
+          "value": 0.8,
+          "min": 0.3,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20,
+          "min": 0,
+          "max": 200,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0,
+          "min": 0,
+          "max": 2,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0,
+          "min": -12,
+          "max": 12,
+          "source": "accelX"
+        },
+        "spread": {
+          "value": 0,
+          "min": 0,
+          "max": 0.3,
+          "source": "total"
+        },
+        "volume": {
+          "value": 0.6,
+          "min": 0.0,
+          "max": 0.9,
+          "source": "sensor1"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor1"
+        },
+        "direction": {
+          "value": 1,
+          "min": -1,
+          "max": 1,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "file": "tone_2.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 400,
+          "min": 80,
+          "max": 900,
+          "source": "sensor2"
+        },
+        "density": {
+          "value": 0.8,
+          "min": 0.3,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20,
+          "min": 0,
+          "max": 200,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0,
+          "min": 0,
+          "max": 2,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0,
+          "min": -12,
+          "max": 12,
+          "source": "accelX"
+        },
+        "spread": {
+          "value": 0,
+          "min": 0,
+          "max": 0.3,
+          "source": "total"
+        },
+        "volume": {
+          "value": 0.6,
+          "min": 0.0,
+          "max": 0.9,
+          "source": "sensor2"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor2"
+        },
+        "direction": {
+          "value": 1,
+          "min": -1,
+          "max": 1,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "file": "tone_3.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 400,
+          "min": 80,
+          "max": 900,
+          "source": "sensor3"
+        },
+        "density": {
+          "value": 0.8,
+          "min": 0.3,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20,
+          "min": 0,
+          "max": 200,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0,
+          "min": 0,
+          "max": 2,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0,
+          "min": -12,
+          "max": 12,
+          "source": "accelX"
+        },
+        "spread": {
+          "value": 0,
+          "min": 0,
+          "max": 0.3,
+          "source": "total"
+        },
+        "volume": {
+          "value": 0.6,
+          "min": 0.0,
+          "max": 0.9,
+          "source": "sensor3"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor3"
+        },
+        "direction": {
+          "value": 1,
+          "min": -1,
+          "max": 1,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "file": "tone_4.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 400,
+          "min": 80,
+          "max": 900,
+          "source": "sensor4"
+        },
+        "density": {
+          "value": 0.8,
+          "min": 0.3,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20,
+          "min": 0,
+          "max": 200,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0,
+          "min": 0,
+          "max": 2,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0,
+          "min": -12,
+          "max": 12,
+          "source": "accelX"
+        },
+        "spread": {
+          "value": 0,
+          "min": 0,
+          "max": 0.3,
+          "source": "total"
+        },
+        "volume": {
+          "value": 0.6,
+          "min": 0.0,
+          "max": 0.9,
+          "source": "sensor4"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor4"
+        },
+        "direction": {
+          "value": 1,
+          "min": -1,
+          "max": 1,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "file": "tone_5.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 400,
+          "min": 80,
+          "max": 900,
+          "source": "sensor5"
+        },
+        "density": {
+          "value": 0.8,
+          "min": 0.3,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20,
+          "min": 0,
+          "max": 200,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0,
+          "min": 0,
+          "max": 2,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0,
+          "min": -12,
+          "max": 12,
+          "source": "accelX"
+        },
+        "spread": {
+          "value": 0,
+          "min": 0,
+          "max": 0.3,
+          "source": "total"
+        },
+        "volume": {
+          "value": 0.6,
+          "min": 0.0,
+          "max": 0.9,
+          "source": "sensor5"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor5"
+        },
+        "direction": {
+          "value": 1,
+          "min": -1,
+          "max": 1,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "file": "tone_6.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 400,
+          "min": 80,
+          "max": 900,
+          "source": "sensor6"
+        },
+        "density": {
+          "value": 0.8,
+          "min": 0.3,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20,
+          "min": 0,
+          "max": 200,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0,
+          "min": 0,
+          "max": 2,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0,
+          "min": -12,
+          "max": 12,
+          "source": "accelX"
+        },
+        "spread": {
+          "value": 0,
+          "min": 0,
+          "max": 0.3,
+          "source": "total"
+        },
+        "volume": {
+          "value": 0.6,
+          "min": 0.0,
+          "max": 0.9,
+          "source": "sensor6"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor6"
+        },
+        "direction": {
+          "value": 1,
+          "min": -1,
+          "max": 1,
+          "source": "none"
+        }
+      },
+      "effects": []
+    }
+  ],
+  "master": {
+    "gain": 1.0,
+    "effects": []
+  }
+}

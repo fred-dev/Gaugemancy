@@ -1,0 +1,749 @@
+{
+  "version": 1,
+  "name": "Preset 2",
+  "playheadSpeed": 0.0114,
+  "slots": [
+    {
+      "enabled": true,
+      "file": "CLDevice4Preset1.wav",
+      "window": "triangular",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 1464.78,
+          "min": 1505.0,
+          "max": 955.816,
+          "source": "sensor1"
+        },
+        "density": {
+          "value": 0.752041,
+          "min": 0.687755,
+          "max": 0.797959,
+          "source": "sensor2"
+        },
+        "distanceJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "sensor3"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "sensor4"
+        },
+        "pitch": {
+          "value": 0.257812,
+          "min": 0.0,
+          "max": 12.0,
+          "source": "sensor6"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "sensor5"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.3,
+          "max": 1.0,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "direction": {
+          "value": 0.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "filter",
+          "enabled": true,
+          "params": {
+            "cutoff": {
+              "value": 14796.0,
+              "min": 14796.0,
+              "max": 20000.0,
+              "source": "sensor6"
+            },
+            "resonance": {
+              "value": 0.0969388,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "delay",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.163265,
+              "min": 0.163265,
+              "max": 0.3,
+              "source": "sensor5"
+            },
+            "time": {
+              "value": 214.286,
+              "min": 128.571,
+              "max": 173.469,
+              "source": "none"
+            },
+            "feedback": {
+              "value": 0.153061,
+              "min": 0.0,
+              "max": 0.95,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.464286,
+              "min": 0.464286,
+              "max": 0.872449,
+              "source": "sensor6"
+            },
+            "time": {
+              "value": 7.2449,
+              "min": 7.2449,
+              "max": 15.3061,
+              "source": "sensor3"
+            },
+            "density": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 200.0,
+              "min": 200.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 20.0,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 2.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": -1.02041,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 1.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "file": "CHDevice1Preset2.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 10.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": 0.0,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "file": "CLDevice4Preset1.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 10.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": 0.0,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "file": "CLDevice4Preset2.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 10.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": 0.0,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "file": "CLDevice4Preset1.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 10.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": 0.0,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "file": "CLDevice4Preset2.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 10.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": 0.0,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "master": {
+    "gain": 1.0,
+    "effects": []
+  }
+}

@@ -265,7 +265,8 @@ int runBenchmark(const Options & options, const std::string & dataRoot) {
 		}
 
 		double total = 0.0;
-		double worst = 0.0;
+		double worst = 0.0;     // worst block after the first
+		double firstBlock = 0.0; // the first block after loading pays one-off costs
 		for (int b = 0; b < blocks; ++b) {
 			ControlInputs inputs = processor.processNormalised(sim.update(static_cast<float>(blockSeconds)), {});
 			auto t0 = std::chrono::steady_clock::now();
@@ -273,7 +274,8 @@ int runBenchmark(const Options & options, const std::string & dataRoot) {
 			audio.renderOffline(out.data(), bufferSize);
 			double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
 			total += seconds;
-			worst = std::max(worst, seconds);
+			if (b == 0) firstBlock = seconds;
+			else worst = std::max(worst, seconds);
 		}
 		double cpu = 100.0 * total / (blocks * blockSeconds);
 		double worstCpu = 100.0 * worst / blockSeconds;
@@ -288,7 +290,8 @@ int runBenchmark(const Options & options, const std::string & dataRoot) {
 		const char * verdict = cpu < 50.0 && worstCpu < 80.0 ? "ok" : (cpu < 80.0 ? "HIGH" : "TOO HIGH");
 		std::printf("preset %zu '%s': %d slot(s), %d slot effect(s), %zu master effect(s)\n", p + 1, preset.name.c_str(),
 			activeSlots, effects, preset.masterEffects.size());
-		std::printf("  average %.1f%%  worst block %.1f%%  -> %s\n", cpu, worstCpu, verdict);
+		std::printf("  average %.1f%%  worst block %.1f%%  first block after loading %.1f%%  -> %s\n", cpu, worstCpu,
+			100.0 * firstBlock / blockSeconds, verdict);
 		if (cpu >= 80.0) worstExit = 1;
 	}
 	return worstExit;

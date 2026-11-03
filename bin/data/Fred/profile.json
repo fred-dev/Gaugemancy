@@ -1,0 +1,181 @@
+{
+  "version": 1,
+  "name": "Fred",
+  "logLevel": "notice",
+  "playMode": "multi",
+  "controlRateHz": 100,
+  "presetSwitchMinIntervalMs": 4000,
+  "presets": [
+    "presets/preset_1.json",
+    "presets/preset_2.json",
+    "presets/preset_3.json",
+    "presets/preset_4.json"
+  ],
+  "sensors": {
+    "maxRaw": 530,
+    "activeThreshold": 0.035,
+    "curve": "linear",
+    "calibrationFrames": 16,
+    "accumulationDenominator": 3.0,
+    "smoothing": 0.0
+  },
+  "audio": {
+    "sampleRate": 44100,
+    "bufferSize": 1024,
+    "numBuffers": 2,
+    "api": "default",
+    "deviceName": "",
+    "deviceId": 5,
+    "masterGain": 1.0
+  },
+  "gestures": {
+    "hitToChangePreset": false,
+    "hitThreshold": 0.25,
+    "troughThreshold": 0.08,
+    "maxPeakMs": 200,
+    "maxTroughMs": 200,
+    "requiredHits": 6,
+    "minSensorsPerHit": 2
+  },
+  "hardware": {
+    "spiDevice": "/dev/spidev0.0",
+    "adcChannels": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "buttonPin": 19,
+    "buttonActiveLow": true,
+    "blueLedPin": 5,
+    "redLedPin": 6,
+    "relayPin": 13,
+    "relayPulseMs": 400,
+    "clickTimeoutMs": 240,
+    "longPressQuits": false,
+    "shutdownOnQuit": false,
+    "accelerometer": true,
+    "i2cBus": "/dev/i2c-1",
+    "accelAddress": 24
+  },
+  "osc": {
+    "telemetry": false,
+    "remoteHost": "192.168.178.236",
+    "remotePort": 1235,
+    "control": true,
+    "controlPort": 1234,
+    "telemetryRateHz": 20
+  },
+  "narration": {
+    "enabled": false,
+    "file": "narrationcha1_Loud.wav",
+    "volume": 1.0,
+    "startWithSensor": true,
+    "autoStartDelayMs": 5000,
+    "glitchThreshold": 0.04,
+    "glitchStrand": 0.016,
+    "window": "hann",
+    "grain": {
+      "length": {
+        "value": 1628.6,
+        "min": 10.0,
+        "max": 3000.0,
+        "source": "none"
+      },
+      "density": {
+        "value": 1.0,
+        "min": 0.1,
+        "max": 1.0,
+        "source": "none"
+      },
+      "distanceJitter": {
+        "value": 80.0,
+        "min": 0.0,
+        "max": 1000.0,
+        "source": "none"
+      },
+      "pitchJitter": {
+        "value": 0.0,
+        "min": -200.0,
+        "max": 200.0,
+        "source": "none"
+      },
+      "pitch": {
+        "value": 0.0,
+        "min": -20.0,
+        "max": 20.0,
+        "source": "none"
+      },
+      "spread": {
+        "value": 0.0,
+        "min": 0.0,
+        "max": 1.0,
+        "source": "none"
+      },
+      "volume": {
+        "value": 0.5,
+        "min": 0.0,
+        "max": 1.0,
+        "source": "none"
+      },
+      "position": {
+        "value": 0.5,
+        "min": 0.0,
+        "max": 1.0,
+        "source": "none"
+      },
+      "direction": {
+        "value": 1.0,
+        "min": -1.0,
+        "max": 1.0,
+        "source": "none"
+      }
+    },
+    "effects": [
+      {
+        "type": "compressor",
+        "enabled": true,
+        "params": {
+          "gain": {
+            "value": 1.0,
+            "min": 0.0,
+            "max": 10.0,
+            "source": "none"
+          },
+          "threshold": {
+            "value": 0.0,
+            "min": -50.0,
+            "max": 0.0,
+            "source": "none"
+          },
+          "ratio": {
+            "value": 4.0,
+            "min": 1.0,
+            "max": 40.0,
+            "source": "none"
+          },
+          "attack": {
+            "value": 10.0,
+            "min": 1.0,
+            "max": 60.0,
+            "source": "none"
+          },
+          "release": {
+            "value": 50.0,
+            "min": 10.0,
+            "max": 250.0,
+            "source": "none"
+          },
+          "knee": {
+            "value": 0.0,
+            "min": 0.0,
+            "max": 10.0,
+            "source": "none"
+          }
+        }
+      }
+    ]
+  }
+}

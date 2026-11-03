@@ -285,6 +285,8 @@ TEST(mode_full_narration_cycle) {
 	CHECK(mc.mode() == Mode::WaitForNarration);
 	mc.update(pressed, {}, 20);
 	CHECK(mc.mode() == Mode::PlayNarration);
+	mc.update(pressed, { 0.1f, false }, 25); // the starting squeeze does not glitch
+	CHECK(mc.mode() == Mode::PlayNarration);
 
 	mc.update(idle, { 0.4f, false }, 30);
 	mc.update(pressed, { 0.5f, false }, 40);

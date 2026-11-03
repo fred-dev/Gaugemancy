@@ -95,6 +95,7 @@ private:
 	int glitchSensor_ = -1;
 	float glitchPosition_ = 0.0f;
 	float pausedPosition_ = 0.0f;
+	bool glitchArmed_ = false; ///< false until the squeeze that started the narration is released
 	bool manualGlitch_ = false;
 	float manualAmount_ = 0.0f;
 };

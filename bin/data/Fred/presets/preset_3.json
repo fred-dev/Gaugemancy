@@ -1,0 +1,1517 @@
+{
+  "version": 1,
+  "name": "Preset 3",
+  "playheadSpeed": 0.012,
+  "slots": [
+    {
+      "enabled": true,
+      "file": "PAD_1.wav",
+      "window": "rectangular",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 1077.86,
+          "min": 604.949,
+          "max": 193.061,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.862245,
+          "min": 0.1,
+          "max": 0.191837,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 484.694,
+          "min": 51.0204,
+          "max": 158.163,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 4.08163,
+          "min": 0.0,
+          "max": 7.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": -0.246094,
+          "min": 0.0,
+          "max": -7.0,
+          "source": "sensor1"
+        },
+        "spread": {
+          "value": 0.392857,
+          "min": 0.0,
+          "max": 0.117347,
+          "source": "none"
+        },
+        "volume": {
+          "value": 1.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor1"
+        },
+        "position": {
+          "value": 0.0351562,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor1"
+        },
+        "direction": {
+          "value": -0.0612245,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "bitcrush",
+          "enabled": true,
+          "params": {
+            "bits": {
+              "value": 16.0,
+              "min": 1.0,
+              "max": 16.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 44100.0,
+              "min": 50.0,
+              "max": 44100.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "chorus",
+          "enabled": true,
+          "params": {
+            "speed": {
+              "value": 3.57143,
+              "min": 100.0,
+              "max": 100.0,
+              "source": "none"
+            },
+            "depth": {
+              "value": 0.01704,
+              "min": 0.0,
+              "max": 0.918367,
+              "source": "sensor1"
+            },
+            "delay": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 200.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "filter",
+          "enabled": true,
+          "params": {
+            "cutoff": {
+              "value": 20000.0,
+              "min": 20.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "resonance": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "delay",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.209184,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "time": {
+              "value": 69.3878,
+              "min": 1.0,
+              "max": 400.0,
+              "source": "none"
+            },
+            "feedback": {
+              "value": 0.0918367,
+              "min": 0.0,
+              "max": 0.95,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.306122,
+              "min": 0.497688,
+              "max": 0.793607,
+              "source": "none"
+            },
+            "time": {
+              "value": 4.18367,
+              "min": 0.1,
+              "max": 20.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.142857,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.214286,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 200.0,
+              "min": 200.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 20.0,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": -8.41837,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "file": "PAD_2.wav",
+      "window": "sine",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 482.908,
+          "min": 100.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 42.8571,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 1.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor2"
+        },
+        "position": {
+          "value": 0.0234375,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor2"
+        },
+        "direction": {
+          "value": 0.204082,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "bitcrush",
+          "enabled": true,
+          "params": {
+            "bits": {
+              "value": 16.0,
+              "min": 1.0,
+              "max": 16.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 44100.0,
+              "min": 50.0,
+              "max": 44100.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "chorus",
+          "enabled": true,
+          "params": {
+            "speed": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 100.0,
+              "source": "none"
+            },
+            "depth": {
+              "value": 11.0204,
+              "min": 0.0,
+              "max": 30.0,
+              "source": "none"
+            },
+            "delay": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 200.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "filter",
+          "enabled": true,
+          "params": {
+            "cutoff": {
+              "value": 20000.0,
+              "min": 20.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "resonance": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "delay",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.576531,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "time": {
+              "value": 197.959,
+              "min": 1.0,
+              "max": 400.0,
+              "source": "none"
+            },
+            "feedback": {
+              "value": 0.0714286,
+              "min": 0.0,
+              "max": 0.95,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.443878,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "time": {
+              "value": 4.4898,
+              "min": 0.1,
+              "max": 20.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.270408,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.132653,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 200.0,
+              "min": 200.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 20.0,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": -16.8367,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "file": "PAD_3.wav",
+      "window": "sine",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 130.087,
+          "min": 100.0,
+          "max": 955.816,
+          "source": "sensor3"
+        },
+        "density": {
+          "value": 0.444388,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 96.9388,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0561224,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 1.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor3"
+        },
+        "position": {
+          "value": 0.0351562,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor3"
+        },
+        "direction": {
+          "value": 0.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "bitcrush",
+          "enabled": true,
+          "params": {
+            "bits": {
+              "value": 16.0,
+              "min": 1.0,
+              "max": 16.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 44100.0,
+              "min": 50.0,
+              "max": 44100.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "chorus",
+          "enabled": true,
+          "params": {
+            "speed": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 100.0,
+              "source": "none"
+            },
+            "depth": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 30.0,
+              "source": "none"
+            },
+            "delay": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 200.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "filter",
+          "enabled": true,
+          "params": {
+            "cutoff": {
+              "value": 11122.0,
+              "min": 20.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "resonance": {
+              "value": 0.627551,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "delay",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "time": {
+              "value": 1.0,
+              "min": 1.0,
+              "max": 400.0,
+              "source": "none"
+            },
+            "feedback": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 0.95,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.602041,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "time": {
+              "value": 4.18367,
+              "min": 0.1,
+              "max": 20.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.285714,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.0867347,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 200.0,
+              "min": 200.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 20.0,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": -11.2245,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "file": "PAD_4.wav",
+      "window": "triangular",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 757.5,
+          "min": 100.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.958673,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 96.9388,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": -185.938,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "sensor4"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 1.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor4"
+        },
+        "position": {
+          "value": 0.0351562,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor4"
+        },
+        "direction": {
+          "value": -0.316327,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "bitcrush",
+          "enabled": true,
+          "params": {
+            "bits": {
+              "value": 16.0,
+              "min": 1.0,
+              "max": 16.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 44100.0,
+              "min": 50.0,
+              "max": 44100.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "chorus",
+          "enabled": true,
+          "params": {
+            "speed": {
+              "value": 25.5102,
+              "min": 0.0,
+              "max": 100.0,
+              "source": "none"
+            },
+            "depth": {
+              "value": 0.627551,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "delay": {
+              "value": 0.0,
+              "min": 1.0,
+              "max": 200.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "filter",
+          "enabled": true,
+          "params": {
+            "cutoff": {
+              "value": 20000.0,
+              "min": 20.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "resonance": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "delay",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "time": {
+              "value": 1.0,
+              "min": 1.0,
+              "max": 400.0,
+              "source": "none"
+            },
+            "feedback": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 0.95,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.418367,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "time": {
+              "value": 4.38775,
+              "min": 0.1,
+              "max": 20.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.479592,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.255102,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 200.0,
+              "min": 200.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 20.0,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": -8.92857,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "file": "PAD_5.wav",
+      "window": "hann",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 589.694,
+          "min": 100.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 1.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor5"
+        },
+        "position": {
+          "value": 0.0234375,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor5"
+        },
+        "direction": {
+          "value": -0.295918,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "bitcrush",
+          "enabled": true,
+          "params": {
+            "bits": {
+              "value": 16.0,
+              "min": 1.0,
+              "max": 16.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 44100.0,
+              "min": 50.0,
+              "max": 44100.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "chorus",
+          "enabled": true,
+          "params": {
+            "speed": {
+              "value": 0.510204,
+              "min": 0.0,
+              "max": 100.0,
+              "source": "none"
+            },
+            "depth": {
+              "value": 0.556641,
+              "min": 0.0,
+              "max": 30.0,
+              "source": "sensor5"
+            },
+            "delay": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 200.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "filter",
+          "enabled": true,
+          "params": {
+            "cutoff": {
+              "value": 20000.0,
+              "min": 20.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "resonance": {
+              "value": 0.00946668,
+              "min": 0.0,
+              "max": 0.510204,
+              "source": "sensor5"
+            }
+          }
+        },
+        {
+          "type": "delay",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.382653,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "time": {
+              "value": 132.653,
+              "min": 1.0,
+              "max": 400.0,
+              "source": "none"
+            },
+            "feedback": {
+              "value": 0.127551,
+              "min": 0.0,
+              "max": 0.95,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.566327,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.255102,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "time": {
+              "value": 4.79592,
+              "min": 0.1,
+              "max": 20.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.433673,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.178571,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 200.0,
+              "min": 200.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 20.0,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": -12.7551,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "file": "PAD_6.wav",
+      "window": "sine",
+      "gate": "auto",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 2344.03,
+          "min": 100.0,
+          "max": 3000.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.1,
+          "max": 1.0,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 0.0,
+          "max": 1000.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": -7.80612,
+          "min": -200.0,
+          "max": 200.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": -20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 1.0,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor6"
+        },
+        "position": {
+          "value": 0.0234375,
+          "min": 0.0,
+          "max": 1.0,
+          "source": "sensor6"
+        },
+        "direction": {
+          "value": 0.0,
+          "min": -1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "bitcrush",
+          "enabled": true,
+          "params": {
+            "bits": {
+              "value": 15.0,
+              "min": 16.0,
+              "max": 10.0,
+              "source": "sensor6"
+            }
+          }
+        },
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 43766.0,
+              "min": 44100.0,
+              "max": 26100.0,
+              "source": "sensor6"
+            }
+          }
+        },
+        {
+          "type": "chorus",
+          "enabled": true,
+          "params": {
+            "speed": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 100.0,
+              "source": "none"
+            },
+            "depth": {
+              "value": 0.0710001,
+              "min": 0.0,
+              "max": 3.82653,
+              "source": "sensor6"
+            },
+            "delay": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 200.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "filter",
+          "enabled": true,
+          "params": {
+            "cutoff": {
+              "value": 20000.0,
+              "min": 20.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "resonance": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "delay",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.27551,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "time": {
+              "value": 55.102,
+              "min": 1.0,
+              "max": 400.0,
+              "source": "none"
+            },
+            "feedback": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 0.95,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.505102,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "time": {
+              "value": 4.08163,
+              "min": 0.1,
+              "max": 20.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.326531,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.173469,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 200.0,
+              "min": 200.0,
+              "max": 20000.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 20.0,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 1.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "compressor",
+          "enabled": true,
+          "params": {
+            "gain": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "threshold": {
+              "value": -14.5408,
+              "min": -50.0,
+              "max": 0.0,
+              "source": "none"
+            },
+            "ratio": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 40.0,
+              "source": "none"
+            },
+            "attack": {
+              "value": 10.0,
+              "min": 1.0,
+              "max": 60.0,
+              "source": "none"
+            },
+            "release": {
+              "value": 50.0,
+              "min": 10.0,
+              "max": 250.0,
+              "source": "none"
+            },
+            "knee": {
+              "value": 1.0,
+              "min": 0.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "master": {
+    "gain": 1.0,
+    "effects": []
+  }
+}

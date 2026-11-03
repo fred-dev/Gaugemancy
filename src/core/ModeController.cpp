@@ -67,6 +67,7 @@ void ModeController::update(const ControlInputs & inputs, const NarrationProgres
 			: nowMs - modeStartMs_ >= static_cast<uint64_t>(settings_.autoStartDelayMs);
 		if (triggered || manualGlitch_) {
 			actions_.playNarration();
+			glitchArmed_ = false; // the starting squeeze must be released first
 			enter(Mode::PlayNarration);
 		}
 		break;
@@ -79,7 +80,10 @@ void ModeController::update(const ControlInputs & inputs, const NarrationProgres
 			break;
 		}
 		int sensor = manualGlitch_ ? 0 : firstSensorAbove(inputs, threshold);
-		if (sensor >= 0) {
+		if (sensor < 0) {
+			glitchArmed_ = true;
+		}
+		if (sensor >= 0 && (glitchArmed_ || manualGlitch_)) {
 			glitchSensor_ = sensor;
 			pausedPosition_ = progress.position;
 			actions_.pauseNarration();

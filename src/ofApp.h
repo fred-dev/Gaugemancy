@@ -9,6 +9,7 @@
 
 #include "ofMain.h"
 
+#include "app/FramePacer.h"
 #include "app/Instrument.h"
 #include "core/Options.h"
 
@@ -41,5 +42,6 @@ private:
 	std::string dataRoot_;
 	bool withGui_;
 	gm::Instrument instrument_;
+	gm::FramePacer pacer_;
 	std::unique_ptr<gm::ProgrammingGui> gui_;
 };
