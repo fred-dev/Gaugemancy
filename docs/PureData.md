@@ -29,11 +29,14 @@ Versions actually present on this Mac when this was written, not just
 "should work":
 
 - **Pure Data (vanilla) 0.57-0** - `/Applications/Pd-0.57-0.app`. The
-  MCP tool's receiver patch needs the `osc` abstraction library (`osc/unpackOSC`,
-  `osc/routeOSC`), which ships with vanilla since around 0.52, and the
-  **iemnet** external (`iemnet/udpreceive`) for the actual UDP socket, which
-  is *not* vanilla - install it from Pd's own Deken plugin (Help > Find
-  externals > search "iemnet").
+  MCP tool's receiver patch needs the `osc` abstraction library
+  (`osc/unpackOSC`, `osc/routeOSC`) and the **iemnet** external
+  (`iemnet/udpreceive`) for the actual UDP socket - **neither ships with this
+  vanilla build** (checked the app bundle's `extra/` folder: not there).
+  Install both from Pd's own Deken plugin (Help > Find externals): search
+  "iemnet" for the external, and search "routeOSC" for the abstraction
+  library (searching by object name works better than guessing the library's
+  listed name).
 - **uv 0.10.12**, **Python 3.14.7** available; Pd-MCP-Server's
   `pyproject.toml` pins `requires-python >= 3.12` and its own `.python-version`
   says `3.12` - let `uv` manage that venv rather than assuming the system
@@ -66,6 +69,25 @@ messages, so you watch the patch get built live.
 - Signal objects created with a trailing `0` argument (e.g. `+~ 0`) get a
   float inlet instead of a signal inlet on Pd 0.55+; the server already
   strips those automatically.
+
+**Gaps found actually building the sensor bridge** (2026-11-03, see
+`pd/base/CLAUDE.md` for the full record):
+- The claim below that the `osc` library "ships with vanilla since around
+  0.52" is **wrong** for this Mac's Pd 0.57-0 - it's not in the app bundle's
+  `extra/` folder. Without it, `authoring.pd`'s own receiver fails to load,
+  which breaks every MCP tool call silently (`create_object` still reports
+  `"status": "success"` - that only means a UDP packet was sent, not that Pd
+  did anything). Install via Deken, searching the object name (`routeOSC`)
+  rather than a library name.
+- `create_object`/`connect_objects` can only ever create into the
+  `workspace` subpatch (the receiver's dynamic-patching target, `s
+  pd-workspace`, is hardcoded) - there is no way to address the top-level
+  canvas or any other subpatch through the MCP tools. Getting a finished
+  graph onto the main canvas is a manual cut-from-workspace,
+  paste-onto-main-canvas step every time.
+- That dynamic-patching target only works while the `workspace` window is
+  already open - `create_object` calls sent before it's ever been opened are
+  dropped with no error and nothing is created.
 
 ## The sensor question: two transports, one patch
 
@@ -161,20 +183,26 @@ Mirrors the existing `bin/data/<Profile>/presets/preset_N.json` convention:
 ## What's actually built so far
 
 Done: `fred-dev/Gaugemancy` and `fred-dev/ofxPd` both have an
-`ai-refactor-pd` branch; `addons.make` updated; `pd/base/authoring.pd` is a
-copy of Pd-MCP-Server's working example patch, not yet extended with the
-sensor-bridge subpatch described above - see `pd/base/CLAUDE.md`.
+`ai-refactor-pd` branch; `addons.make` updated; `pd/base/authoring.pd` has
+the sensor-bridge chain (`iemnet/udpreceive 9000` -> `osc/unpackOSC` ->
+`osc/routeOSC` -> thirteen sends) built live via the MCP tools and saved,
+sitting as flat objects on the main canvas (not encapsulated into a `[pd
+sensor-bridge]` box - tried, skipped as unnecessary since `send`/`receive`
+are global in Pd regardless of nesting). See `pd/base/CLAUDE.md` for the
+real-world gaps hit getting here (missing `osc` library on vanilla Pd
+0.57-0, `workspace` window must be open before dynamic-patching into it,
+etc.) - read that before doing this on a fresh machine.
 
 Not built yet, in rough order:
-1. The sensor-bridge subpatch inside `pd/base/authoring.pd` (needs a real Pd
-   session to build correctly, not hand-edited text).
-2. `PdEngine` (`src/audio/` or a new `src/pd/`) wrapping `ofxPd`: load patch,
+1. `PdEngine` (`src/audio/` or a new `src/pd/`) wrapping `ofxPd`: load patch,
    `sendFloat` per control tick, DSP on/off, preset switch = load a different
    file or re-send a parameter set.
-3. Transport B: an OSC-forward mode in `Instrument` that runs the full
-   sensor/button pipeline without `PdEngine` and sends `/gm/...` instead.
-4. Profile/preset JSON schema for `patches` (list of `.pd` files +
+2. Transport B: an OSC-forward mode in `Instrument` that runs the full
+   sensor/button pipeline without `PdEngine` and sends `/gm/...` instead -
+   needed to actually test the bridge end-to-end (squeeze a ball, confirm
+   `[r sensorN]` fires).
+3. Profile/preset JSON schema for `patches` (list of `.pd` files +
    optional per-preset parameter sets), replacing `audio`/presets'
    slot-based schema on this branch.
-5. Fixing `save_patch`/`load_patch`/`delete_object`/`disconnect_objects` in
+4. Fixing `save_patch`/`load_patch`/`delete_object`/`disconnect_objects` in
    the MCP tool's receiver patch, if the manual-save workaround gets annoying.
