@@ -53,3 +53,12 @@ bin/data/settings.xml
 
 # Local presets backups (not for version control)
 bin/data_backup_*/
+
+# macOS
+.DS_Store
+
+# Xcode per-user project state (project.pbxproj and the shared schemes are
+# tracked - this is just the local workspace/user state, regenerated per
+# machine)
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/
