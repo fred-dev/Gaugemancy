@@ -86,7 +86,76 @@ cd ~/openFrameworks/apps/myApps/Gaugemancy
 make -j1 Release
 ```
 
-## 3. Watching a long build without blocking the terminal
+## 3. If -j1 still isn't enough: real swap and the desktop GUI
+
+Even at `-j1`, this Pi's "swap" is **zram** (RAM-backed compressed swap) by
+default - it doesn't add real headroom, since the compressed pages still
+live in RAM. The kernel OOM-killer killed `cc1plus` (the compiler itself,
+~250 MB RSS) mid-build with zram showing as "mostly free". Two fixes, both
+safe to do over SSH without losing access (SSH is its own service,
+independent of either of these):
+
+**Add a real disk swapfile** alongside zram (2 GB was plenty, 20 GB was free
+on the SD card):
+
+```bash
+sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab   # survive reboots
+```
+
+**Disable the desktop GUI entirely** if programming always happens on a
+laptop anyway (per the project's own ground rules) - frees real memory the
+desktop session was holding (compositor, panel, the GUI update checker),
+takes effect immediately with no reboot, and doesn't touch SSH:
+
+```bash
+sudo systemctl set-default multi-user.target   # boots to console from now on
+sudo systemctl isolate multi-user.target        # stop the desktop right now
+```
+
+Console auto-login (if `raspi-config` had it set up, check with
+`cat /etc/systemd/system/getty@tty1.service.d/*.conf`) survives this
+unchanged - it's a separate `agetty --autologin` config, not tied to the
+graphical session. Revert with
+`sudo systemctl set-default graphical.target` (+ isolate or reboot).
+
+With both of these, the same `-j1` build that had been getting OOM-killed
+completed cleanly.
+
+## 4. Missing `-ljack` at link time
+
+```
+/usr/bin/ld: .../ofxMidi/libs/rtmidi/RtMidi.o: undefined reference to symbol 'jack_port_name'
+/usr/bin/ld: /lib/aarch64-linux-gnu/libjack.so.0: error adding symbols: DSO missing from command line
+```
+
+`ofxMidi`'s bundled `rtmidi` is compiled with `__UNIX_JACK__` (a default OF
+compile flag on Linux), but on this Pi `libjack` wasn't installed - in fact
+apt's history log showed the very first automatic system update had
+*removed* `libjack-jackd2-0`, which is almost certainly what broke this (it
+was presumably present, as a transitive dependency of something else,
+before that update ran).
+
+`sudo apt-get install -y libjack-jackd2-dev` fixes the *missing library*
+half of it, but **not** the actual link error: `ofxMidi`'s
+`addon_config.mk` already says `ADDON_PKG_CONFIG_LIBRARIES = alsa jack`,
+and `pkg-config --libs jack` correctly returns `-ljack` once the package is
+installed, but that never makes it onto this project's actual link command
+- the addon pkg-config resolution mechanism doesn't pick it up here, for a
+reason not tracked down. (If you go looking: `config.project.mk` in
+`libs/openFrameworksCompiled/project/makefileCommon/` is **not** a build
+cache safe to delete - it's a file tracked in openFrameworks' own git
+history; deleting it just breaks the build differently. That was a dead
+end, not the fix.)
+
+The actual fix is in Gaugemancy's own `config.make`:
+
+```make
+PROJECT_LDFLAGS += -ljack
+```
+
+## 5. Watching a long build without blocking the terminal
 
 Over SSH, background it and tail the log rather than waiting on a foreground
 command (useful given how long this takes on this hardware):
@@ -113,3 +182,15 @@ free -h                             # watch for available dropping toward 0
 - If it does hang (SSH banner exchange times out, ping still works): it's
   not coming back on its own on this hardware - power-cycle it, then resume
   with `-j1` and let `ccache` pick up what already compiled.
+- If `-j1` *still* gets OOM-killed: add a real disk swapfile (zram alone
+  isn't real headroom) and, if the Pi only ever gets programmed from a
+  laptop anyway, disable the desktop GUI (`multi-user.target`) - both safe
+  over SSH, no reboot needed, don't touch SSH access either way.
+- The link will fail on `undefined reference to jack_port_name` unless
+  `libjack-jackd2-dev` is installed *and* `PROJECT_LDFLAGS += -ljack` is
+  added to `config.make` - the addon's own `pkg-config`-based LDFLAGS
+  resolution doesn't add it automatically here.
+- This was the actual end-to-end result on 2026-11-03: `bin/Gaugemancy`
+  built and ran on this Pi 3B+ (no sensor circuit attached to it) -
+  `--selftest` passed GPIO/LEDs/button, correctly reported SPI/I2C as
+  unconnected, and found the onboard audio device.

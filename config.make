@@ -84,6 +84,14 @@ OF_ROOT = ../../..
 ################################################################################
 # PROJECT_LDFLAGS=-Wl,-rpath=./libs
 
+# ofxMidi's bundled rtmidi is compiled with __UNIX_JACK__ on Linux, but the
+# addon's "ADDON_PKG_CONFIG_LIBRARIES = alsa jack" (its own addon_config.mk)
+# does not end up adding -ljack to this project's final link command, so
+# it fails with "undefined reference to jack_port_name" unless added here
+# explicitly. Confirmed needed on Raspberry Pi OS Trixie even with
+# libjack-jackd2-dev installed and pkg-config correctly finding it.
+PROJECT_LDFLAGS += -ljack
+
 ################################################################################
 # PROJECT DEFINES
 #   Create a space-delimited list of DEFINES. The list will be converted into 
