@@ -4,7 +4,7 @@ This file is the running status of the refactor so a new session (local on
 Mac/Windows/Linux, or on the Raspberry Pi over SSH) can pick up where the last
 one stopped. **Update it after every major milestone.**
 
-Last updated: 2026-11-03 (cloud session, after the converter/test-data/frame-pacing milestone).
+Last updated: 2026-11-03 (cloud session, after motion, 3D view, Pi scripts and docs).
 
 ## Ground rules from the owner (Fred)
 
@@ -44,9 +44,18 @@ src/audio/     Effect + Effects.cpp (8 effects), EffectChain, GrainSlot,
 src/hardware/  SensorSource (MCP3008/LIS3DH, replay, simulation), ControlPanel
 src/app/       Instrument (runtime shared by Pi and desktop), RemoteControl
                (OSC), Diagnostics (--selftest/--benchmark), FramePacer
-src/gui/       ProgrammingGui, GuiBuilder (controls bound to settings), Views
-tools/         convert_xml_settings.py, make_test_data.py
+src/gui/       ProgrammingGui, GuiBuilder (controls bound to settings), Views,
+               DeviceView (3D instrument: squeeze balls, drag to tilt)
+tools/         convert_xml_settings.py, make_test_data.py, gm-ctl.py (OSC)
+scripts/       pi/install.sh + pi/gaugemancy.service (systemd user), remote.sh (SSH)
+docs/          RaspberryPi.md (setup, wiring, service, SSH workflow)
 tests/         unit tests (no OF needed), this file
+
+Motion: core/Smoother.h (time-constant smoothing + SmoothingBank, one per
+modulation source), core/MotionProcessor (level = startup orientation or a
+fixed up axis; outputs tiltX, tiltY, tilt, shake as modulation sources).
+Sensor ball numbering in the 3D view: 1 top, 2 bottom, 3 side A upper,
+4 side B lower, 5 side C upper, 6 side D lower (ADC channels in profile).
 bin/data/      gaugemancy.json, one folder per performer profile, recordings/
 ```
 
@@ -84,7 +93,8 @@ Cloud-session tricks: no sound card or GPIO in the container, so use
 ## Verified so far (cloud, Ubuntu 24.04 x86-64, gcc 13, OF main 2026-11-02)
 
 - All 4 Gaugemancy-related forks build on OF main; ofxPDSP example links.
-- 40 core unit tests pass (also under ASan/UBSan); ofxGPIO and ofxAudioFile tests pass.
+- 47 core unit tests pass (also under ASan/UBSan); ofxGPIO and ofxAudioFile tests pass.
+- 3D view renders (Xvfb screenshot), squeeze/tilt via gm-ctl.py over OSC works.
 - Benchmark (x86, 512 buffer): Demo light preset ~2% of a core, stress preset
   (42 effects) ~9%.
 - Headless loop: <1% CPU after FramePacer (was ~25% with ofSetFrameRate).
@@ -100,21 +110,22 @@ Cloud-session tricks: no sound card or GPIO in the container, so use
 - [ ] Windows build (Visual Studio via project generator, or msys2).
 - [ ] Listening tests: effect chains, narration pause/resume, glitch.
 
+## Done since the first handoff
+
+- Motion processing and smoothing bank, tilt/shake modulation sources.
+- 3D instrument view (DeviceView) with squeeze and tilt simulation.
+- gm-ctl.py, Pi install script + systemd user service, remote.sh, docs, README.
+- pm2 `ecosystem.config.js` removed (replaced by systemd).
+
 ## Next steps (in order)
 
-1. Motion: generic smoothing class used for every value; accelerometer
-   reference orientation (zero at startup, or absolute "up"); tilt and shake
-   as modulation sources like the balls; settings + GUI + tests.
-2. 3D device simulation view: body with 10 balls (top, bottom, two per side),
-   6 sensor balls (top, bottom, and on each side alternately the upper and the
-   lower ball) that squash when pressed; click a ball to squeeze it; rotating
-   the view drives the simulated accelerometer. Reference: `Intrument_model.png`.
-3. Pi deployment: systemd user service, install script, `tools/gm-ctl.py`
-   (OSC commands/telemetry from a laptop), docs/RaspberryPi.md (SPI/I2C
-   enable, groups, USB stick mount, PipeWire vs ALSA device choice).
-4. README rewrite; regenerate Xcode/VS projects; remove `ecosystem.config.js`
-   (pm2) once systemd is in.
-5. Local platform testing (see "NOT verified yet").
+1. Local platform testing (see "NOT verified yet"); fix what breaks.
+2. Regenerate the Xcode and Visual Studio projects with the project generator.
+3. Confirm the physical sensor numbering and ADC channels against the real
+   instrument; adjust `hardware.adcChannels` defaults and the DeviceView table.
+4. Confirm the LIS3DH axis orientation on the board (absolute "up" axis).
+5. Listening pass on converted performer presets (delay/reverb are now inserts
+   with a wet mix rather than parallel sends; levels may need a trim).
 
 ## Bugs found in the original code (for the record)
 

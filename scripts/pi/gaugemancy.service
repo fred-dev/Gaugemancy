@@ -1,0 +1,21 @@
+# Gaugemancy as a systemd USER service (runs inside the desktop session, so
+# PipeWire/PulseAudio audio is available). Installed by scripts/pi/install.sh to
+# ~/.config/systemd/user/gaugemancy.service
+#
+#   systemctl --user status gaugemancy      is it running?
+#   journalctl --user -u gaugemancy -f      follow the log
+#   systemctl --user restart gaugemancy     after changing settings or rebuilding
+
+[Unit]
+Description=Gaugemancy instrument
+After=pipewire.service pulseaudio.service sound.target
+
+[Service]
+Type=simple
+WorkingDirectory=@APP_DIR@
+ExecStart=@APP_DIR@/bin/Gaugemancy --headless
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target
