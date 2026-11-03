@@ -4,7 +4,7 @@ This file is the running status of the refactor so a new session (local on
 Mac/Windows/Linux, or on the Raspberry Pi over SSH) can pick up where the last
 one stopped. **Update it after every major milestone.**
 
-Last updated: 2026-11-03 (cloud session, after motion, 3D view, Pi scripts and docs).
+Last updated: 2026-11-03 (local Mac session: first macOS build/run).
 
 ## Ground rules from the owner (Fred)
 
@@ -105,10 +105,31 @@ Cloud-session tricks: no sound card or GPIO in the container, so use
 - [ ] Raspberry Pi (Trixie, 64 bit): build, `--selftest` with real hardware
       (button pin 19 pull-up active-low, LEDs 5/6, relay 13, MCP3008 on
       spidev0.0, LIS3DH 0x18), `--benchmark` numbers, real audio device by name.
-- [ ] macOS build (Xcode project is from the old code and must be regenerated
-      with the project generator; the Makefile build should work).
 - [ ] Windows build (Visual Studio via project generator, or msys2).
 - [ ] Listening tests: effect chains, narration pause/resume, glitch.
+
+## macOS, verified 2026-11-03 (Xcode 17F42, local, x86_64 build)
+
+- All three forked addons (`ofxAudioFile`, `ofxPDSP`, `ofxGPIO`) switched to
+  `fred-dev`'s `ai-refactor` branch in `openFrameworks/addons/`. ofxGPIO's
+  rewrite builds clean off Linux (`--selftest` correctly reports "not a Linux
+  build" and skips GPIO/ADC/accel checks instead of failing to compile).
+- Old `Gaugemancy.xcodeproj` deleted and regenerated with
+  `projectGenerator/projectGenerator -o<ofPath> -posx <projectPath>`
+  (downloaded via `scripts/osx/download_projectGenerator.sh`); picks up all 6
+  addons from `addons.make` automatically.
+- Build succeeds (`xcodebuild ... -scheme "Gaugemancy Debug" build`) and the
+  app launches and runs `--selftest`/`--help`; settings and the "Fred" profile
+  load (its sample `.wav`s aren't in git, so `--selftest` reports those
+  missing — expected, not a build problem).
+- **Gotcha: building inside this Dropbox-synced folder, Xcode's automatic
+  "Sign to Run Locally" codesign step fails** ("resource fork, Finder
+  information, or similar detritus not allowed") because Dropbox tags files
+  in the built `.app` with `com.dropbox.attrs`/`com.apple.FinderInfo` xattrs.
+  The project's own `OF_CODESIGN` script-based signing is already off; this is
+  Xcode's separate automatic signing. Workaround: build with
+  `CODE_SIGNING_ALLOWED=NO` (command line), or in Xcode set the target's
+  Signing & Capabilities to "None" for local runs.
 
 ## Done since the first handoff
 
@@ -120,7 +141,7 @@ Cloud-session tricks: no sound card or GPIO in the container, so use
 ## Next steps (in order)
 
 1. Local platform testing (see "NOT verified yet"); fix what breaks.
-2. Regenerate the Xcode and Visual Studio projects with the project generator.
+2. Regenerate the Visual Studio project with the project generator (Xcode done).
 3. Confirm the physical sensor numbering and ADC channels against the real
    instrument; adjust `hardware.adcChannels` defaults and the DeviceView table.
 4. Confirm the LIS3DH axis orientation on the board (absolute "up" axis).
