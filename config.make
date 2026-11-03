@@ -1,4 +1,10 @@
 ################################################################################
+# Gaugemancy: always name the binary "Gaugemancy", whatever the folder is called
+# (scripts, systemd and the docs rely on bin/Gaugemancy).
+APPNAME = Gaugemancy
+################################################################################
+
+################################################################################
 # CONFIGURE PROJECT MAKEFILE (optional)
 #   This file is where we make project specific configurations.
 ################################################################################

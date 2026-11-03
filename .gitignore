@@ -38,5 +38,14 @@
 # Folders
 */obj/
 
-# Different adding.make for different platforms so
-addons.make
+
+# Build products
+bin/Gaugemancy
+bin/Gaugemancy_debug
+bin/*.app/
+obj/
+tests/test_core
+
+# Local test output
+bin/data/**/*.tmp
+recording*.csv

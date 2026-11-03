@@ -7,6 +7,7 @@
 #include "core/Curve.h"
 #include "core/HitGestureDetector.h"
 #include "core/LedPattern.h"
+#include "core/Options.h"
 #include "core/ModeController.h"
 #include "core/Playhead.h"
 #include "core/SensorProcessor.h"
@@ -538,6 +539,33 @@ TEST(store_reports_missing_and_broken_files) {
 	CHECK(!loaded.warnings.empty());
 	CHECK(loaded.presets.size() == 1); // defaults still give a playable preset
 	fs::remove_all(root);
+}
+
+// ================================================================== options
+
+TEST(options_defaults) {
+	Options o = parseCommandLine({ "Gaugemancy" });
+	CHECK(o.command == Command::Run);
+	CHECK(o.sensors == SensorMode::Auto);
+	CHECK(o.errors.empty());
+}
+
+TEST(options_parse_everything) {
+	Options o = parseCommandLine({ "app", "--data", "/media/Data", "--profile", "Fred", "--headless",
+		"--sensors", "replay:take.csv", "--no-loop", "--record", "out.csv", "--log", "verbose", "--benchmark", "5" });
+	CHECK(o.errors.empty());
+	CHECK(o.dataRoot == "/media/Data" && o.profile == "Fred" && o.headless);
+	CHECK(o.sensors == SensorMode::Replay && o.replayFile == "take.csv" && !o.loopReplay);
+	CHECK(o.recordFile == "out.csv" && o.logLevel == "verbose");
+	CHECK(o.command == Command::Benchmark);
+	CHECK_NEAR(o.benchmarkSeconds, 5.0f, 1e-6);
+}
+
+TEST(options_report_mistakes) {
+	Options o = parseCommandLine({ "app", "--bogus", "--sensors", "elbow", "--data" });
+	CHECK(o.errors.size() == 3);
+	Options xcode = parseCommandLine({ "app", "-NSDocumentRevisionsDebugMode", "YES" });
+	CHECK(xcode.errors.empty());
 }
 
 int main() {
