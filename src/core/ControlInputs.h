@@ -7,7 +7,11 @@
 // A "modulation source" is simply an index into this array. Sources are:
 //   sensor1..sensor6  pressure on each ball (after calibration, threshold, curve)
 //   total             combined pressure of all balls ("accumulated pressure")
-//   accelX/Y/Z        tilt of the instrument from the accelerometer
+//   tiltX, tiltY      tilt left/right and forward/back (0.5 = level, 0 / 1 =
+//                     tilted by the configured range either way)
+//   tilt              how far the instrument is tilted in any direction (0..1)
+//   shake             how hard it is being shaken or moved (0..1)
+// Motion sources come from the accelerometer (see MotionProcessor).
 //
 // This file has no openFrameworks dependency so it can be unit tested anywhere.
 // -----------------------------------------------------------------------------
@@ -34,22 +38,23 @@ enum class ModSource {
 	Sensor5,
 	Sensor6,
 	Total,
-	AccelX,
-	AccelY,
-	AccelZ,
+	TiltX,
+	TiltY,
+	Tilt,
+	Shake,
 	Count
 };
 
 constexpr int kNumModSources = static_cast<int>(ModSource::Count);
 
-/// Stable text id used in JSON ("none", "sensor1", ... "accelZ").
+/// Stable text id used in JSON ("none", "sensor1", ... "shake").
 std::string modSourceId(ModSource source);
 
-/// Label for the GUI ("None", "Sensor 1", ... "Tilt Z").
+/// Label for the GUI ("None", "Sensor 1", ... "Shake").
 std::string modSourceLabel(ModSource source);
 
-/// Parse a JSON id. Also accepts the legacy integer form 0..6 (0 = none).
-/// Unknown text returns ModSource::None.
+/// Parse a JSON id. Unknown text returns ModSource::None. The early ids
+/// "accelX", "accelY" and "accelZ" are read as tiltX, tiltY and tilt.
 ModSource modSourceFromId(const std::string & id);
 ModSource modSourceFromLegacyIndex(int index);
 

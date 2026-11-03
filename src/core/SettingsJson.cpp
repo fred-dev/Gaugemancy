@@ -196,7 +196,18 @@ Json toJson(const ProfileSettings & p) {
 		{ "curve", curveId(p.sensors.curve) },
 		{ "calibrationFrames", p.sensors.calibrationFrames },
 		{ "accumulationDenominator", p.sensors.accumulationDenominator },
-		{ "smoothing", p.sensors.smoothing },
+		{ "smoothingMs", p.sensors.smoothingMs },
+	};
+	j["motion"] = {
+		{ "enabled", p.motion.enabled },
+		{ "zeroAtStartup", p.motion.zeroAtStartup },
+		{ "upAxis", p.motion.upAxis },
+		{ "rangeDegrees", p.motion.rangeDegrees },
+		{ "deadzoneDegrees", p.motion.deadzoneDegrees },
+		{ "smoothingMs", p.motion.smoothingMs },
+		{ "shakeSensitivity", p.motion.shakeSensitivity },
+		{ "shakeReleaseMs", p.motion.shakeReleaseMs },
+		{ "calibrationFrames", p.motion.calibrationFrames },
 	};
 	j["audio"] = {
 		{ "sampleRate", p.audio.sampleRate },
@@ -433,7 +444,18 @@ ProfileSettings profileFromJson(const Json & json, Warnings & warnings) {
 	if (!curve.empty()) p.sensors.curve = curveFromId(curve);
 	s.read("calibrationFrames", p.sensors.calibrationFrames, 1, 1000);
 	s.read("accumulationDenominator", p.sensors.accumulationDenominator, 0.1f, 6.0f);
-	s.read("smoothing", p.sensors.smoothing, 0.0f, 0.95f);
+	s.read("smoothingMs", p.sensors.smoothingMs, 0.0f, 2000.0f);
+
+	Reader m(r.raw("motion"), "motion", warnings);
+	m.read("enabled", p.motion.enabled);
+	m.read("zeroAtStartup", p.motion.zeroAtStartup);
+	m.read("upAxis", p.motion.upAxis);
+	m.read("rangeDegrees", p.motion.rangeDegrees, 5.0f, 180.0f);
+	m.read("deadzoneDegrees", p.motion.deadzoneDegrees, 0.0f, 45.0f);
+	m.read("smoothingMs", p.motion.smoothingMs, 0.0f, 2000.0f);
+	m.read("shakeSensitivity", p.motion.shakeSensitivity, 0.01f, 8.0f);
+	m.read("shakeReleaseMs", p.motion.shakeReleaseMs, 1.0f, 5000.0f);
+	m.read("calibrationFrames", p.motion.calibrationFrames, 1, 1000);
 
 	Reader a(r.raw("audio"), "audio", warnings);
 	a.read("sampleRate", p.audio.sampleRate, 8000, 192000);

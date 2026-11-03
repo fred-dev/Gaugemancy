@@ -17,7 +17,7 @@
     "curve": "linear",
     "calibrationFrames": 16,
     "accumulationDenominator": 3.0,
-    "smoothing": 0.0
+    "smoothingMs": 0.0
   },
   "audio": {
     "sampleRate": 44100,

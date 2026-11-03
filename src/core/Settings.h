@@ -150,7 +150,20 @@ struct SensorSettings {
 	Curve curve = Curve::Linear;
 	int calibrationFrames = 16;     ///< frames averaged at start for the zero point
 	float accumulationDenominator = 3.0f; ///< total pressure that counts as 100%
-	float smoothing = 0.0f;         ///< 0 = none .. 0.95 = heavy low-pass on readings
+	float smoothingMs = 0.0f;       ///< low-pass time on each ball, 0 = none
+};
+
+/// Accelerometer interpretation (see MotionProcessor).
+struct MotionSettings {
+	bool enabled = true;
+	bool zeroAtStartup = true;      ///< "level" = orientation at startup; else `upAxis`
+	std::string upAxis = "+z";      ///< device axis pointing up when level (absolute mode)
+	float rangeDegrees = 45.0f;     ///< tilt that reaches 0 or 1
+	float deadzoneDegrees = 3.0f;   ///< small tilts are ignored
+	float smoothingMs = 80.0f;      ///< low-pass time on the tilt values
+	float shakeSensitivity = 0.5f;  ///< movement (g) that counts as a full shake
+	float shakeReleaseMs = 300.0f;  ///< how fast "shake" falls back
+	int calibrationFrames = 20;     ///< frames averaged for the startup reference
 };
 
 struct AudioSettings {
@@ -207,6 +220,7 @@ struct ProfileSettings {
 	int presetSwitchMinIntervalMs = 4000;
 	std::vector<std::string> presetFiles = { "presets/preset_1.json" };
 	SensorSettings sensors;
+	MotionSettings motion;
 	AudioSettings audio;
 	GestureSettings gestures;
 	HardwareSettings hardware;

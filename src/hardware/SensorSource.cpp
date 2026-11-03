@@ -105,7 +105,7 @@ public:
 	bool read(uint64_t, float dtSeconds, SensorFrame & frame) override {
 		frame.isRaw = false;
 		frame.normalised = simulator_.update(dtSeconds);
-		frame.accel = AccelSample {};
+		frame.accel = simulator_.accel();
 		return true;
 	}
 

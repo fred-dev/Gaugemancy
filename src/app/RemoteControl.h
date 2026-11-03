@@ -12,7 +12,8 @@
 //   /gm/sensors/source <string>     "hardware", "sim" or "replay:<file>"
 //   /gm/sim/sensor <int> <float>    simulated level of sensor 1..6
 //   /gm/sim/ramp <float speed> [<int mask>]  start a squeeze ramp
-//   /gm/calibrate                   re-measure the sensors' resting values
+//   /gm/sim/accel <f x> <f y> <f z> simulated accelerometer reading in g
+//   /gm/calibrate                   re-measure resting values and "level"
 //   /gm/reload                      reload the profile from disk
 //   /gm/status                      reply with /gm/state (to the sender)
 //   /gm/record <string file>        start recording sensors ("" stops)

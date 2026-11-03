@@ -18,9 +18,10 @@ const SourceName kSourceNames[kNumModSources] = {
 	{ "sensor5", "Sensor 5" },
 	{ "sensor6", "Sensor 6" },
 	{ "total", "Total pressure" },
-	{ "accelX", "Tilt X" },
-	{ "accelY", "Tilt Y" },
-	{ "accelZ", "Tilt Z" },
+	{ "tiltX", "Tilt left/right" },
+	{ "tiltY", "Tilt forward/back" },
+	{ "tilt", "Tilt (any way)" },
+	{ "shake", "Shake" },
 };
 } // namespace
 
@@ -35,6 +36,9 @@ std::string modSourceLabel(ModSource source) {
 }
 
 ModSource modSourceFromId(const std::string & id) {
+	if (id == "accelX") return ModSource::TiltX;
+	if (id == "accelY") return ModSource::TiltY;
+	if (id == "accelZ") return ModSource::Tilt;
 	for (int i = 0; i < kNumModSources; ++i) {
 		if (id == kSourceNames[i].id) {
 			return static_cast<ModSource>(i);

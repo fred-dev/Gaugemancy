@@ -20,6 +20,8 @@ std::vector<std::string> curveNames() {
 	return names;
 }
 
+const std::vector<std::string> kAxisIds = { "+z", "-z", "+x", "-x", "+y", "-y" };
+
 std::vector<std::string> effectNames() {
 	std::vector<std::string> names;
 	for (const EffectInfo & info : EffectCatalog::all()) {
@@ -337,10 +339,26 @@ void ProgrammingGui::buildProfile() {
 		p.sensors.curve = static_cast<Curve>(i);
 		changed();
 	});
-	profileBuilder_.floatSlider(s, "smoothing", p.sensors.smoothing, 0.0f, 0.95f, changed);
+	profileBuilder_.floatSlider(s, "smoothing (ms)", p.sensors.smoothingMs, 0.0f, 300.0f, changed);
 	profileBuilder_.floatSlider(s, "balls for 100% total", p.sensors.accumulationDenominator, 0.5f, 6.0f, changed);
 	profileBuilder_.intSlider(s, "calibration frames", p.sensors.calibrationFrames, 1, 200, changed);
 	profilePanel_.add(&s);
+
+	ofxGuiGroup & m = *profileBuilder_.group("Motion (accelerometer)", true);
+	profileBuilder_.toggle(m, "enabled", p.motion.enabled, changed);
+	profileBuilder_.toggle(m, "level = position at startup", p.motion.zeroAtStartup, changed);
+	profileBuilder_.choice(m, "else 'up' axis", std::max(0, static_cast<int>(std::find(kAxisIds.begin(), kAxisIds.end(), p.motion.upAxis) - kAxisIds.begin()) % 6),
+		{ "+z", "-z", "+x", "-x", "+y", "-y" }, [&p, changed](int i) {
+			p.motion.upAxis = kAxisIds[i];
+			changed();
+		});
+	profileBuilder_.floatSlider(m, "tilt range (deg)", p.motion.rangeDegrees, 5.0f, 180.0f, changed);
+	profileBuilder_.floatSlider(m, "dead zone (deg)", p.motion.deadzoneDegrees, 0.0f, 20.0f, changed);
+	profileBuilder_.floatSlider(m, "tilt smoothing (ms)", p.motion.smoothingMs, 0.0f, 1000.0f, changed);
+	profileBuilder_.floatSlider(m, "shake sensitivity (g)", p.motion.shakeSensitivity, 0.05f, 4.0f, changed);
+	profileBuilder_.floatSlider(m, "shake release (ms)", p.motion.shakeReleaseMs, 10.0f, 3000.0f, changed);
+	profileBuilder_.button(m, "set level now (recalibrate)", [this]() { instrument_.recalibrate(); });
+	profilePanel_.add(&m);
 
 	ofxGuiGroup & g = *profileBuilder_.group("Hit gesture (change preset)", true);
 	profileBuilder_.toggle(g, "enabled", p.gestures.hitToChangePreset, changed);

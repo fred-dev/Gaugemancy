@@ -256,7 +256,7 @@ int runBenchmark(const Options & options, const std::string & dataRoot) {
 		sim.setRamp(ramp);
 		sim.startRamp();
 		SensorProcessor processor;
-		processor.configure(profile.sensors);
+		processor.configure(profile.sensors, profile.motion);
 		processor.setZeroPoints({});
 		std::array<SlotOverrides, kMaxSlots> overrides {};
 		for (auto & o : overrides) {
@@ -268,7 +268,8 @@ int runBenchmark(const Options & options, const std::string & dataRoot) {
 		double worst = 0.0;     // worst block after the first
 		double firstBlock = 0.0; // the first block after loading pays one-off costs
 		for (int b = 0; b < blocks; ++b) {
-			ControlInputs inputs = processor.processNormalised(sim.update(static_cast<float>(blockSeconds)), {});
+			ControlInputs inputs = processor.processNormalised(sim.update(static_cast<float>(blockSeconds)), sim.accel(),
+				static_cast<float>(blockSeconds));
 			auto t0 = std::chrono::steady_clock::now();
 			audio.update(preset, profile.narration, inputs, overrides, 1.0f);
 			audio.renderOffline(out.data(), bufferSize);

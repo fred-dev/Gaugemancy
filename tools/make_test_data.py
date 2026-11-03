@@ -165,7 +165,10 @@ def profile(name, mode, presets, narration_enabled):
         "controlRateHz": 100, "presetSwitchMinIntervalMs": 2000,
         "presets": ["presets/preset_%d.json" % (i + 1) for i in range(presets)],
         "sensors": {"maxRaw": FULL, "activeThreshold": 0.035, "curve": "linear", "calibrationFrames": 16,
-                    "accumulationDenominator": 3.0, "smoothing": 0.2},
+                    "accumulationDenominator": 3.0, "smoothingMs": 20.0},
+        "motion": {"enabled": True, "zeroAtStartup": True, "upAxis": "+z", "rangeDegrees": 45,
+                   "deadzoneDegrees": 3, "smoothingMs": 80, "shakeSensitivity": 0.5, "shakeReleaseMs": 300,
+                   "calibrationFrames": 20},
         "audio": {"sampleRate": 44100, "bufferSize": 512, "numBuffers": 3, "api": "default",
                   "deviceName": "", "deviceId": -1, "masterGain": 0.8},
         "gestures": {"hitToChangePreset": True, "hitThreshold": 0.25, "troughThreshold": 0.08, "maxPeakMs": 300,
@@ -262,7 +265,7 @@ def main():
                           damping=p(0.5, 0, 1), hiCut=p(6000, 200, 20000), modFreq=p(0.2, 0, 20),
                           modAmount=p(0.1, 0, 1)), compressor()]))
     write_json(os.path.join(demo, "presets", "preset_4.json"),
-               preset("Tilt and total", [slot(i, [], pitch=p(0, -12, 12, "accelX"), spread=p(0, 0, 0.3, "total"))
+               preset("Tilt and total", [slot(i, [], pitch=p(0, -12, 12, "tiltX"), spread=p(0, 0, 0.3, "total"))
                                          for i in range(6)]))
 
     acc = os.path.join(data, "DemoAccumulated")

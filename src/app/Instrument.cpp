@@ -71,7 +71,7 @@ bool Instrument::setup(const Options & options, const std::string & dataRoot) {
 	button_.setClickTimeout(static_cast<uint64_t>(loaded_.profile.hardware.clickTimeoutMs));
 
 	// 3. Sensors.
-	processor_.configure(loaded_.profile.sensors);
+	processor_.configure(loaded_.profile.sensors, loaded_.profile.motion);
 	gesture_.configure(loaded_.profile.gestures);
 	openSensors(options.sensors, options.replayFile);
 	if (!options.recordFile.empty()) {
@@ -184,7 +184,7 @@ void Instrument::skipNarration() {
 
 void Instrument::recalibrate() {
 	processor_.beginCalibration();
-	note("recalibrating sensors - do not touch the balls");
+	note("recalibrating - keep the instrument still and do not touch the balls");
 }
 
 bool Instrument::reloadFromDisk() {
@@ -193,7 +193,7 @@ bool Instrument::reloadFromDisk() {
 	if (fresh.presets.empty()) fresh.presets.emplace_back();
 	loaded_ = std::move(fresh);
 	presetIndex_ = std::min(presetIndex_, static_cast<int>(loaded_.presets.size()) - 1);
-	processor_.configure(loaded_.profile.sensors);
+	processor_.configure(loaded_.profile.sensors, loaded_.profile.motion);
 	gesture_.configure(loaded_.profile.gestures);
 	for (const std::string & problem : audio_.loadNarration(loaded_.profile.narration, audioResolver())) {
 		note(problem, true);
@@ -216,7 +216,7 @@ bool Instrument::savePresetToDisk(std::string & error) {
 }
 
 void Instrument::settingsChanged() {
-	processor_.configure(loaded_.profile.sensors);
+	processor_.configure(loaded_.profile.sensors, loaded_.profile.motion);
 	gesture_.configure(loaded_.profile.gestures);
 	audio_.syncStructure(preset(), loaded_.profile.narration);
 }
@@ -309,9 +309,9 @@ void Instrument::readSensors(uint64_t nowMs, float dt) {
 	hadSensorError_ = false;
 	if (frame.isRaw) {
 		if (recorder_.isOpen()) recorder_.write(nowMs, frame.raw, frame.accel);
-		inputs_ = processor_.process(frame.raw, frame.accel);
+		inputs_ = processor_.process(frame.raw, frame.accel, dt);
 	} else {
-		inputs_ = processor_.processNormalised(frame.normalised, frame.accel);
+		inputs_ = processor_.processNormalised(frame.normalised, frame.accel, dt);
 	}
 }
 
@@ -380,6 +380,8 @@ void Instrument::handleRemote() {
 			for (int i = 0; i < kNumSensors; ++i) ramp.sensors[i] = (mask >> i) & 1;
 			simulator_.setRamp(ramp);
 			simulator_.startRamp();
+		} else if (a == "/gm/sim/accel") {
+			simulator_.setAccel(number(0, 0.0f), number(1, 0.0f), number(2, 1.0f));
 		} else if (a == "/gm/calibrate") {
 			recalibrate();
 		} else if (a == "/gm/reload") {

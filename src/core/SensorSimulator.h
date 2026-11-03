@@ -12,6 +12,7 @@
 // -----------------------------------------------------------------------------
 
 #include "ControlInputs.h"
+#include "SensorProcessor.h"
 
 #include <array>
 
@@ -43,12 +44,18 @@ public:
 	/// Current ramp level (0..1).
 	float rampLevel() const { return level_; }
 
+	/// Simulated accelerometer reading in g (default: upright, +z up).
+	/// The 3D view sets this from the orientation of the virtual instrument.
+	void setAccel(float x, float y, float z) { accel_ = { x, y, z, true }; }
+	const AccelSample & accel() const { return accel_; }
+
 private:
 	std::array<float, kNumSensors> manual_ {};
 	RampSettings ramp_;
 	bool running_ = false;
 	bool rising_ = true;
 	float level_ = 0.0f;
+	AccelSample accel_ { 0.0f, 0.0f, 1.0f, true };
 };
 
 } // namespace gm

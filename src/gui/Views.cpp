@@ -72,16 +72,16 @@ void WaveformView::draw(pdsp::SampleBuffer * sample, const std::string & title, 
 void SensorView::draw(const ControlInputs & inputs, Curve curve, float threshold) {
 	ofPushStyle();
 	const float gap = 8.0f;
-	const int bars = kNumSensors + 4; // sensors, total, tilt x/y/z
+	const int bars = kNumSensors + 5; // sensors, total, tilt x/y/any, shake
 	float curveSize = std::min(rect_.height, 160.0f);
 	ofRectangle barArea(rect_.x, rect_.y, rect_.width - curveSize - gap, rect_.height);
 	float barWidth = (barArea.width - gap * (bars - 1)) / bars;
 
-	const char * labels[] = { "1", "2", "3", "4", "5", "6", "sum", "tx", "ty", "tz" };
+	const char * labels[] = { "1", "2", "3", "4", "5", "6", "sum", "tx", "ty", "tlt", "shk" };
 	for (int i = 0; i < bars; ++i) {
 		float value = i < kNumSensors ? inputs.sensor(i)
 			: i == kNumSensors ? inputs.get(ModSource::Total)
-			: inputs.get(static_cast<ModSource>(static_cast<int>(ModSource::AccelX) + (i - kNumSensors - 1)));
+			: inputs.get(static_cast<ModSource>(static_cast<int>(ModSource::TiltX) + (i - kNumSensors - 1)));
 		ofRectangle bar(barArea.x + i * (barWidth + gap), barArea.y, barWidth, barArea.height - 14);
 		ofNoFill();
 		ofSetColor(80);

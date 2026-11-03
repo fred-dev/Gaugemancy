@@ -38,7 +38,7 @@
           "value": 0,
           "min": -12,
           "max": 12,
-          "source": "accelX"
+          "source": "tiltX"
         },
         "spread": {
           "value": 0,
@@ -102,7 +102,7 @@
           "value": 0,
           "min": -12,
           "max": 12,
-          "source": "accelX"
+          "source": "tiltX"
         },
         "spread": {
           "value": 0,
@@ -166,7 +166,7 @@
           "value": 0,
           "min": -12,
           "max": 12,
-          "source": "accelX"
+          "source": "tiltX"
         },
         "spread": {
           "value": 0,
@@ -230,7 +230,7 @@
           "value": 0,
           "min": -12,
           "max": 12,
-          "source": "accelX"
+          "source": "tiltX"
         },
         "spread": {
           "value": 0,
@@ -294,7 +294,7 @@
           "value": 0,
           "min": -12,
           "max": 12,
-          "source": "accelX"
+          "source": "tiltX"
         },
         "spread": {
           "value": 0,
@@ -358,7 +358,7 @@
           "value": 0,
           "min": -12,
           "max": 12,
-          "source": "accelX"
+          "source": "tiltX"
         },
         "spread": {
           "value": 0,

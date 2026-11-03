@@ -14,7 +14,18 @@
     "curve": "linear",
     "calibrationFrames": 16,
     "accumulationDenominator": 3.0,
-    "smoothing": 0.2
+    "smoothingMs": 20.0
+  },
+  "motion": {
+    "enabled": true,
+    "zeroAtStartup": true,
+    "upAxis": "+z",
+    "rangeDegrees": 45,
+    "deadzoneDegrees": 3,
+    "smoothingMs": 80,
+    "shakeSensitivity": 0.5,
+    "shakeReleaseMs": 300,
+    "calibrationFrames": 20
   },
   "audio": {
     "sampleRate": 44100,

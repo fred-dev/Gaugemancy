@@ -421,7 +421,7 @@ def convert_performer(root_dir, name, dry_run):
             "curve": CURVES[clamp(int(app["curve"]), 0, 3)],
             "calibrationFrames": 16,
             "accumulationDenominator": app["denominator"],
-            "smoothing": 0.0,
+            "smoothingMs": 0.0,
         },
         "audio": {
             "sampleRate": 44100,

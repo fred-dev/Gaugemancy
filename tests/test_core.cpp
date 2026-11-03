@@ -7,6 +7,8 @@
 #include "core/Curve.h"
 #include "core/HitGestureDetector.h"
 #include "core/LedPattern.h"
+#include "core/MotionProcessor.h"
+#include "core/Smoother.h"
 #include "core/Options.h"
 #include "core/ModeController.h"
 #include "core/Playhead.h"
@@ -113,18 +115,18 @@ TEST(sensor_calibration_averages_first_frames) {
 	settings.maxRaw = 600;
 	settings.activeThreshold = 0.0f;
 	SensorProcessor proc;
-	proc.configure(settings);
+	proc.configure(settings, MotionSettings {});
 	proc.beginCalibration();
 	RawSensorFrame rest { 200, 210, 190, 200, 200, 200 };
 	RawSensorFrame rest2 { 204, 214, 194, 200, 200, 200 };
-	for (int i = 0; i < 2; ++i) proc.process(rest, {});
-	for (int i = 0; i < 2; ++i) proc.process(rest2, {});
+	for (int i = 0; i < 2; ++i) proc.process(rest, {}, 0.01f);
+	for (int i = 0; i < 2; ++i) proc.process(rest2, {}, 0.01f);
 	CHECK(!proc.isCalibrating());
 	CHECK(proc.zeroPoints()[0] == 202);
 	CHECK(proc.zeroPoints()[1] == 212);
 
 	RawSensorFrame squeezed { 401, 212, 192, 200, 200, 200 };
-	ControlInputs in = proc.process(squeezed, {});
+	ControlInputs in = proc.process(squeezed, {}, 0.01f);
 	CHECK_NEAR(in.sensor(0), (401.0f - 202.0f) / (600.0f - 202.0f), 1e-5);
 	CHECK_NEAR(in.sensor(1), 0.0f, 1e-6);
 }
@@ -133,9 +135,9 @@ TEST(sensor_outputs_zero_while_calibrating) {
 	SensorProcessor proc;
 	SensorSettings settings;
 	settings.calibrationFrames = 3;
-	proc.configure(settings);
+	proc.configure(settings, MotionSettings {});
 	proc.beginCalibration();
-	ControlInputs in = proc.process({ 1000, 1000, 1000, 1000, 1000, 1000 }, {});
+	ControlInputs in = proc.process({ 1000, 1000, 1000, 1000, 1000, 1000 }, {}, 0.01f);
 	CHECK(!in.anySensorActive());
 }
 
@@ -147,17 +149,134 @@ TEST(total_pressure_uses_denominator_and_clamps) {
 	CHECK_NEAR(SensorProcessor::totalPressure(in, 1.0f), 1.0f, 1e-6);
 }
 
-TEST(tilt_maps_minus1g_to_plus1g) {
-	CHECK_NEAR(SensorProcessor::tiltToUnit(-1.0f), 0.0f, 1e-6);
-	CHECK_NEAR(SensorProcessor::tiltToUnit(0.0f), 0.5f, 1e-6);
-	CHECK_NEAR(SensorProcessor::tiltToUnit(2.0f), 1.0f, 1e-6);
-}
-
 TEST(no_accelerometer_reads_level) {
 	SensorProcessor proc;
 	proc.setZeroPoints({});
-	ControlInputs in = proc.processNormalised({}, AccelSample {});
-	CHECK_NEAR(in.get(ModSource::AccelX), 0.5f, 1e-6);
+	ControlInputs in = proc.processNormalised({}, AccelSample {}, 0.01f);
+	CHECK_NEAR(in.get(ModSource::TiltX), 0.5f, 1e-6);
+	CHECK_NEAR(in.get(ModSource::Tilt), 0.0f, 1e-6);
+	CHECK_NEAR(in.get(ModSource::Shake), 0.0f, 1e-6);
+}
+
+// ================================================================ smoothing
+
+TEST(smoother_takes_first_value_and_follows_time_constant) {
+	Smoother s;
+	s.setTime(100.0f);
+	CHECK_NEAR(s.process(0.0f, 0.01f), 0.0f, 1e-6); // first value as-is
+	float v = 0.0f;
+	for (int i = 0; i < 10; ++i) v = s.process(1.0f, 0.01f); // 100 ms
+	CHECK_NEAR(v, 1.0f - std::exp(-1.0f), 1e-3);              // ~63%
+	Smoother off;
+	off.process(0.0f, 0.01f);
+	CHECK_NEAR(off.process(1.0f, 0.01f), 1.0f, 1e-6);         // 0 ms = no smoothing
+}
+
+TEST(smoothing_is_frame_rate_independent) {
+	Smoother fast, slow;
+	fast.setTime(50.0f);
+	slow.setTime(50.0f);
+	fast.process(0.0f, 0.005f);
+	slow.process(0.0f, 0.02f);
+	float a = 0.0f, b = 0.0f;
+	for (int i = 0; i < 40; ++i) a = fast.process(1.0f, 0.005f); // 200 ms at 200 Hz
+	for (int i = 0; i < 10; ++i) b = slow.process(1.0f, 0.02f);  // 200 ms at 50 Hz
+	CHECK_NEAR(a, b, 1e-4);
+}
+
+TEST(smoothing_bank_keeps_sources_separate) {
+	SmoothingBank bank;
+	bank.setTime(ModSource::Sensor1, 1000.0f);
+	ControlInputs first;
+	bank.process(first, 0.01f);
+	ControlInputs in;
+	in.setSensor(0, 1.0f);
+	in.setSensor(1, 1.0f);
+	bank.process(in, 0.01f);
+	CHECK(in.sensor(0) < 0.05f);         // heavily smoothed
+	CHECK_NEAR(in.sensor(1), 1.0f, 1e-6); // not smoothed
+}
+
+// =================================================================== motion
+
+namespace {
+// Accelerometer reading (gravity) for a device tilted by `degrees` about its Y axis.
+Vec3 tiltedAboutY(float degrees) {
+	float r = degrees / 57.29578f;
+	return { std::sin(r), 0.0f, std::cos(r) };
+}
+
+MotionOutput settle(MotionProcessor & m, const Vec3 & g, int frames = 300) {
+	MotionOutput out;
+	for (int i = 0; i < frames; ++i) out = m.process(g.x, g.y, g.z, true, 0.01f);
+	return out;
+}
+} // namespace
+
+TEST(motion_angles_around_up) {
+	Vec3 up { 0.0f, 0.0f, 1.0f };
+	auto a = MotionProcessor::anglesFor(tiltedAboutY(30.0f), up);
+	CHECK_NEAR(a.x, 30.0f, 0.1);
+	CHECK_NEAR(a.y, 0.0f, 0.1);
+	CHECK_NEAR(a.total, 30.0f, 0.1);
+	CHECK_NEAR(MotionProcessor::signedToUnit(0.0f, 3.0f, 45.0f), 0.5f, 1e-6);
+	CHECK_NEAR(MotionProcessor::signedToUnit(45.0f, 3.0f, 45.0f), 1.0f, 1e-6);
+	CHECK_NEAR(MotionProcessor::signedToUnit(-90.0f, 3.0f, 45.0f), 0.0f, 1e-6);
+	CHECK_NEAR(MotionProcessor::signedToUnit(2.0f, 3.0f, 45.0f), 0.5f, 1e-6); // dead zone
+}
+
+TEST(motion_zero_at_startup_uses_mounting_orientation) {
+	MotionSettings s;
+	s.zeroAtStartup = true;
+	s.calibrationFrames = 10;
+	s.deadzoneDegrees = 0.0f;
+	MotionProcessor m;
+	m.configure(s);
+	m.beginCalibration();
+	// Board mounted sideways: gravity along +x at rest.
+	for (int i = 0; i < 10; ++i) m.process(1.0f, 0.0f, 0.0f, true, 0.01f);
+	CHECK(!m.isCalibrating());
+	MotionOutput rest = settle(m, { 1.0f, 0.0f, 0.0f });
+	CHECK_NEAR(rest.tilt, 0.0f, 1e-3);
+	CHECK_NEAR(rest.tiltX, 0.5f, 1e-3);
+	CHECK_NEAR(rest.shake, 0.0f, 1e-3);
+}
+
+TEST(motion_absolute_reference_reports_tilt) {
+	MotionSettings s;
+	s.zeroAtStartup = false;
+	s.upAxis = "+z";
+	s.rangeDegrees = 45.0f;
+	s.deadzoneDegrees = 0.0f;
+	MotionProcessor m;
+	m.configure(s);
+	m.beginCalibration();
+	MotionOutput out = settle(m, tiltedAboutY(22.5f));
+	CHECK_NEAR(out.tilt, 0.5f, 0.01);
+	CHECK(out.tiltX > 0.7f || out.tiltX < 0.3f); // tilted one way on X
+	CHECK_NEAR(out.tiltY, 0.5f, 0.01);
+	CHECK(axisFromId("-x").x == -1.0f);
+}
+
+TEST(motion_shake_rises_and_falls) {
+	MotionSettings s;
+	s.zeroAtStartup = false;
+	s.shakeSensitivity = 0.5f;
+	s.shakeReleaseMs = 100.0f;
+	MotionProcessor m;
+	m.configure(s);
+	m.beginCalibration();
+	settle(m, { 0.0f, 0.0f, 1.0f });
+	MotionOutput jolt = m.process(0.6f, 0.0f, 1.0f, true, 0.01f);
+	CHECK(jolt.shake > 0.9f);
+	MotionOutput calm = settle(m, { 0.0f, 0.0f, 1.0f }, 200);
+	CHECK(calm.shake < 0.05f);
+}
+
+TEST(legacy_accel_ids_map_to_tilt) {
+	CHECK(modSourceFromId("accelX") == ModSource::TiltX);
+	CHECK(modSourceFromId("accelZ") == ModSource::Tilt);
+	CHECK(modSourceFromId("shake") == ModSource::Shake);
 }
 
 // ================================================================== button
