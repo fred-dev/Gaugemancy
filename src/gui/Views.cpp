@@ -71,6 +71,39 @@ void WaveformView::draw(pdsp::SampleBuffer * sample, const std::string & title, 
 	ofPopStyle();
 }
 
+void WaveformView::drawLive(const std::vector<float> & samples, const std::string & title, float volume, bool selected, bool active) {
+	ofPushStyle();
+	ofNoFill();
+
+	if (samples.size() > 1) {
+		ofSetColor(active ? kWave : ofColor(kWave, 120));
+		float midY = rect_.getCenter().y;
+		float halfH = rect_.height * 0.45f;
+		ofPolyline line;
+		for (size_t i = 0; i < samples.size(); ++i) {
+			float x = rect_.x + rect_.width * (static_cast<float>(i) / static_cast<float>(samples.size() - 1));
+			float y = midY - std::clamp(samples[i], -1.0f, 1.0f) * halfH;
+			line.addVertex(x, y);
+		}
+		line.draw();
+	} else {
+		ofSetColor(120);
+		ofDrawBitmapString("(starting up)", rect_.x + 8, rect_.getCenter().y);
+	}
+
+	float vy = rect_.getBottom() - rect_.height * std::clamp(volume, 0.0f, 1.0f);
+	ofSetColor(80, 160, 255);
+	ofDrawLine(rect_.x, vy, rect_.getRight(), vy);
+
+	ofSetColor(selected ? kSelected : kFrame);
+	ofSetLineWidth(selected ? 3.0f : 1.0f);
+	ofDrawRectangle(rect_);
+	ofSetColor(kText);
+	size_t maxChars = static_cast<size_t>(std::max(rect_.width - 12.0f, 8.0f) / 8.0f);
+	ofDrawBitmapString(title.size() > maxChars ? title.substr(0, maxChars - 1) + "~" : title, rect_.x + 6, rect_.y + 14);
+	ofPopStyle();
+}
+
 // ------------------------------------------------------------------ SensorView
 
 void SensorView::draw(const ControlInputs & inputs, Curve curve, float threshold) {

@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 
 namespace gm {
 
@@ -35,6 +36,10 @@ public:
 	/// Draw the waveform of `sample` (cached until the buffer changes).
 	void draw(pdsp::SampleBuffer * sample, const std::string & title, const GrainMeter & grains,
 		float playhead, float volume, bool selected, bool active);
+
+	/// Draw a live trace of `samples` instead of a static waveform - for a
+	/// synth/generator source, which has no sample to plot.
+	void drawLive(const std::vector<float> & samples, const std::string & title, float volume, bool selected, bool active);
 
 	/// Position (0..1) of a screen x inside the view.
 	float positionAt(float x) const;

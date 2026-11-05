@@ -113,6 +113,13 @@ GrainSlot::GrainSlot() {
 		lfoWaveGain_[3][ch] >> amp_[ch];
 	}
 	volume_.set(0.0f);
+
+	// Live scope: taps the end of the chain (post-effects, channel 0) so a
+	// synth/generator slot (no sample to plot) can still show something
+	// moving in its box. out_signal() is deliberately silent - AudioEngine
+	// patches it into the shared engine's blackhole so it actually ticks.
+	scope_.set(1024);
+	chain_.out(0) >> scope_;
 }
 
 GrainSlot::~GrainSlot() = default;

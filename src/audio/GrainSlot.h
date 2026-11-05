@@ -36,6 +36,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace gm {
 
@@ -95,6 +96,16 @@ public:
 	bool gateOpen() const { return lastGate_; }
 	float effectMeter(int effectIndex) const { return chain_.meter(effectIndex); }
 
+	/// Live samples at the end of the slot's chain (post-effects, channel 0) -
+	/// a synth/generator source has no sample to plot, so its slot box draws
+	/// this instead. Only ticks while something downstream (see AudioEngine's
+	/// constructor) keeps it patched to the engine's blackhole.
+	const std::vector<float> & scopeBuffer() const { return scope_.getBuffer(); }
+
+	/// For AudioEngine to patch once, into the engine's blackhole, so the
+	/// scope above actually gets processed every block.
+	pdsp::Patchable & scopeTap() { return scope_; }
+
 	/// Pure helper: is the slot audible this frame? (exposed for tests)
 	static bool gateFor(const SlotSettings & settings, const ControlInputs & inputs);
 
@@ -107,6 +118,7 @@ private:
 	std::string sampleName_;
 	std::array<pdsp::Amp, 2> amp_;
 	EffectChain chain_;
+	pdsp::Scope scope_;
 
 	// One control per grain parameter except volume, which drives the amps.
 	pdsp::ValueControl length_, density_, distanceJitter_, pitchJitter_;

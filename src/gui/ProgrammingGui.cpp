@@ -425,8 +425,15 @@ void ProgrammingGui::drawSlotEditor(SlotSettings & slot, int index) {
 		builder_.endGroup();
 	}
 
+	if (!slot.enabled) {
+		// No separate "enabled" switch any more - it duplicated "heard" below
+		// but silenced the slot outright, which is easy to flip by accident
+		// and then forget about. "heard" is now the one place that decides.
+		slot.enabled = true;
+		structureChanged();
+	}
+
 	if (builder_.group("Playback")) {
-		builder_.toggle("enabled", slot.enabled, [this]() { structureChanged(); });
 		std::vector<std::string> gates = { "Auto (while its sensors are pressed)", "Always" };
 		for (int i = 1; i < kNumModSources; ++i) gates.push_back("While " + modSourceLabel(static_cast<ModSource>(i)));
 		int gateIndex = slot.gate == GateMode::Auto ? 0 : slot.gate == GateMode::Always ? 1 : 1 + static_cast<int>(slot.gateSource);
@@ -787,17 +794,23 @@ void ProgrammingGui::drawSlots() {
 	for (int i = 0; i < kMaxSlots; ++i) {
 		GrainSlot & slot = instrument_.audio().slot(i);
 		const SlotSettings & settings = instrument_.preset().slots[i];
-		GrainMeter meter {
-			[&slot]() { return slot.voices(); },
-			[&slot](int v) { return slot.grainPosition(v); },
-			[&slot](int v) { return slot.grainEnvelope(v); },
-		};
-		std::string what = settings.sourceType == "granular" ? (settings.file.empty() ? "(empty)" : settings.file)
+		bool granular = settings.sourceType == "granular";
+		std::string what = granular ? (settings.file.empty() ? "(empty)" : settings.file)
 			: SourceCatalog::find(settings.sourceType) != nullptr ? SourceCatalog::find(settings.sourceType)->label : settings.sourceType;
-		std::string title = std::to_string(i + 1) + ": " + what
-			+ (settings.enabled ? "" : "  [off]") + (accumulated && i > 0 ? "  [unused in accumulated mode]" : "");
+		std::string title = std::to_string(i + 1) + ": " + what + (accumulated && i > 0 ? "  [unused in accumulated mode]" : "");
 		bool selected = target_ == Target::Slot && selectedSlot_ == i;
-		slotViews_[i].draw(slot.sample(), title, meter, slot.currentPosition(), slot.currentVolume(), selected, slot.gateOpen());
+		if (granular) {
+			GrainMeter meter {
+				[&slot]() { return slot.voices(); },
+				[&slot](int v) { return slot.grainPosition(v); },
+				[&slot](int v) { return slot.grainEnvelope(v); },
+			};
+			slotViews_[i].draw(slot.sample(), title, meter, slot.currentPosition(), slot.currentVolume(), selected, slot.gateOpen());
+		} else {
+			// No sample to plot for a synth/generator source - trace its
+			// actual output instead, so the box still shows something live.
+			slotViews_[i].drawLive(slot.scopeBuffer(), title, slot.currentVolume(), selected, slot.gateOpen());
+		}
 	}
 }
 

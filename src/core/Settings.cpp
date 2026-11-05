@@ -107,7 +107,16 @@ EffectSettings EffectSettings::make(const std::string & type) {
 
 // ----------------------------------------------------------------- presets --
 
-PresetSettings::PresetSettings() : slots(kMaxSlots) {}
+PresetSettings::PresetSettings() : slots(kMaxSlots) {
+	// Sensible default so a fresh slot is heard without any setup: slot N
+	// plays while sensor N is pressed, matching the physical ball under
+	// your hand - not "always on" (which would never be quiet) and not a
+	// separate "enabled" switch (easy to flip by accident and forget about).
+	for (int i = 0; i < kMaxSlots; ++i) {
+		slots[i].gate = GateMode::Source;
+		slots[i].gateSource = sensorSource(i);
+	}
+}
 
 // ------------------------------------------------------------------- enums --
 

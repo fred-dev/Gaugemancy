@@ -47,6 +47,9 @@ std::vector<ofSoundDevice> outputDevices(ofSoundDevice::Api api) {
 AudioEngine::AudioEngine() {
 	for (auto & slot : slots_) {
 		slot = std::make_unique<GrainSlot>();
+		// The scope's own output is deliberately silent; patching it into
+		// the blackhole is just what makes pdsp actually process it.
+		slot->scopeTap() >> engine_.blackhole();
 	}
 	masterGain_.enableSmoothing(50.0f);
 	masterGain_.set(1.0f);
