@@ -58,6 +58,7 @@ private:
 	std::array<pdsp::PatchNode, 2> out_;
 	std::vector<Slot> effects_;
 	std::vector<std::string> signature_; ///< type of each settings entry ("" = disabled)
+	bool built_ = false; ///< false until build() has run at least once (in_/out_ not yet wired)
 };
 
 } // namespace gm

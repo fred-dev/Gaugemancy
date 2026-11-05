@@ -203,4 +203,25 @@ bool SettingsStore::createProfile(const std::string & profile, std::string & err
 	return saveAll(settings, presets, error);
 }
 
+bool SettingsStore::duplicateProfile(const std::string & source, const std::string & newName, std::string & error) const {
+	std::error_code ec;
+	if (fs::exists(profileFilePath(newName), ec)) {
+		error = "profile '" + newName + "' already exists";
+		return false;
+	}
+	if (!fs::exists(profileFilePath(source), ec)) {
+		error = "profile '" + source + "' does not exist";
+		return false;
+	}
+	fs::create_directories(profileDir(newName), ec);
+	fs::copy(profileDir(source), profileDir(newName), fs::copy_options::recursive, ec);
+	if (ec) {
+		error = "could not copy '" + source + "' to '" + newName + "': " + ec.message();
+		return false;
+	}
+	LoadedProfile loaded = loadProfile(newName);
+	loaded.profile.name = newName;
+	return saveAll(loaded.profile, loaded.presets, error);
+}
+
 } // namespace gm

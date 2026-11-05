@@ -61,6 +61,9 @@ public:
 	void skipNarration();
 	void recalibrate();
 	bool reloadFromDisk();
+	/// Load a different profile by name (its folder under the data root) and
+	/// switch to it - same machinery as reloadFromDisk(), for a different name.
+	bool switchProfile(const std::string & name);
 	bool saveToDisk(std::string & error);
 	bool savePresetToDisk(std::string & error);
 	bool useSensorMode(SensorMode mode, const std::string & replayFile = "");

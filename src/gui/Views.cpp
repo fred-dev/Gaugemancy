@@ -64,7 +64,10 @@ void WaveformView::draw(pdsp::SampleBuffer * sample, const std::string & title, 
 	ofSetLineWidth(selected ? 3.0f : 1.0f);
 	ofDrawRectangle(rect_);
 	ofSetColor(kText);
-	ofDrawBitmapString(title, rect_.x + 6, rect_.y + 14);
+	// Bitmap font: ~8 px per character; cut long titles to fit the box so a
+	// long filename can never bleed into the next slot's rectangle.
+	size_t maxChars = static_cast<size_t>(std::max(rect_.width - 12.0f, 8.0f) / 8.0f);
+	ofDrawBitmapString(title.size() > maxChars ? title.substr(0, maxChars - 1) + "~" : title, rect_.x + 6, rect_.y + 14);
 	ofPopStyle();
 }
 

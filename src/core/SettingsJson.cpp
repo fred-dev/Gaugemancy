@@ -148,6 +148,14 @@ Json toJson(const SlotSettings & slot) {
 	j["voices"] = slot.voices;
 	j["grain"] = toJson(slot.grain);
 	j["effects"] = toJson(slot.effects);
+	j["sourceType"] = slot.sourceType;
+	Json synth = Json::object();
+	if (const SourceInfo * info = SourceCatalog::find(slot.sourceType)) {
+		for (size_t i = 0; i < info->params.size() && i < slot.synthParams.size(); ++i) {
+			synth[info->params[i].id] = toJson(slot.synthParams[i]);
+		}
+	}
+	j["synth"] = synth;
 	return j;
 }
 
@@ -377,6 +385,24 @@ SlotSettings slotFromJson(const Json & json, const std::string & path, Warnings 
 	r.read("voices", slot.voices, 1, 32);
 	if (r.has("grain")) slot.grain = grainFromJson(r.raw("grain"), r.pathOf("grain"), warnings);
 	slot.effects = effectChainFromJson(r.raw("effects"), r.pathOf("effects"), warnings);
+	r.read("sourceType", slot.sourceType);
+	const SourceInfo * sourceInfo = SourceCatalog::find(slot.sourceType);
+	if (slot.sourceType.empty()) {
+		slot.sourceType = "granular";
+	} else if (sourceInfo == nullptr) {
+		r.warn("sourceType", "unknown source '" + slot.sourceType + "', using granular");
+		slot.sourceType = "granular";
+	}
+	slot.synthParams = SourceCatalog::makeParams(slot.sourceType);
+	if (sourceInfo != nullptr && r.has("synth")) {
+		Reader synth(r.raw("synth"), r.pathOf("synth"), warnings);
+		for (size_t i = 0; i < sourceInfo->params.size(); ++i) {
+			const ParamSpec & spec = sourceInfo->params[i];
+			if (synth.has(spec.id)) {
+				slot.synthParams[i] = modulatedParamFromJson(synth.raw(spec.id), spec, synth.pathOf(spec.id), warnings);
+			}
+		}
+	}
 	return slot;
 }
 

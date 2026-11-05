@@ -1,28 +1,26 @@
 #pragma once
 
 // -----------------------------------------------------------------------------
-// GuiBuilder: builds ofxGui controls that are bound directly to settings
-// fields. Changing a control writes the field and calls an optional callback;
-// nothing else has to be kept in sync.
+// GuiBuilder: thin wrapper over ImGui widgets, bound directly to settings
+// fields. Unlike the old ofxGui-based version, nothing here is retained
+// across frames - every call just draws one widget for the current value and
+// writes straight back into the bound reference when it changes. There is no
+// group/control/listener lifetime to manage and no "rebuild the panel" dance;
+// call these every frame from inside an ImGui window.
 //
-//   GuiBuilder b;
-//   ofxGuiGroup * g = b.group("Sensors");
-//   b.floatSlider(*g, "Threshold", settings.activeThreshold, 0, 1);
-//   b.choice(*g, "Curve", curveIndex, curveNames, [&](int i) { ... });
-//   panel.add(g);
+//   if (b.group("Sensors")) {
+//       b.floatSlider("Threshold", settings.activeThreshold, 0, 1);
+//       b.endGroup();
+//   }
 //
-// The builder owns every parameter, control and listener it creates; clear()
-// destroys them. Bound references must outlive the controls, so panels are
-// rebuilt (clear + build again) whenever the structure they show changes.
+// Callers looping over repeated items (slots, effects) must wrap the loop
+// body in ImGui::PushID(index)/PopID() themselves so widget labels don't
+// collide across iterations - GuiBuilder does not do this for you.
 // -----------------------------------------------------------------------------
 
 #include "../core/ModulatedParam.h"
 
-#include "ofxGui.h"
-
-#include <deque>
 #include <functional>
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -32,31 +30,30 @@ class GuiBuilder {
 public:
 	using Callback = std::function<void()>;
 
-	/// Destroy everything this builder made.
-	void clear();
+	/// Collapsible section. Only draw contents (and call endGroup()) if this
+	/// returns true - mirrors ImGui::TreeNode()/TreePop() pairing.
+	bool group(const std::string & name, bool defaultOpen = true);
+	void endGroup();
 
-	/// A new (owned) group, to be added to a panel or another group.
-	ofxGuiGroup * group(const std::string & name, bool minimized = false);
+	bool floatSlider(const std::string & label, float & target, float lo, float hi, Callback onChange = {});
+	bool intSlider(const std::string & label, int & target, int lo, int hi, Callback onChange = {});
+	bool toggle(const std::string & label, bool & target, Callback onChange = {});
+	bool text(const std::string & label, std::string & target, Callback onChange = {});
+	bool button(const std::string & label);
+	void label(const std::string & text);
 
-	void floatSlider(ofxGuiGroup & g, const std::string & label, float & target, float lo, float hi, Callback onChange = {});
-	void intSlider(ofxGuiGroup & g, const std::string & label, int & target, int lo, int hi, Callback onChange = {});
-	void toggle(ofxGuiGroup & g, const std::string & label, bool & target, Callback onChange = {});
-	void text(ofxGuiGroup & g, const std::string & label, std::string & target, Callback onChange = {});
-	void button(ofxGuiGroup & g, const std::string & label, Callback onClick);
-	void label(ofxGuiGroup & g, const std::string & text);
+	/// Dropdown over `names`; returns true and updates `current` on pick.
+	bool choice(const std::string & label, int & current, const std::vector<std::string> & names);
 
-	/// Pick one of `names` (shown as a slider plus the chosen name).
-	void choice(ofxGuiGroup & g, const std::string & label, int current, const std::vector<std::string> & names,
-		std::function<void(int)> onPick);
+	/// A file name field with a "browse" button alongside. Picked files
+	/// outside `baseDir` are copied into it, so a profile folder stays
+	/// self-contained.
+	bool pathField(const std::string & label, std::string & target, const std::string & baseDir, Callback onChange = {});
 
-	/// A file name field with a "browse" button. Picked files outside
-	/// `baseDir` are copied into it, so a profile folder stays self-contained.
-	void pathField(ofxGuiGroup & g, const std::string & label, std::string & target, const std::string & baseDir,
-		Callback onChange = {});
-
-	/// value / min / max sliders and a source choice for one ModulatedParam.
-	ofxGuiGroup * modulated(ofxGuiGroup & g, const ParamSpec & spec, ModulatedParam & target, Callback onChange = {},
-		bool allowSources = true);
+	/// value / min / max sliders and a source choice for one ModulatedParam,
+	/// in a collapsible section titled with spec.label. Only draws the
+	/// min/max/source controls when allowSources is true.
+	bool modulated(const ParamSpec & spec, ModulatedParam & target, Callback onChange = {}, bool allowSources = true);
 
 	/// Labels of every modulation source, in enum order.
 	static std::vector<std::string> sourceNames();
@@ -64,14 +61,6 @@ public:
 	/// Copy `path` into `baseDir` if it is not already there; returns the file
 	/// name to store in the settings, or "" on failure.
 	static std::string adoptFile(const std::string & path, const std::string & baseDir, std::string & error);
-
-private:
-	template <typename T>
-	ofParameter<T> & makeParam();
-
-	std::deque<std::unique_ptr<ofAbstractParameter>> params_;
-	std::vector<std::unique_ptr<ofxBaseGui>> controls_;
-	ofEventListeners listeners_; ///< ofEventListener cannot live in a std::vector
 };
 
 } // namespace gm

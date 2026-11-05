@@ -88,7 +88,7 @@ int main(int argc, char ** argv) {
 	bool window = wantWindow(options);
 	if (window) {
 		ofGLWindowSettings settings;
-		settings.setSize(1600, 900);
+		settings.setSize(1920, 1080);
 		settings.windowMode = OF_WINDOW;
 		settings.title = "Gaugemancy";
 		auto win = ofCreateWindow(settings);

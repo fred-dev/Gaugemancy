@@ -1,5 +1,6 @@
 #include "GrainSlot.h"
 
+#include <algorithm>
 #include <filesystem>
 
 namespace gm {
@@ -23,9 +24,93 @@ GrainSlot::GrainSlot() {
 	// Smooth the controls a sensor moves most, so squeezes do not click.
 	volume_.enableSmoothing(20.0f);
 	position_.enableSmoothing(30.0f);
+	// Gain switches between sources/waveforms are also smoothed: changing
+	// SlotSettings::sourceType (or "waveform") is an ordinary atomic control
+	// change (see the class comment), and without this it would click like
+	// any other instant gain jump.
+	cloudGainCtrl_.enableSmoothing(15.0f);
+	fmGainCtrl_.enableSmoothing(15.0f);
+	noiseGainCtrl_.enableSmoothing(15.0f);
+	cloudGainCtrl_.set(1.0f);
+	fmGainCtrl_.set(0.0f);
+	noiseGainCtrl_.set(0.0f);
+	for (auto & c : vaWaveGainCtrl_) c.enableSmoothing(15.0f);
+	for (auto & c : lfoWaveGainCtrl_) c.enableSmoothing(15.0f);
+
+	vaPitch_.set(57.0f);
+	fmPitch_.set(57.0f);
+	lfoFreq_.set(220.0f);
+	noisePitch_.set(-100.0f);
+	vaPitch_ >> vaOsc_.in_pitch();
+	vaPulseWidth_ >> vaOsc_.in_pw();
+	fmPitch_ >> fmOp_.in_pitch();
+	fmRatio_ >> fmOp_.in_ratio();
+	fmAmount_ >> fmOp_.in_fm();
+	fmFeedback_ >> fmOp_.in_fb();
+	lfoFreq_ >> lfoOsc_.in_freq();
+	noisePitch_ >> noise_.in_pitch();
+	noiseDecimation_ >> noise_.in_decimation();
+	noiseBits_ >> noise_.in_bits();
+
 	for (int ch = 0; ch < 2; ++ch) {
+		cloudGainCtrl_ >> cloudGain_[ch].in_mod();
+		fmGainCtrl_ >> fmGain_[ch].in_mod();
+		noiseGainCtrl_ >> noiseGain_[ch].in_mod();
+		fmOp_.out_signal() >> fmGain_[ch];
+		cloudGain_[ch] >> amp_[ch];
+		fmGain_[ch] >> amp_[ch];
+		noiseGain_[ch] >> amp_[ch];
+
 		volume_ >> amp_[ch].in_mod();
 		amp_[ch] >> chain_.in(ch);
+	}
+	// BitNoise is natively stereo (two independent noise channels) - feed
+	// each straight to its own channel instead of duplicating one signal.
+	noise_.ch(0) >> noiseGain_[0];
+	noise_.ch(1) >> noiseGain_[1];
+
+	// VAOscillator/LFO compute all 4 of their waveforms unconditionally,
+	// same as the FM/noise sources above; "waveform" in update() just picks
+	// which one's gain is non-zero. Order matches SourceCatalog's
+	// "waveform" param comment (0=saw 1=pulse 2=tri 3=sine for VA,
+	// 0=tri 1=sine 2=saw 3=square for the LFO).
+	//
+	// out_X() selects that output on the oscillator itself (shared, mutable
+	// state - see VAOscillator.h's own doc comments) and must be patched
+	// immediately, not stored for later: calling out_pulse() after out_saw()
+	// changes what out_saw()'s *already-returned* reference would connect.
+	for (int ch = 0; ch < 2; ++ch) {
+		vaWaveGainCtrl_[0] >> vaWaveGain_[0][ch].in_mod();
+		vaOsc_.out_saw() >> vaWaveGain_[0][ch];
+		vaWaveGain_[0][ch] >> amp_[ch];
+
+		vaWaveGainCtrl_[1] >> vaWaveGain_[1][ch].in_mod();
+		vaOsc_.out_pulse() >> vaWaveGain_[1][ch];
+		vaWaveGain_[1][ch] >> amp_[ch];
+
+		vaWaveGainCtrl_[2] >> vaWaveGain_[2][ch].in_mod();
+		vaOsc_.out_triangle() >> vaWaveGain_[2][ch];
+		vaWaveGain_[2][ch] >> amp_[ch];
+
+		vaWaveGainCtrl_[3] >> vaWaveGain_[3][ch].in_mod();
+		vaOsc_.out_sine() >> vaWaveGain_[3][ch];
+		vaWaveGain_[3][ch] >> amp_[ch];
+
+		lfoWaveGainCtrl_[0] >> lfoWaveGain_[0][ch].in_mod();
+		lfoOsc_.out_triangle() >> lfoWaveGain_[0][ch];
+		lfoWaveGain_[0][ch] >> amp_[ch];
+
+		lfoWaveGainCtrl_[1] >> lfoWaveGain_[1][ch].in_mod();
+		lfoOsc_.out_sine() >> lfoWaveGain_[1][ch];
+		lfoWaveGain_[1][ch] >> amp_[ch];
+
+		lfoWaveGainCtrl_[2] >> lfoWaveGain_[2][ch].in_mod();
+		lfoOsc_.out_saw() >> lfoWaveGain_[2][ch];
+		lfoWaveGain_[2][ch] >> amp_[ch];
+
+		lfoWaveGainCtrl_[3] >> lfoWaveGain_[3][ch].in_mod();
+		lfoOsc_.out_square() >> lfoWaveGain_[3][ch];
+		lfoWaveGain_[3][ch] >> amp_[ch];
 	}
 	volume_.set(0.0f);
 }
@@ -73,7 +158,7 @@ void GrainSlot::createCloud(int voices) {
 	position_ >> cloud_->in_position();
 	direction_ >> cloud_->in_direction();
 	for (int ch = 0; ch < 2; ++ch) {
-		cloud_->ch(ch) >> amp_[ch];
+		cloud_->ch(ch) >> cloudGain_[ch];
 	}
 	if (sample_) {
 		cloud_->setSample(sample_.get());
@@ -108,15 +193,30 @@ bool GrainSlot::gateFor(const SlotSettings & settings, const ControlInputs & inp
 	case GateMode::Auto:
 		break;
 	}
-	// Auto: open while any source used by a grain parameter is active, as the
-	// original instrument did (a slot sounds while "its" balls are pressed).
-	for (int i = 0; i < GrainSettings::count(); ++i) {
-		const ModulatedParam & p = settings.grain.at(i);
-		if (p.isModulated() && inputs.get(p.source) > 0.0f) {
-			return true;
+	// Auto: open while any source used by a grain (or, for a synth source,
+	// synth) parameter is active, as the original instrument did (a slot
+	// sounds while "its" balls are pressed) - but only once something is
+	// actually mapped to gate on. A slot with nothing modulated yet (a
+	// freshly-picked synth source, for instance) has nothing to "auto" on,
+	// so it just plays - that's much more useful than silence by default.
+	bool anyModulated = false;
+	if (settings.sourceType == "granular") {
+		for (int i = 0; i < GrainSettings::count(); ++i) {
+			const ModulatedParam & p = settings.grain.at(i);
+			if (p.isModulated()) {
+				anyModulated = true;
+				if (inputs.get(p.source) > 0.0f) return true;
+			}
+		}
+	} else {
+		for (const ModulatedParam & p : settings.synthParams) {
+			if (p.isModulated()) {
+				anyModulated = true;
+				if (inputs.get(p.source) > 0.0f) return true;
+			}
 		}
 	}
-	return false;
+	return !anyModulated;
 }
 
 void GrainSlot::update(const SlotSettings & settings, const ControlInputs & inputs, const SlotOverrides & overrides) {
@@ -132,10 +232,59 @@ void GrainSlot::update(const SlotSettings & settings, const ControlInputs & inpu
 	lastPosition_ = overrides.overridePosition ? overrides.position : g.position.resolve(inputs);
 	position_.set(lastPosition_);
 
+	// Each source type resolves its own volume from its own param list -
+	// grain's for granular, the matching synth param otherwise - so "Volume"
+	// is always right there with that source's other parameters, not a
+	// separate grain-only control a synth source would have to borrow.
+	const SourceInfo * sourceInfo = SourceCatalog::find(settings.sourceType);
+	auto resolveSynth = [&](const std::string & id, float fallback) {
+		if (sourceInfo == nullptr) return fallback;
+		for (size_t i = 0; i < sourceInfo->params.size(); ++i) {
+			if (sourceInfo->params[i].id == id && i < settings.synthParams.size()) {
+				return settings.synthParams[i].resolve(inputs);
+			}
+		}
+		return fallback;
+	};
+
 	lastGate_ = overrides.overrideGate ? overrides.gateOpen : gateFor(settings, inputs);
-	float volume = overrides.overrideVolume ? overrides.volume : g.volume.resolve(inputs);
-	lastVolume_ = (settings.enabled && lastGate_ && sample_) ? volume : 0.0f;
+	float volume = overrides.overrideVolume ? overrides.volume
+		: settings.sourceType == "granular" ? g.volume.resolve(inputs) : resolveSynth("volume", 0.8f);
+	// A synth source always "has sound" (no file needed); granular still
+	// needs a loaded sample.
+	bool audible = settings.enabled && lastGate_ && (settings.sourceType != "granular" || sample_);
+	lastVolume_ = audible ? volume : 0.0f;
 	volume_.set(lastVolume_);
+
+	cloudGainCtrl_.set(settings.sourceType == "granular" ? 1.0f : 0.0f);
+	fmGainCtrl_.set(settings.sourceType == "fm_operator" ? 1.0f : 0.0f);
+	noiseGainCtrl_.set(settings.sourceType == "noise" ? 1.0f : 0.0f);
+
+	// "waveform" is just another resolved param (see SourceCatalog), so a
+	// sensor can sweep through waveforms exactly like any other parameter -
+	// round it to pick which single gain of the 4 is open.
+	int vaWave = settings.sourceType == "va_osc" ? std::clamp(static_cast<int>(resolveSynth("waveform", 0.0f)), 0, 3) : -1;
+	int lfoWave = settings.sourceType == "lfo_osc" ? std::clamp(static_cast<int>(resolveSynth("waveform", 0.0f)), 0, 3) : -1;
+	for (int w = 0; w < 4; ++w) {
+		vaWaveGainCtrl_[w].set(w == vaWave ? 1.0f : 0.0f);
+		lfoWaveGainCtrl_[w].set(w == lfoWave ? 1.0f : 0.0f);
+	}
+
+	if (settings.sourceType == "va_osc") {
+		vaPitch_.set(resolveSynth("pitch", 57.0f));
+		vaPulseWidth_.set(resolveSynth("pulseWidth", 0.5f));
+	} else if (settings.sourceType == "fm_operator") {
+		fmPitch_.set(resolveSynth("pitch", 57.0f));
+		fmRatio_.set(resolveSynth("ratio", 1.0f));
+		fmAmount_.set(resolveSynth("fmAmount", 0.0f));
+		fmFeedback_.set(resolveSynth("feedback", 0.0f));
+	} else if (settings.sourceType == "lfo_osc") {
+		lfoFreq_.set(resolveSynth("freq", 220.0f));
+	} else if (settings.sourceType == "noise") {
+		noisePitch_.set(resolveSynth("pitch", -100.0f));
+		noiseDecimation_.set(resolveSynth("decimation", 151.0f));
+		noiseBits_.set(resolveSynth("bits", 12.0f));
+	}
 
 	chain_.apply(settings.effects, inputs);
 }

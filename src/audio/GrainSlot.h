@@ -3,11 +3,24 @@
 // -----------------------------------------------------------------------------
 // GrainSlot: one voice of the instrument.
 //
-//   sample -> GrainCloud -> volume/gate amp -> EffectChain -> out(ch)
+//   sample -> GrainCloud --------> cloudGain -----\
+//   VAOscillator (4 waveforms) --> vaWaveGain[0-3] -\
+//   (always     FMOperator ------> fmGain -----------+-> volume/gate amp -> EffectChain -> out(ch)
+//    running)   LFO (4 waveforms)-> lfoWaveGain[0-3] -/
+//               BitNoise ---------> noiseGain --------/
 //
-// Every grain parameter has a pdsp::ValueControl patched to the cloud once;
-// update() resolves the parameters from the settings and sensors each control
-// frame and sets the controls (atomic, no repatching).
+// Every source - and every waveform of the two multi-waveform oscillators -
+// is always patched and always running; which one is actually heard is just
+// which single gain is set to the resolved volume (every other one to 0) for
+// SlotSettings::sourceType (and, for "va_osc"/"lfo_osc", the "waveform"
+// param), each control frame. That makes switching source or waveform an
+// ordinary atomic control change, not a structural rebuild - no patch lock
+// needed, unlike voices/window/effects - and even lets a sensor sweep
+// through waveforms live.
+//
+// Every grain and synth parameter has a pdsp::ValueControl patched to its
+// module once; update() resolves the parameters from the settings and
+// sensors each control frame and sets the controls (atomic, no repatching).
 //
 // Structural changes (sample, voice count, window, effect list) go through
 // rebuild()/setSample(), which must be called while holding the engine's
@@ -98,6 +111,25 @@ private:
 	// One control per grain parameter except volume, which drives the amps.
 	pdsp::ValueControl length_, density_, distanceJitter_, pitchJitter_;
 	pdsp::ValueControl pitch_, spread_, position_, direction_, volume_;
+
+	// The synth/noise sources, always running; see the class comment for how
+	// only one "voice" gain is ever actually open. vaWaveGain_/lfoWaveGain_
+	// hold one gain per waveform (so "waveform" can be swept by a sensor
+	// with no repatching) - index order matches SourceCatalog's "waveform"
+	// param comment (0=saw/1=pulse/2=tri/3=sine for VA, 0=tri/1=sine/2=saw/
+	// 3=square for the LFO).
+	pdsp::VAOscillator vaOsc_;
+	pdsp::FMOperator fmOp_;
+	pdsp::LFO lfoOsc_;
+	pdsp::BitNoise noise_;
+	std::array<pdsp::Amp, 2> cloudGain_, fmGain_, noiseGain_;
+	std::array<std::array<pdsp::Amp, 2>, 4> vaWaveGain_, lfoWaveGain_;
+	pdsp::ValueControl cloudGainCtrl_, fmGainCtrl_, noiseGainCtrl_;
+	std::array<pdsp::ValueControl, 4> vaWaveGainCtrl_, lfoWaveGainCtrl_;
+	pdsp::ValueControl vaPitch_, vaPulseWidth_;
+	pdsp::ValueControl fmPitch_, fmRatio_, fmAmount_, fmFeedback_;
+	pdsp::ValueControl lfoFreq_;
+	pdsp::ValueControl noisePitch_, noiseDecimation_, noiseBits_;
 
 	int builtVoices_ = 0;
 	WindowType builtWindow_ = WindowType::Count;

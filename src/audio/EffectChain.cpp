@@ -44,10 +44,14 @@ void EffectChain::build(const EffectChainSettings & settings) {
 		*previous >> out_[ch];
 	}
 	signature_ = signatureOf(settings);
+	built_ = true;
 }
 
 bool EffectChain::matches(const EffectChainSettings & settings) const {
-	return signatureOf(settings) == signature_;
+	// Before the first build(), in_/out_ are not wired to each other at all
+	// (not even the empty-chain pass-through) - never report a match then,
+	// or a caller that only rebuilds on mismatch would stay silent forever.
+	return built_ && signatureOf(settings) == signature_;
 }
 
 void EffectChain::apply(const EffectChainSettings & settings, const ControlInputs & inputs) {

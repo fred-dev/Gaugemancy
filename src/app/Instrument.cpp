@@ -214,7 +214,13 @@ void Instrument::recalibrate() {
 }
 
 bool Instrument::reloadFromDisk() {
-	LoadedProfile fresh = store_.loadProfile(loaded_.profile.name);
+	bool ok = switchProfile(loaded_.profile.name);
+	if (ok) note("settings reloaded from disk");
+	return ok;
+}
+
+bool Instrument::switchProfile(const std::string & name) {
+	LoadedProfile fresh = store_.loadProfile(name);
 	for (const std::string & warning : fresh.warnings) note(warning, true);
 	if (fresh.presets.empty()) fresh.presets.emplace_back();
 	loaded_ = std::move(fresh);
@@ -225,7 +231,8 @@ bool Instrument::reloadFromDisk() {
 		note(problem, true);
 	}
 	loadCurrentPreset();
-	note("settings reloaded from disk");
+	restartAudio();
+	note("switched to profile '" + loaded_.profile.name + "'");
 	return true;
 }
 

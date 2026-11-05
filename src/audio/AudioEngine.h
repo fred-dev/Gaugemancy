@@ -56,6 +56,10 @@ public:
 	/// Human readable list of output devices for an API ("default", "alsa"...).
 	static std::vector<std::string> describeOutputDevices(const std::string & api);
 
+	/// Plain device names for an API, in the same order as describeOutputDevices()
+	/// - for a GUI picker that sets AudioSettings::deviceName directly.
+	static std::vector<std::string> outputDeviceNames(const std::string & api);
+
 	// ---- content -------------------------------------------------------------
 
 	/// Load every slot's sample and build the chains for a preset. Files are
@@ -82,6 +86,10 @@ public:
 	GrainSlot & slot(int index) { return *slots_[index]; }
 	NarrationVoice & narration() { return narration_; }
 	EffectChain & master() { return master_; }
+
+	/// Final output level after every slot and narration are summed and the
+	/// master chain/gain applied - channel 0 = left, 1 = right. Thread-safe.
+	float masterMeter(int channel) const { return masterAmp_[channel & 1].meter_output(); }
 
 	/// Buffers output as silence because the graph was being changed.
 	uint64_t skippedCallbacks() const { return engine_.getSkippedCallbacks(); }

@@ -20,6 +20,7 @@
 #include "Curve.h"
 #include "EffectCatalog.h"
 #include "ModulatedParam.h"
+#include "SourceCatalog.h"
 
 #include <string>
 #include <vector>
@@ -106,6 +107,14 @@ struct SlotSettings {
 	int voices = 8;                         ///< grain voices (CPU cost scales with this)
 	GrainSettings grain;
 	EffectChainSettings effects;
+
+	/// SourceCatalog id: what the slot actually sounds like. "granular"
+	/// (the default) plays `file` through `grain`; anything else is a
+	/// synth/oscillator using `synthParams` instead - `file`/`grain` stay
+	/// around either way, so switching back to granular picks up where it
+	/// left off.
+	std::string sourceType = "granular";
+	std::vector<ModulatedParam> synthParams; ///< same order as SourceCatalog::find(sourceType)->params
 };
 
 // ----------------------------------------------------------------- presets --

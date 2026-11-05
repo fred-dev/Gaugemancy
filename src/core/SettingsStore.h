@@ -64,6 +64,10 @@ public:
 	/// Create a new profile folder with defaults (does not overwrite).
 	bool createProfile(const std::string & profile, std::string & error) const;
 
+	/// Create a new profile folder as a full copy of `source` (settings,
+	/// presets and every sample file) under `newName` (does not overwrite).
+	bool duplicateProfile(const std::string & source, const std::string & newName, std::string & error) const;
+
 	// ---- helpers (public for tests and tools) -------------------------------
 	static bool readJsonFile(const std::string & path, Json & out, std::string & error);
 	static bool writeJsonFileAtomic(const std::string & path, const Json & json, std::string & error);

@@ -25,6 +25,12 @@ std::string lower(std::string text) {
 	return text;
 }
 
+/// A synth source always has something to play; granular still needs a
+/// loaded sample.
+bool isPlayable(const SlotSettings & settings, const GrainSlot & slot) {
+	return settings.enabled && (settings.sourceType != "granular" || slot.hasSample());
+}
+
 std::vector<ofSoundDevice> outputDevices(ofSoundDevice::Api api) {
 	ofSoundStream stream;
 	std::vector<ofSoundDevice> outputs;
@@ -65,6 +71,14 @@ std::vector<std::string> AudioEngine::describeOutputDevices(const std::string & 
 			+ (d.isDefaultOutput ? " default" : ""));
 	}
 	return lines;
+}
+
+std::vector<std::string> AudioEngine::outputDeviceNames(const std::string & api) {
+	std::vector<std::string> names;
+	for (const ofSoundDevice & d : outputDevices(apiFromName(api))) {
+		names.push_back(d.name);
+	}
+	return names;
 }
 
 bool AudioEngine::startDevice(const AudioSettings & settings, std::string & report) {
@@ -215,7 +229,7 @@ std::string AudioEngine::loadSlotSample(int slot, const std::string & path, cons
 
 void AudioEngine::connectOutputs(const PresetSettings & preset) {
 	for (int i = 0; i < kMaxSlots; ++i) {
-		bool playable = preset.slots[i].enabled && slots_[i]->hasSample();
+		bool playable = isPlayable(preset.slots[i], *slots_[i]);
 		if (playable == slotConnected_[i]) continue;
 		for (int ch = 0; ch < 2; ++ch) {
 			if (playable) {
@@ -231,7 +245,7 @@ void AudioEngine::connectOutputs(const PresetSettings & preset) {
 void AudioEngine::syncStructure(const PresetSettings & preset, const NarrationSettings & narration) {
 	bool slotChanges = false;
 	for (int i = 0; i < kMaxSlots; ++i) {
-		bool playable = preset.slots[i].enabled && slots_[i]->hasSample();
+		bool playable = isPlayable(preset.slots[i], *slots_[i]);
 		slotChanges |= slots_[i]->needsRebuild(preset.slots[i]) || playable != slotConnected_[i];
 	}
 	bool masterChanged = !master_.matches(preset.masterEffects);

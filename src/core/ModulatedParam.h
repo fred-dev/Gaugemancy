@@ -16,6 +16,7 @@
 #include "ControlInputs.h"
 
 #include <string>
+#include <vector>
 
 namespace gm {
 
@@ -25,6 +26,11 @@ struct ParamSpec {
 	float defaultValue;
 	float lowest;         ///< legal minimum
 	float highest;        ///< legal maximum
+
+	/// Named options for a discrete parameter (e.g. a waveform pick), lowest
+	/// first - index i means value `lowest + i`. Empty (the default) means
+	/// "continuous": the GUI draws a slider instead of a dropdown.
+	std::vector<const char *> choices {};
 };
 
 struct ModulatedParam {
