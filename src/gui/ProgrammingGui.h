@@ -138,6 +138,12 @@ private:
 	int auditionSlot_ = -1;
 	bool glitchByMouse_ = false;
 
+	// "Free run" per synth slot: an ephemeral, not-saved override (same
+	// mechanism as click-to-audition) so a synth/generator source can be
+	// heard and tuned continuously without needing the sensor simulator
+	// running or a ball pressed.
+	std::array<bool, kMaxSlots> freeRun_ {};
+
 	// Hidden-by-default windows, toggled from the menu bar or F7/F10.
 	bool showSettings_ = false;
 	bool showLog_ = false;

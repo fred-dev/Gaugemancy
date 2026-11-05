@@ -130,29 +130,19 @@ bool GuiBuilder::modulated(const ParamSpec & spec, ModulatedParam & target, Call
 	bool changed = false;
 	if (group(spec.label, false)) {
 		if (!spec.choices.empty()) {
-			// A discrete parameter (e.g. a waveform pick): named dropdown, not
-			// a slider over raw numbers - still just a float under the hood,
-			// so modulating it (min/max/source) works exactly as before.
+			// A discrete parameter (e.g. a waveform pick) is just set, not
+			// modulated: "min (source at 0) / max (source at 1)" sweeping
+			// through named options by sensor pressure isn't a sensible
+			// control, so there is no source picker here at all - picking a
+			// value is the whole story.
 			std::vector<std::string> names(spec.choices.begin(), spec.choices.end());
 			int count = static_cast<int>(names.size());
-			auto drawChoice = [&](const char * label, float & field) {
-				int index = std::clamp(static_cast<int>(std::lround(field - spec.lowest)), 0, count - 1);
-				if (choice(label, index, names)) {
-					field = spec.lowest + static_cast<float>(index);
-					changed = true;
-					if (onChange) onChange();
-				}
-			};
-			drawChoice("value", target.value);
-			if (allowSources) {
-				drawChoice("min (source at 0)", target.min);
-				drawChoice("max (source at 1)", target.max);
-				int source = static_cast<int>(target.source);
-				if (choice("source", source, sourceNames())) {
-					target.source = static_cast<ModSource>(source);
-					changed = true;
-					if (onChange) onChange();
-				}
+			target.source = ModSource::None; // never modulated, even if loaded from an older save
+			int index = std::clamp(static_cast<int>(std::lround(target.value - spec.lowest)), 0, count - 1);
+			if (choice("value", index, names)) {
+				target.value = spec.lowest + static_cast<float>(index);
+				changed = true;
+				if (onChange) onChange();
 			}
 		} else {
 			changed |= floatSlider("value", target.value, spec.lowest, spec.highest, onChange);

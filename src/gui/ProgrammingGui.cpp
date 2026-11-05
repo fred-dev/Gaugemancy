@@ -397,28 +397,36 @@ void ProgrammingGui::drawMasterSection() {
 }
 
 void ProgrammingGui::drawSlotEditor(SlotSettings & slot, int index) {
+	bool granular = slot.sourceType == "granular";
+
 	if (builder_.group("Source")) {
 		int sourceIndex = sourceTypeIndex(slot.sourceType);
 		if (builder_.choice("type", sourceIndex, sourceTypeNames())) {
 			slot.sourceType = SourceCatalog::all()[sourceIndex].id;
 			slot.synthParams = SourceCatalog::makeParams(slot.sourceType);
+			granular = slot.sourceType == "granular";
+			if (freeRun_[index]) {
+				// The toggle below only exists for a synth source; switching
+				// away from one must not leave it stuck audibly "on" with no
+				// way left on screen to turn it back off.
+				freeRun_[index] = false;
+				instrument_.setAudition(index, false, 0.0f);
+			}
 			structureChanged();
 		}
 		if (const SourceInfo * info = SourceCatalog::find(slot.sourceType)) {
 			builder_.label(info->description);
 		}
+		if (!granular) {
+			if (builder_.toggle("free run (play continuously - for tuning by ear)", freeRun_[index])) {
+				instrument_.setAudition(index, freeRun_[index], 0.0f);
+			}
+		}
 		builder_.endGroup();
 	}
 
-	if (builder_.group("Sample")) {
+	if (builder_.group("Playback")) {
 		builder_.toggle("enabled", slot.enabled, [this]() { structureChanged(); });
-		if (builder_.pathField("file", slot.file, audioDir())) samplesToReload_.push_back(index);
-		int windowIndex = static_cast<int>(slot.window);
-		if (builder_.choice("grain window", windowIndex, windowNames())) {
-			slot.window = static_cast<WindowType>(windowIndex);
-			structureChanged();
-		}
-		builder_.intSlider("grain voices (cpu)", slot.voices, 1, 32, [this]() { structureChanged(); });
 		std::vector<std::string> gates = { "Auto (while its sensors are pressed)", "Always" };
 		for (int i = 1; i < kNumModSources; ++i) gates.push_back("While " + modSourceLabel(static_cast<ModSource>(i)));
 		int gateIndex = slot.gate == GateMode::Auto ? 0 : slot.gate == GateMode::Always ? 1 : 1 + static_cast<int>(slot.gateSource);
@@ -430,6 +438,19 @@ void ProgrammingGui::drawSlotEditor(SlotSettings & slot, int index) {
 				slot.gateSource = static_cast<ModSource>(gateIndex - 1);
 			}
 		}
+		builder_.endGroup();
+	}
+
+	// File/window/voices are all granular-only - a synth source has nothing
+	// to load or window, so showing them next to it is just clutter/confusion.
+	if (granular && builder_.group("Sample")) {
+		if (builder_.pathField("file", slot.file, audioDir())) samplesToReload_.push_back(index);
+		int windowIndex = static_cast<int>(slot.window);
+		if (builder_.choice("grain window", windowIndex, windowNames())) {
+			slot.window = static_cast<WindowType>(windowIndex);
+			structureChanged();
+		}
+		builder_.intSlider("grain voices (cpu)", slot.voices, 1, 32, [this]() { structureChanged(); });
 		builder_.endGroup();
 	}
 
@@ -877,7 +898,9 @@ void ProgrammingGui::mouseDragged(int x, int y, int) {
 void ProgrammingGui::mouseReleased(int x, int y, int) {
 	if (deviceView_.mouseReleased(x, y)) return;
 	if (auditionSlot_ >= 0) {
-		instrument_.setAudition(auditionSlot_, false, 0.0f);
+		// Letting go of a click-held audition must not silence a slot whose
+		// "free run" toggle is separately keeping it on.
+		if (!freeRun_[auditionSlot_]) instrument_.setAudition(auditionSlot_, false, 0.0f);
 		auditionSlot_ = -1;
 	}
 	if (glitchByMouse_) {
