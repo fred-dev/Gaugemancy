@@ -65,6 +65,7 @@ bool Instrument::setup(const Options & options, const std::string & dataRoot) {
 	std::string panelReport;
 	if (panel_.open(loaded_.profile.hardware, panelReport)) {
 		note("control panel ready");
+		panel_.playStartupSequenceBlocking();
 	} else if (hardwareExpected()) {
 		note("control panel: " + panelReport, true);
 	}

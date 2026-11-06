@@ -80,6 +80,21 @@ void ControlPanel::pulseRelayBlocking(int pulseMs) {
 	relayActive_ = false;
 }
 
+void ControlPanel::playStartupSequenceBlocking() {
+	if (!pins_->blueLed.isOpen() && !pins_->redLed.isOpen()) return;
+	constexpr int kStepMs = 220;
+	auto step = [this, kStepMs](bool blue, bool red) {
+		if (pins_->blueLed.isOpen()) pins_->blueLed.write(blue);
+		if (pins_->redLed.isOpen()) pins_->redLed.write(red);
+		std::this_thread::sleep_for(std::chrono::milliseconds(kStepMs));
+	};
+	step(true, false);  // blue
+	step(true, true);   // purple
+	step(false, true);  // red
+	step(false, false); // off, until setLeds()/update() takes over
+	blueState_ = redState_ = 0; // so the next real update() always writes fresh
+}
+
 void ControlPanel::update(uint64_t nowMs) {
 	if (relayActive_ && nowMs >= relayOffAtMs_) {
 		pins_->relay.write(false);

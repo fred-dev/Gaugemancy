@@ -5,9 +5,10 @@
 // one push button, a blue and a red status LED, and the relay that switches
 // the speaker (a pulse toggles it).
 //
-// Nothing here blocks except pulseRelayBlocking() (startup/shutdown only):
-// relay pulses from the main loop and LED blinking are timed in update().
-// On a laptop open() fails cleanly and every method does nothing.
+// Nothing here blocks except pulseRelayBlocking() and
+// playStartupSequenceBlocking() (startup/shutdown only): relay pulses from
+// the main loop and LED blinking are timed in update(). On a laptop open()
+// fails cleanly and every method does nothing.
 // -----------------------------------------------------------------------------
 
 #include "../core/LedPattern.h"
@@ -36,6 +37,12 @@ public:
 
 	/// Pattern shown on the LEDs from now on.
 	void setLeds(const LedPattern & pattern) { pattern_ = pattern; }
+
+	/// A one-off blink through blue -> purple -> red -> off at startup, so
+	/// a technician can see both LEDs actually work before the instrument
+	/// settles into its steady per-preset colour (set separately via
+	/// setLeds(), right after this returns). Never repeats.
+	void playStartupSequenceBlocking();
 
 	/// Start a relay pulse (toggles the speaker power).
 	void pulseRelay(uint64_t nowMs);
