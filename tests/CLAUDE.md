@@ -8,7 +8,11 @@ Last updated: 2026-11-03 (local Mac session: first macOS build/run).
 
 ## Ground rules from the owner (Fred)
 
-- Work on the `ai-refactor` branch in every repo; commit and push there.
+- Work on `main` in fred-dev/Gaugemancy itself (as of 2026-11-06 - the old
+  `gui-rewrite` branch was renamed to `main`; the pre-rewrite codebase that
+  used to be `main` is kept as `legacy_version`, reference only). The three
+  addon forks below keep their own, separate `ai-refactor` branch - that
+  name is unrelated to Gaugemancy's branches, don't conflate the two.
 - Never modify openFrameworks core or the standard OF addons (ofxGui, ofxOsc...).
 - Addon changes go into Fred's forks only. If another addon needs changing,
   **ask Fred to fork it first**, then make the change in the fork.
@@ -20,18 +24,19 @@ Last updated: 2026-11-03 (local Mac session: first macOS build/run).
 - Code style: small classes, short functions, clear comments, safe on all platforms.
 - User-facing text: no em dashes.
 
-## Repositories (all on branch `ai-refactor`)
+## Repositories
 
-| Repo | Role | State |
-|---|---|---|
-| fred-dev/Gaugemancy | the app | rewritten, builds and runs on OF main (Linux x86 tested) |
-| fred-dev/ofxPDSP | DSP | builds on OF main; `lockPatching()`, `renderOffline()`, denormal flush |
-| fred-dev/ofxGPIO | Pi GPIO/SPI/I2C | rewritten on GPIO chardev v2 + spidev + i2c-dev; legacy API kept |
-| fred-dev/ofxAudioFile | sample decoding | memory bugs fixed, decoders updated; recommended for `master` too |
-| danomatika/ofxMidi | dependency of ofxPDSP | upstream works on OF main, no fork needed |
+| Repo | Branch | Role | State |
+|---|---|---|---|
+| fred-dev/Gaugemancy | `main` | the app | GUI rewrite (ofxImGui) merged in; builds and runs on OF main |
+| fred-dev/ofxPDSP | `ai-refactor` | DSP | builds on OF main; `lockPatching()`, `renderOffline()`, denormal flush |
+| fred-dev/ofxGPIO | `ai-refactor` | Pi GPIO/SPI/I2C | rewritten on GPIO chardev v2 + spidev + i2c-dev; legacy API kept |
+| fred-dev/ofxAudioFile | `ai-refactor` | sample decoding | memory bugs fixed, decoders updated; recommended for `master` too |
+| danomatika/ofxMidi | `master` | dependency of ofxPDSP | upstream works on OF main, no fork needed |
+| jvcleave/ofxImGui | `develop` | the programming GUI | added for the GUI rewrite |
 
-Addons in `addons.make` (one file for every platform): ofxGui ofxOsc
-ofxAudioFile ofxMidi ofxPDSP ofxGPIO. ofxGPIO compiles to stubs off Linux.
+Addons in `addons.make` (one file for every platform): ofxAudioFile ofxGPIO
+ofxImGui ofxMidi ofxOsc ofxPDSP. ofxGPIO compiles to stubs off Linux.
 
 ## Layout of the app
 

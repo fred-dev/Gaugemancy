@@ -24,9 +24,18 @@ git clone -b ai-refactor https://github.com/fred-dev/ofxPDSP.git
 git clone -b ai-refactor https://github.com/fred-dev/ofxAudioFile.git
 git clone -b ai-refactor https://github.com/fred-dev/ofxGPIO.git
 git clone https://github.com/danomatika/ofxMidi.git
+git clone -b develop https://github.com/jvcleave/ofxImGui.git
 cd ~/openFrameworks/apps/myApps
-git clone -b ai-refactor https://github.com/fred-dev/Gaugemancy.git
+git clone https://github.com/fred-dev/Gaugemancy.git
 ```
+
+`main` is Gaugemancy's default, up-to-date branch (as of 2026-11-06 - what
+used to be `gui-rewrite` was renamed to `main`; the previous `main`, the
+pre-GUI-rewrite codebase, is kept as `legacy_version` for reference only).
+No `-b` flag is needed above. The `fred-dev` addon forks (`ofxPDSP`,
+`ofxAudioFile`, `ofxGPIO`) still use their own separate `ai-refactor`
+branch - that naming is unrelated to Gaugemancy's own branches, don't
+conflate the two.
 
 ## 2. Pi setup (once)
 

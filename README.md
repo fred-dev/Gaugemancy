@@ -23,20 +23,23 @@ The same program is:
 ## Requirements
 
 * openFrameworks `main` (git), built as usual for your platform
-* addons, each on its `ai-refactor` branch where it is a fork:
-  * [fred-dev/ofxPDSP](https://github.com/fred-dev/ofxPDSP) (audio engine)
-  * [fred-dev/ofxAudioFile](https://github.com/fred-dev/ofxAudioFile) (sample loading)
-  * [fred-dev/ofxGPIO](https://github.com/fred-dev/ofxGPIO) (Pi GPIO, SPI, I2C; stubs elsewhere)
+* addons:
+  * [fred-dev/ofxPDSP](https://github.com/fred-dev/ofxPDSP) (audio engine), on its `ai-refactor` branch
+  * [fred-dev/ofxAudioFile](https://github.com/fred-dev/ofxAudioFile) (sample loading), on its `ai-refactor` branch
+  * [fred-dev/ofxGPIO](https://github.com/fred-dev/ofxGPIO) (Pi GPIO, SPI, I2C; stubs elsewhere), on its `ai-refactor` branch
   * [danomatika/ofxMidi](https://github.com/danomatika/ofxMidi) (needed by ofxPDSP)
-  * ofxGui, ofxOsc (bundled with openFrameworks)
+  * [jvcleave/ofxImGui](https://github.com/jvcleave/ofxImGui) (the programming GUI), on its `develop` branch
+  * ofxOsc (bundled with openFrameworks)
 
-One `addons.make` works on every platform.
+One `addons.make` works on every platform. The `ai-refactor` branch name
+above is specific to those three addon forks - unrelated to Gaugemancy's
+own branches below.
 
 ## Build
 
 ```bash
 cd openFrameworks/apps/myApps
-git clone -b ai-refactor https://github.com/fred-dev/Gaugemancy.git
+git clone https://github.com/fred-dev/Gaugemancy.git
 cd Gaugemancy
 make -j4 Release            # Linux, Raspberry Pi, macOS (command line)
 make -C tests               # unit tests (no openFrameworks needed)
@@ -44,10 +47,14 @@ python3 tools/make_test_data.py
 bin/Gaugemancy --profile Demo
 ```
 
-On macOS (Xcode) and Windows (Visual Studio), create the project files with the
-openFrameworks project generator (the bundled Xcode project predates the
-rewrite and should be regenerated). The Raspberry Pi setup, wiring, service and
-SSH workflow are in **[docs/RaspberryPi.md](docs/RaspberryPi.md)**.
+`main` is the default, up-to-date branch; no `-b` flag is needed above.
+(The old pre-rewrite codebase is kept as `legacy_version`, for reference
+only.)
+
+On Windows (Visual Studio), create the project files with the openFrameworks
+project generator. The bundled `Gaugemancy.xcodeproj` is kept up to date for
+macOS. The Raspberry Pi setup, wiring, service and SSH workflow are in
+**[docs/RaspberryPi.md](docs/RaspberryPi.md)**.
 
 ## Settings
 

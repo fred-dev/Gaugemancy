@@ -80,10 +80,11 @@ Runbook for that Claude session (confirmed against a real unit 2026-11-06):
 3. Follow `docs/RaspberryPi.md` section 1 to clone openFrameworks + addons
    and section 2 to run `scripts/pi/install.sh` + reboot, for a *fresh*
    unit. For an existing checkout being updated instead: `git fetch origin`
-   in the app folder, then check out whatever branch is current (confirm
-   with Fred or against this laptop's own `git rev-parse HEAD` - don't
-   assume `main`, this project did substantial work on `gui-rewrite` before
-   it merged). `ofxImGui` is a newer addon (added for the GUI rewrite) that
+   in the app folder, then `git checkout main` (as of 2026-11-06, `main` is
+   the current, up-to-date branch - what used to be `gui-rewrite` was
+   renamed to `main`, and the old `main` is kept as `legacy_version` for
+   reference only; don't confuse the two). `ofxImGui` is a newer addon (added
+   for the GUI rewrite that is now `main`) that
    an older checkout's `openFrameworks/addons/` won't have yet -
    `git clone -b develop https://github.com/jvcleave/ofxImGui.git` there;
    the other addons (`ofxPDSP`/`ofxAudioFile`/`ofxGPIO`/`ofxMidi`) are
@@ -185,8 +186,9 @@ session has been doing all along to build and test Gaugemancy on macOS:
      for the GUI rewrite - **not yet in `docs/RaspberryPi.md`'s addon list
      either**, flag to fix there too when this work happens)
    - `ofxOsc` ships with core openFrameworks already - no separate clone.
-6. `cd openFrameworks/apps/myApps && git clone <branch-at-the-time> https://github.com/fred-dev/Gaugemancy.git`
-   (confirm at handoff time whether `gui-rewrite` has merged to `main`).
+6. `cd openFrameworks/apps/myApps && git clone https://github.com/fred-dev/Gaugemancy.git`
+   - `main` is the default branch and the current, up-to-date one (as of
+     2026-11-06); no `-b` flag needed.
 7. `cd Gaugemancy && make -j4 Release` (same command used throughout this
    whole session) - or open `Gaugemancy.xcodeproj` and build the Release
    scheme in Xcode's UI if the collaborator prefers that.
@@ -230,8 +232,9 @@ the repo and needs no server.
 - Exact Raspberry Pi OS image identifier/release date to standardize on.
 - Final unit count, and whether any is a Pi 3B+.
 - Standard SSH username/password to set via the Imager.
-- Which Gaugemancy branch to hand off (`main` vs `gui-rewrite`) by the time
-  this actually happens.
+- ~~Which Gaugemancy branch to hand off~~ - settled 2026-11-06: `main` is
+  the one, permanently (the old `gui-rewrite` was renamed to `main`; the
+  previous `main` is now `legacy_version`, reference only).
 - Where each unit's USB stick currently lives - already with the hardware,
   or does data need copying from Fred's laptop first.
 

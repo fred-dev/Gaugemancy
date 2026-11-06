@@ -51,12 +51,10 @@ git clone https://github.com/fred-dev/Gaugemancy.git
 cd Gaugemancy
 ```
 
-Check with Fred which branch is current before this step if it isn't
-obvious - the work may still be on `gui-rewrite` rather than `main`:
-
-```
-git clone -b gui-rewrite https://github.com/fred-dev/Gaugemancy.git
-```
+`main` is the current, up-to-date branch (as of 2026-11-06 - what used to be
+called `gui-rewrite` was renamed to `main`, and the old `main` is now kept
+as `legacy_version` for reference only). The clone above already gets it;
+no `-b` flag needed.
 
 ## 3. Read the real plan, then follow it
 
