@@ -489,14 +489,33 @@ TEST(playhead_moves_only_while_pressed_and_stops_at_end) {
 	CHECK_NEAR(p.position(), 0.0f, 1e-6);
 }
 
-TEST(led_patterns_cycle_and_blink) {
-	CHECK(LedPattern::forPreset(0).blue && !LedPattern::forPreset(0).red);
-	CHECK(LedPattern::forPreset(1).red);
-	CHECK(LedPattern::forPreset(2).blinkMs > 0);
-	CHECK(LedPattern::forPreset(4).blinkMs == 0); // cycle repeats
-	LedPattern blink = LedPattern::forPreset(2);
-	CHECK(blink.at(0).blue);
-	CHECK(!blink.at(blink.blinkMs).blue);
+TEST(led_preset_colours_never_go_dark) {
+	// No preset's colour-mix cycle may ever show "off" - that is the whole
+	// point of replacing the old blink-to-black scheme.
+	for (int i = 0; i < 6; ++i) {
+		LedPattern p = LedPattern::forPreset(i);
+		int total = p.blueMs + p.bothMs + p.redMs;
+		CHECK(total > 0);
+		for (int t = 0; t < total; t += 37) {
+			LedPattern now = p.at(static_cast<uint64_t>(t));
+			CHECK(now.blue || now.red);
+		}
+	}
+}
+
+TEST(led_preset_colours_differ_and_are_consistent) {
+	LedPattern p0 = LedPattern::forPreset(0);
+	LedPattern p1 = LedPattern::forPreset(1);
+	CHECK(p0.blueMs != p1.blueMs || p0.redMs != p1.redMs); // visibly different mixes
+	CHECK(p0.blueMs > p0.redMs);                           // preset 0 reads as "mostly blue"
+	CHECK(LedPattern::forPreset(0).blueMs == p0.blueMs);   // same index -> same mix every time
+}
+
+TEST(led_error_still_blinks_to_black) {
+	LedPattern e = LedPattern::error();
+	CHECK(e.blinkMs > 0);
+	CHECK(e.at(0).red);
+	CHECK(!e.at(static_cast<uint64_t>(e.blinkMs)).red);
 }
 
 // ================================================================ recording
