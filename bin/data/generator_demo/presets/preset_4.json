@@ -149,9 +149,9 @@
         },
         "volume": {
           "value": 0.6000000238418579,
-          "min": 0.6000000238418579,
+          "min": 0.0,
           "max": 0.6000000238418579,
-          "source": "none"
+          "source": "sensor1"
         },
         "freq": {
           "value": 315.2900085449219,
@@ -301,9 +301,9 @@
         },
         "volume": {
           "value": 0.5,
-          "min": 0.5,
+          "min": 0.0,
           "max": 0.5,
-          "source": "none"
+          "source": "sensor2"
         },
         "freq": {
           "value": 220.0,
@@ -465,9 +465,9 @@
         },
         "volume": {
           "value": 0.44999998807907104,
-          "min": 0.44999998807907104,
+          "min": 0.0,
           "max": 0.44999998807907104,
-          "source": "none"
+          "source": "sensor3"
         },
         "pitch": {
           "value": 60.05799865722656,
@@ -623,9 +623,9 @@
       "synth": {
         "volume": {
           "value": 0.4000000059604645,
-          "min": 0.4000000059604645,
+          "min": 0.0,
           "max": 0.4000000059604645,
-          "source": "none"
+          "source": "sensor4"
         },
         "pitch": {
           "value": 57.0,
@@ -787,9 +787,9 @@
       "synth": {
         "volume": {
           "value": 0.3499999940395355,
-          "min": 0.3499999940395355,
+          "min": 0.0,
           "max": 0.3499999940395355,
-          "source": "none"
+          "source": "sensor5"
         },
         "pitch": {
           "value": 61.0,
@@ -945,9 +945,9 @@
       "synth": {
         "volume": {
           "value": 0.4000000059604645,
-          "min": 0.4000000059604645,
+          "min": 0.0,
           "max": 0.4000000059604645,
-          "source": "none"
+          "source": "sensor6"
         },
         "pitch": {
           "value": 60.59400177001953,
