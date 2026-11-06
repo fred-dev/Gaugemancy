@@ -1,0 +1,977 @@
+{
+  "version": 1,
+  "name": "Harmonic Series",
+  "playheadSpeed": 0.012000000104308128,
+  "slots": [
+    {
+      "enabled": true,
+      "file": "",
+      "window": "hann",
+      "gate": "sensor1",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "chorus",
+          "enabled": true,
+          "params": {
+            "speed": {
+              "value": 0.05000000074505806,
+              "min": 0.05000000074505806,
+              "max": 0.800000011920929,
+              "source": "sensor1"
+            },
+            "depth": {
+              "value": 10.0,
+              "min": 10.0,
+              "max": 10.0,
+              "source": "none"
+            },
+            "delay": {
+              "value": 12.0,
+              "min": 12.0,
+              "max": 12.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.5,
+              "min": 0.5,
+              "max": 0.5,
+              "source": "none"
+            },
+            "time": {
+              "value": 9.0,
+              "min": 9.0,
+              "max": 9.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.6499999761581421,
+              "min": 0.6499999761581421,
+              "max": 0.6499999761581421,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.30000001192092896,
+              "min": 0.30000001192092896,
+              "max": 0.30000001192092896,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 4000.0,
+              "min": 4000.0,
+              "max": 4000.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "source": "none"
+            }
+          }
+        }
+      ],
+      "sourceType": "lfo_osc",
+      "synth": {
+        "waveform": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.6000000238418579,
+          "min": 0.6000000238418579,
+          "max": 0.6000000238418579,
+          "source": "none"
+        },
+        "freq": {
+          "value": 315.2900085449219,
+          "min": 110.0,
+          "max": 110.0,
+          "source": "none"
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "file": "",
+      "window": "hann",
+      "gate": "sensor2",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "filter",
+          "enabled": true,
+          "params": {
+            "cutoff": {
+              "value": 1000.0,
+              "min": 1000.0,
+              "max": 8000.0,
+              "source": "sensor2"
+            },
+            "resonance": {
+              "value": 0.15000000596046448,
+              "min": 0.15000000596046448,
+              "max": 0.15000000596046448,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.4000000059604645,
+              "min": 0.4000000059604645,
+              "max": 0.4000000059604645,
+              "source": "none"
+            },
+            "time": {
+              "value": 5.0,
+              "min": 5.0,
+              "max": 5.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.5,
+              "min": 0.5,
+              "max": 0.5,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.4000000059604645,
+              "min": 0.4000000059604645,
+              "max": 0.4000000059604645,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 6000.0,
+              "min": 6000.0,
+              "max": 6000.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "source": "none"
+            }
+          }
+        }
+      ],
+      "sourceType": "lfo_osc",
+      "synth": {
+        "waveform": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "freq": {
+          "value": 220.0,
+          "min": 220.0,
+          "max": 225.0,
+          "source": "sensor2"
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "file": "",
+      "window": "hann",
+      "gate": "sensor3",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "delay",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.15000000596046448,
+              "min": 0.15000000596046448,
+              "max": 0.5,
+              "source": "sensor3"
+            },
+            "time": {
+              "value": 227.0,
+              "min": 227.0,
+              "max": 227.0,
+              "source": "none"
+            },
+            "feedback": {
+              "value": 0.30000001192092896,
+              "min": 0.30000001192092896,
+              "max": 0.30000001192092896,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.5,
+              "min": 0.5,
+              "max": 0.5,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.30000001192092896,
+              "min": 0.30000001192092896,
+              "max": 0.30000001192092896,
+              "source": "none"
+            },
+            "time": {
+              "value": 3.0,
+              "min": 3.0,
+              "max": 3.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.4000000059604645,
+              "min": 0.4000000059604645,
+              "max": 0.4000000059604645,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.44999998807907104,
+              "min": 0.44999998807907104,
+              "max": 0.44999998807907104,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 6500.0,
+              "min": 6500.0,
+              "max": 6500.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "source": "none"
+            }
+          }
+        }
+      ],
+      "sourceType": "va_osc",
+      "synth": {
+        "waveform": {
+          "value": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.44999998807907104,
+          "min": 0.44999998807907104,
+          "max": 0.44999998807907104,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 60.05799865722656,
+          "min": 64.23899841308594,
+          "max": 53.0,
+          "source": "sensor3"
+        },
+        "pulseWidth": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "file": "",
+      "window": "hann",
+      "gate": "sensor4",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "chorus",
+          "enabled": true,
+          "params": {
+            "speed": {
+              "value": 0.4000000059604645,
+              "min": 0.4000000059604645,
+              "max": 0.4000000059604645,
+              "source": "none"
+            },
+            "depth": {
+              "value": 8.0,
+              "min": 8.0,
+              "max": 8.0,
+              "source": "none"
+            },
+            "delay": {
+              "value": 10.0,
+              "min": 10.0,
+              "max": 10.0,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.3499999940395355,
+              "min": 0.3499999940395355,
+              "max": 0.3499999940395355,
+              "source": "none"
+            },
+            "time": {
+              "value": 4.0,
+              "min": 4.0,
+              "max": 4.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.5,
+              "min": 0.5,
+              "max": 0.5,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.4000000059604645,
+              "min": 0.4000000059604645,
+              "max": 0.4000000059604645,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 5500.0,
+              "min": 5500.0,
+              "max": 5500.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "source": "none"
+            }
+          }
+        }
+      ],
+      "sourceType": "fm_operator",
+      "synth": {
+        "volume": {
+          "value": 0.4000000059604645,
+          "min": 0.4000000059604645,
+          "max": 0.4000000059604645,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 57.0,
+          "min": 57.0,
+          "max": 57.0,
+          "source": "none"
+        },
+        "ratio": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        },
+        "fmAmount": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 2.5,
+          "source": "sensor4"
+        },
+        "feedback": {
+          "value": 0.20000000298023224,
+          "min": 0.20000000298023224,
+          "max": 0.20000000298023224,
+          "source": "none"
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "file": "",
+      "window": "hann",
+      "gate": "sensor5",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "filter",
+          "enabled": true,
+          "params": {
+            "cutoff": {
+              "value": 9000.0,
+              "min": 9000.0,
+              "max": 9000.0,
+              "source": "none"
+            },
+            "resonance": {
+              "value": 0.10000000149011612,
+              "min": 0.10000000149011612,
+              "max": 0.10000000149011612,
+              "source": "none"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.25,
+              "min": 0.25,
+              "max": 0.25,
+              "source": "none"
+            },
+            "time": {
+              "value": 2.0,
+              "min": 2.0,
+              "max": 2.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.30000001192092896,
+              "min": 0.30000001192092896,
+              "max": 0.30000001192092896,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.5,
+              "min": 0.5,
+              "max": 0.5,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 9000.0,
+              "min": 9000.0,
+              "max": 9000.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "source": "none"
+            }
+          }
+        }
+      ],
+      "sourceType": "fm_operator",
+      "synth": {
+        "volume": {
+          "value": 0.3499999940395355,
+          "min": 0.3499999940395355,
+          "max": 0.3499999940395355,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 61.0,
+          "min": 61.0,
+          "max": 61.0,
+          "source": "none"
+        },
+        "ratio": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 2.0,
+          "source": "sensor5"
+        },
+        "fmAmount": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "feedback": {
+          "value": 0.10000000149011612,
+          "min": 0.10000000149011612,
+          "max": 0.10000000149011612,
+          "source": "none"
+        }
+      }
+    },
+    {
+      "enabled": true,
+      "file": "",
+      "window": "hann",
+      "gate": "sensor6",
+      "voices": 8,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "bitcrush",
+          "enabled": true,
+          "params": {
+            "bits": {
+              "value": 16.0,
+              "min": 16.0,
+              "max": 4.0,
+              "source": "sensor6"
+            }
+          }
+        },
+        {
+          "type": "reverb",
+          "enabled": true,
+          "params": {
+            "mix": {
+              "value": 0.44999998807907104,
+              "min": 0.44999998807907104,
+              "max": 0.44999998807907104,
+              "source": "none"
+            },
+            "time": {
+              "value": 6.0,
+              "min": 6.0,
+              "max": 6.0,
+              "source": "none"
+            },
+            "density": {
+              "value": 0.550000011920929,
+              "min": 0.550000011920929,
+              "max": 0.550000011920929,
+              "source": "none"
+            },
+            "damping": {
+              "value": 0.3499999940395355,
+              "min": 0.3499999940395355,
+              "max": 0.3499999940395355,
+              "source": "none"
+            },
+            "hiCut": {
+              "value": 5000.0,
+              "min": 5000.0,
+              "max": 5000.0,
+              "source": "none"
+            },
+            "modFreq": {
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
+              "source": "none"
+            },
+            "modAmount": {
+              "value": 0.0,
+              "min": 0.0,
+              "max": 0.0,
+              "source": "none"
+            }
+          }
+        }
+      ],
+      "sourceType": "noise",
+      "synth": {
+        "volume": {
+          "value": 0.4000000059604645,
+          "min": 0.4000000059604645,
+          "max": 0.4000000059604645,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 60.59400177001953,
+          "min": 0.4009999930858612,
+          "max": 64.25800323486328,
+          "source": "sensor6"
+        },
+        "decimation": {
+          "value": 151.0,
+          "min": 151.0,
+          "max": 151.0,
+          "source": "none"
+        },
+        "bits": {
+          "value": 16.0,
+          "min": 16.0,
+          "max": 5.0,
+          "source": "sensor6"
+        }
+      }
+    }
+  ],
+  "master": {
+    "gain": 1.0,
+    "effects": []
+  }
+}
