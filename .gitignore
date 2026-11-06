@@ -33,6 +33,10 @@
 
 # Media
 *.wav
+# ...except each performer profile's own samples/narration - these are real
+# performance data, not build output, and belong in the repo so every
+# machine/USB stick converges on the same copy.
+!bin/data/*/audio/*.wav
 
 
 # Folders

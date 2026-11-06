@@ -1,9 +1,12 @@
 # Handing Gaugemancy units + the laptop app to a collaborator
 
-**Status: planning only. Nothing below has been built yet** - no scripts,
-no website, no doc updates to the other files it references. This is the
-saved plan for that work, written so it survives between sessions and can be
-hand carried (with the repo) to whoever picks it up next, human or Claude.
+**Status: Phases B and C have now actually been run once, on a real unit
+(2026-11-06)** - those two sections below are a confirmed procedure, not
+just a plan, and include the real lessons from doing it (low-RAM build
+limits, `.local` resolution failing, the exact shutdown behaviour). Phases
+A, D, E and F are still planning only - no SD-card guide, no laptop doc, no
+website. This file is meant to survive between sessions and be hand
+carried (with the repo) to whoever picks it up next, human or Claude.
 
 ## The situation
 
@@ -58,42 +61,106 @@ What the collaborator gives Claude: each unit's hostname (or IP, if `.local`
 mDNS resolution is unreliable on their network) and the SSH username/password
 set in Phase A.
 
-Runbook for that Claude session (to write up properly later, but the shape
-is):
-1. Confirm reachability: `ssh <user>@<hostname>.local` (fall back to the
-   router's DHCP client list for an IP if `.local` doesn't resolve).
-2. Follow `docs/RaspberryPi.md` section 1 to clone openFrameworks + addons
-   and section 2 to run `scripts/pi/install.sh` + reboot - no need to
-   duplicate those steps here, just point at them.
-3. Build and verify per section 3: `make -j4 Release`, `make -C tests`,
-   `bin/Gaugemancy --selftest`, `--benchmark 20`.
-4. Mount and migrate that unit's USB stick - see Phase C.
-5. Enable the systemd service (`scripts/pi/install.sh` already does this)
-   and confirm `--selftest` passes with the real sensor hardware attached,
-   not just offline.
-6. Repeat for the next unit's hostname.
+Runbook for that Claude session (confirmed against a real unit 2026-11-06):
+1. Confirm reachability: `ssh <user>@<hostname>.local`. In practice
+   `.local` mDNS resolution from a Mac can just fail outright (it did:
+   `ping: cannot resolve gaugemancy.local`) even with the Pi up and SSH
+   reachable - don't take that as "the Pi is off." Fall back to `arp -a`
+   on the Mac and look for a Raspberry Pi Foundation MAC prefix (`b8:27:eb`,
+   `dc:a6:32`, `e4:5f:01`, `d8:3a:dd`...) to find its IP directly, or the
+   router's DHCP client list.
+2. **If updating an already-running unit** (not a fresh SD card): stop the
+   app *before* touching anything - `systemctl --user stop gaugemancy`.
+   This is a real `SIGTERM`-triggered clean exit (`src/main.cpp` handles
+   it), not a kill, and `Instrument::shutdown()` unconditionally pulses the
+   speaker relay off as part of it - that is "the full shutoff routine,"
+   turning off the speaker without powering off the Pi. Confirm the old
+   PID is actually gone (`systemctl --user status gaugemancy`,
+   `ps -p <pid>`) before moving on.
+3. Follow `docs/RaspberryPi.md` section 1 to clone openFrameworks + addons
+   and section 2 to run `scripts/pi/install.sh` + reboot, for a *fresh*
+   unit. For an existing checkout being updated instead: `git fetch origin`
+   in the app folder, then check out whatever branch is current (confirm
+   with Fred or against this laptop's own `git rev-parse HEAD` - don't
+   assume `main`, this project did substantial work on `gui-rewrite` before
+   it merged). `ofxImGui` is a newer addon (added for the GUI rewrite) that
+   an older checkout's `openFrameworks/addons/` won't have yet -
+   `git clone -b develop https://github.com/jvcleave/ofxImGui.git` there;
+   the other addons (`ofxPDSP`/`ofxAudioFile`/`ofxGPIO`/`ofxMidi`) are
+   normally already present and already on their correct tracked branch -
+   verify with `git status -sb` in each rather than assuming, but don't
+   re-clone them if they're already clean and up to date.
+4. **Check `free -h` before building.** `docs/RaspberryPi.md` assumes a Pi
+   4/5 and says `make -j4 Release`; a Pi 3B+ (905 MB RAM) cannot take that -
+   `docs/RaspberryPi3BPlus.md` documents it taking the whole Pi down hard
+   enough to need a physical power-cycle, even at `-j2`, for this exact
+   app+addons build. If `free -h` shows well under ~2 GB total, use
+   `make -j1 Release` for the Gaugemancy/addons build specifically (OF core
+   alone, if it needs rebuilding too, tolerates `-j2`), confirm a real
+   swapfile exists already (`swapon --show` / `cat /proc/swaps` - `zram`
+   alone is not real headroom, see that doc for adding one) and that the
+   desktop GUI is disabled (`systemctl get-default` should say
+   `multi-user.target`, not `graphical.target`) if programming only ever
+   happens from a laptop anyway. Run the build in the background
+   (`nohup make -j1 Release > ~/gaugemancy_build.log 2>&1 & disown`) and
+   poll it - watching `free -h` and tailing the log - rather than blocking
+   on it in the foreground; it can take a long time on this hardware and a
+   blocked foreground SSH command gives no warning before a hang.
+5. Build and verify: `make -C tests`, `bin/Gaugemancy --selftest`,
+   `--benchmark 20`.
+6. Mount and migrate that unit's USB stick - see Phase C.
+7. Enable the systemd service (`scripts/pi/install.sh` already does this
+   for a fresh unit) and confirm `--selftest` passes with the real sensor
+   hardware attached, not just offline.
+8. Repeat for the next unit's hostname.
 
 ## Phase C - USB stick settings migration (once per stick)
 
-`tools/convert_xml_settings.py` already does the XML → JSON conversion and
-deliberately leaves the originals in place ("nothing is deleted" - see its
-own docstring). `docs/RaspberryPi.md` section 4 already has the exact
-`/etc/fstab` line for auto-mounting a stick labelled `DATA` at
-`/media/Data` on boot - that part needs no new work, just executing it per
-unit.
+**Done for real once already** (2026-11-06, the first unit, stick labelled
+`EMI_GAUGE`), so this is no longer speculative - it's the actual procedure,
+run over SSH on the Pi itself (the stick was already mounted at
+`/media/Data` per `docs/RaspberryPi.md` section 4's fstab line - that part
+needed no new work). Repeat exactly this per stick:
 
-The one gap: nothing currently *archives* the old XML afterward, so a
-migrated stick ends up with old and new files sitting side by side
-indefinitely. Plan for a small new script, run once per stick, likely
-`tools/archive_old_xml_settings.py` (sits next to the converter):
-1. Run (or confirm has already been run) `convert_xml_settings.py`.
-2. Move the original XML files (`username.xml` + each performer's
+1. **Archive first, convert second.** Copy (never move) every performer's
+   raw XML - `username.xml` at the top plus each performer folder's
    `*_appSettings.xml` / `*_fileSettings.xml` / `*_preset_N.xml` /
    `*_effectSettings_preset_N.xml` / `*_effectParameterSettings_preset_N.xml`
-   / `*_narr.xml`) into a timestamped folder, e.g. `_archive_xml/<date>/`,
-   rather than deleting them - a safety net, not a permanent mess.
-3. Make it safe to run more than once (new timestamp each time, never
-   clobbers a previous archive).
+   / `*_narr.xml` - into `/media/Data/_archive_xml/`, mirroring the
+   performer-folder structure. This is a pure backup; it must not disturb
+   the originals, because step 2 reads those same original paths and
+   writes its JSON output *next to them* (nothing in the real performer
+   folders gets deleted or moved - `convert_xml_settings.py`'s own
+   docstring already says so, this just adds an extra, separate copy).
+2. **Convert**: `python3 tools/convert_xml_settings.py /media/Data` - no
+   extra Python packages needed, this (and every script in `tools/`) is
+   standard-library only, so whatever `python3` is already on the machine
+   works as-is. Check its output for anything beyond the "values clamped"
+   kind of notice it documents; stop and ask Fred about anything else.
+3. **Record each performer's modification date before moving on** - the
+   latest `mtime` among that performer's *original* XML files, e.g. a
+   one-line note per performer in `/media/Data/_archive_xml/README.md`.
+   This matters because the same performer's data likely exists, slightly
+   diverged, on more than one unit's stick (edited live on whichever unit
+   they last played) - comparing these recorded dates across units later is
+   how to find the actually-newest version of each performer's presets
+   without guessing. Treat *this* stick's converted copy as the current
+   "final" one for now, but don't discard the date - a later unit's stick
+   may turn out to hold a newer edit of the same performer.
+4. **Bring it into the git repo.** Copy each performer's resulting folder
+   (old XML *and* new JSON side by side, exactly as the stick has them) and
+   their sample audio into this repo's `bin/data/<performer>/`, plus the
+   `_archive_xml/` copy, then commit and push - GitHub is meant to become
+   the single converging point across every unit's stick over time, not
+   any one stick. Check each audio file's size before adding it: GitHub
+   hard-rejects anything over 100 MB per file, and a repo heavy with many
+   large WAVs is worth flagging to Fred rather than just pushing - say so
+   rather than silently committing something huge.
+5. Only after all of this does the stick get a `gaugemancy.json` (if it
+   doesn't have one yet) pointing `activeProfile` at whichever profile
+   should actually run on that unit - don't set this before the migration
+   above, or the app starts reading a data root that's still only
+   half-converted.
 
 ## Phase D - laptop app build (collaborator's Mac)
 

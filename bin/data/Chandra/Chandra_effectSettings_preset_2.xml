@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SLOTS>
    <SLOT_1>
-      <BIT_CRUSH>1</BIT_CRUSH>
-      <DECIMATOR>1</DECIMATOR>
+      <BIT_CRUSH>0</BIT_CRUSH>
+      <DECIMATOR>0</DECIMATOR>
       <CHORUS>0</CHORUS>
       <FILTER>1</FILTER>
       <DELAY>1</DELAY>

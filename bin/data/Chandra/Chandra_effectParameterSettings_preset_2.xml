@@ -15,21 +15,21 @@
 		<Delay_connect_to>0</Delay_connect_to>
 	</Chorus_slot_1>
 	<Filter_slot_1>
-		<Freq>16556</Freq>
-		<Freq_Min>10816</Freq_Min>
+		<Freq>14796</Freq>
+		<Freq_Min>14796</Freq_Min>
 		<Freq_Max>20000</Freq_Max>
 		<Freq_connect_to>6</Freq_connect_to>
-		<Reso>0.331633</Reso>
+		<Reso>0.0969388</Reso>
 		<Reso_Min>0</Reso_Min>
 		<Reso_Max>1</Reso_Max>
 		<Reso_connect_to>0</Reso_connect_to>
 	</Filter_slot_1>
 	<Reverb_slot_1>
-		<Send_>0.719388</Send_>
+		<Send_>0.464286</Send_>
 		<Send_Min>0.464286</Send_Min>
 		<Send_Max>0.872449</Send_Max>
-		<Send_Connect_To>5</Send_Connect_To>
-		<Time_>12.2832</Time_>
+		<Send_Connect_To>6</Send_Connect_To>
+		<Time_>7.2449</Time_>
 		<Time_Min>7.2449</Time_Min>
 		<Time_Max>15.3061</Time_Max>
 		<Time_Connect_To>3</Time_Connect_To>
@@ -55,24 +55,25 @@
 		<Mod_amount_Connect_To>0</Mod_amount_Connect_To>
 	</Reverb_slot_1>
 	<Compressor_slot_1>
-		<Threshold>-1.78571</Threshold>
+		<Threshold>-1.02041</Threshold>
 		<GR_meter>0</GR_meter>
-		<Attack__MS_>5.81633</Attack__MS_>
+		<Attack__MS_>1</Attack__MS_>
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>2.0</In_gain>
 	</Compressor_slot_1>
 	<Decimator_slot_1>
-		<Rate>34537</Rate>
+		<Rate>44100</Rate>
 		<Rate_Min>44100</Rate_Min>
-		<Rate_Max>38250</Rate_Max>
+		<Rate_Max>44100</Rate_Max>
 		<Rate_Connect_to>5</Rate_Connect_to>
 	</Decimator_slot_1>
 	<Delay_slot_1>
-		<Send_>0.295918</Send_>
-		<Send_Min>0</Send_Min>
-		<Send_Max>1</Send_Max>
-		<Send_Connect_To>0</Send_Connect_To>
+		<Send_>0.163265</Send_>
+		<Send_Min>0.163265</Send_Min>
+		<Send_Max>0.3</Send_Max>
+		<Send_Connect_To>5</Send_Connect_To>
 		<Time_>214.286</Time_>
 		<Time_Min>128.571</Time_Min>
 		<Time_Max>173.469</Time_Max>
@@ -81,7 +82,7 @@
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>
-		<feedback_>0.0561224</feedback_>
+		<feedback_>0.153061</feedback_>
 		<feedback_Min>0</feedback_Min>
 		<feedback_Max>1</feedback_Max>
 		<feedback_COnnect_To>0</feedback_COnnect_To>

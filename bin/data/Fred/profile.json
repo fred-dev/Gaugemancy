@@ -1,7 +1,7 @@
 {
   "version": 1,
   "name": "Fred",
-  "logLevel": "error",
+  "logLevel": "verbose",
   "playMode": "multi",
   "controlRateHz": 100,
   "presetSwitchMinIntervalMs": 4000,
@@ -12,7 +12,7 @@
     "presets/preset_4.json"
   ],
   "sensors": {
-    "maxRaw": 530,
+    "maxRaw": 500,
     "activeThreshold": 0.035,
     "curve": "linear",
     "calibrationFrames": 16,
@@ -21,11 +21,11 @@
   },
   "audio": {
     "sampleRate": 44100,
-    "bufferSize": 1024,
-    "numBuffers": 2,
+    "bufferSize": 128,
+    "numBuffers": 8,
     "api": "default",
     "deviceName": "",
-    "deviceId": 5,
+    "deviceId": 0,
     "masterGain": 1.0,
     "pi": {
       "enabled": true,

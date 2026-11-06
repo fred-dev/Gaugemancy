@@ -1,54 +1,54 @@
 {
   "version": 1,
   "name": "Preset 2",
-  "playheadSpeed": 0.012,
+  "playheadSpeed": 0.0048,
   "slots": [
     {
       "enabled": true,
       "file": "MDevice2Preset2.wav",
-      "window": "rectangular",
+      "window": "sine",
       "gate": "auto",
       "voices": 8,
       "grain": {
         "length": {
-          "value": 421.888,
+          "value": 757.381,
           "min": 803.265,
           "max": 193.061,
           "source": "sensor1"
         },
         "density": {
-          "value": 0.239477,
+          "value": 0.397438,
           "min": 0.403061,
           "max": 0.141327,
           "source": "sensor2"
         },
         "distanceJitter": {
-          "value": 117.985,
+          "value": 53.3223,
           "min": 51.0204,
           "max": 158.163,
           "source": "sensor3"
         },
         "pitchJitter": {
-          "value": 4.375,
+          "value": 0.150391,
           "min": 0.0,
           "max": 7.0,
           "source": "sensor4"
         },
         "pitch": {
-          "value": -4.375,
+          "value": 0.150391,
           "min": 0.0,
-          "max": -7.0,
+          "max": 7.0,
           "source": "sensor6"
         },
         "spread": {
-          "value": 0.0733419,
+          "value": 0.00252113,
           "min": 0.0,
           "max": 0.117347,
           "source": "sensor5"
         },
         "volume": {
-          "value": 1.0,
-          "min": 0.0,
+          "value": 0.9,
+          "min": 0.7,
           "max": 1.0,
           "source": "none"
         },
@@ -67,41 +67,17 @@
       },
       "effects": [
         {
-          "type": "bitcrush",
-          "enabled": true,
-          "params": {
-            "bits": {
-              "value": 16.0,
-              "min": 1.0,
-              "max": 16.0,
-              "source": "none"
-            }
-          }
-        },
-        {
-          "type": "decimator",
-          "enabled": true,
-          "params": {
-            "rate": {
-              "value": 34537.0,
-              "min": 44100.0,
-              "max": 38250.0,
-              "source": "sensor5"
-            }
-          }
-        },
-        {
           "type": "filter",
           "enabled": true,
           "params": {
             "cutoff": {
-              "value": 16556.0,
-              "min": 10816.0,
+              "value": 12816.0,
+              "min": 12816.0,
               "max": 20000.0,
               "source": "sensor6"
             },
             "resonance": {
-              "value": 0.331633,
+              "value": 0.168367,
               "min": 0.0,
               "max": 1.0,
               "source": "none"
@@ -143,13 +119,13 @@
           "enabled": true,
           "params": {
             "mix": {
-              "value": 0.719388,
+              "value": 0.464286,
               "min": 0.464286,
               "max": 0.872449,
               "source": "sensor5"
             },
             "time": {
-              "value": 12.2832,
+              "value": 7.2449,
               "min": 7.2449,
               "max": 15.3061,
               "source": "sensor3"
@@ -191,13 +167,13 @@
           "enabled": true,
           "params": {
             "gain": {
-              "value": 1.0,
+              "value": 2.0,
               "min": 0.0,
               "max": 10.0,
               "source": "none"
             },
             "threshold": {
-              "value": -1.78571,
+              "value": -1.02041,
               "min": -50.0,
               "max": 0.0,
               "source": "none"
@@ -209,7 +185,7 @@
               "source": "none"
             },
             "attack": {
-              "value": 5.81633,
+              "value": 1.0,
               "min": 1.0,
               "max": 60.0,
               "source": "none"

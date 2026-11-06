@@ -1,7 +1,7 @@
 {
   "version": 1,
   "name": "Clement",
-  "logLevel": "error",
+  "logLevel": "verbose",
   "playMode": "multi",
   "controlRateHz": 100,
   "presetSwitchMinIntervalMs": 4000,

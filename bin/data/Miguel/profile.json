@@ -7,7 +7,9 @@
   "presetSwitchMinIntervalMs": 4000,
   "presets": [
     "presets/preset_1.json",
-    "presets/preset_2.json"
+    "presets/preset_2.json",
+    "presets/preset_3.json",
+    "presets/preset_4.json"
   ],
   "sensors": {
     "maxRaw": 500,
@@ -20,10 +22,10 @@
   "audio": {
     "sampleRate": 44100,
     "bufferSize": 512,
-    "numBuffers": 3,
+    "numBuffers": 2,
     "api": "default",
     "deviceName": "",
-    "deviceId": 1,
+    "deviceId": 2,
     "masterGain": 1.0,
     "pi": {
       "enabled": true,
@@ -73,14 +75,14 @@
     "telemetryRateHz": 20
   },
   "narration": {
-    "enabled": false,
-    "file": "NarrationShort.wav",
-    "volume": 1.0,
+    "enabled": true,
+    "file": "NarrationShort_Cleaned.wav",
+    "volume": 0.9,
     "startWithSensor": true,
     "autoStartDelayMs": 5000,
     "glitchThreshold": 0.04,
     "glitchStrand": 0.016,
-    "window": "hann",
+    "window": "rectangular",
     "grain": {
       "length": {
         "value": 1628.6,

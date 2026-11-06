@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PATHS>
+	<NARRATION_FILE>narrationcha1_Loud_Cleaned.wav</NARRATION_FILE>
+
+	<FILE_1_1>CHDevice1Preset1.wav</FILE_1_1>
+	<FILE_2_1>CHDevice1Preset2.wav</FILE_2_1>
+	<FILE_3_1>CLDevice4Preset1.wav</FILE_3_1>
+	<FILE_4_1>CLDevice4Preset2.wav</FILE_4_1>
+	<FILE_5_1>EDevice3Preset1.wav</FILE_5_1>
+	<FILE_6_1>EDevice3Preset2.wav</FILE_6_1>
+
+	<FILE_1_2>CHDevice1Preset2.wav</FILE_1_2>
+	<FILE_2_2>EDevice3Preset2.wav</FILE_2_2>
+	<FILE_3_2>EDevice3Preset2.wav</FILE_3_2>
+	<FILE_4_2>EDevice3Preset2.wav</FILE_4_2>
+	<FILE_5_2>EDevice3Preset2.wav</FILE_5_2>
+	<FILE_6_2>EDevice3Preset2.wav</FILE_6_2>
+
+	<FILE_1_3>CHDevice1Preset3.wav</FILE_1_3>
+	<FILE_3_3>EDevice3Preset2.wav</FILE_3_3>
+	<FILE_3_3>EDevice3Preset2.wav</FILE_3_3>
+	<FILE_4_3>EDevice3Preset2.wav</FILE_4_3>
+	<FILE_5_3>EDevice3Preset2.wav</FILE_5_3>
+	<FILE_6_3>EDevice3Preset2.wav</FILE_6_3>
+
+	<FILE_1_4>CHDevice1Preset4.wav</FILE_1_4>
+	<FILE_3_4>EDevice3Preset2.wav</FILE_3_4>
+	<FILE_3_4>EDevice3Preset2.wav</FILE_3_4>
+	<FILE_4_4>EDevice3Preset2.wav</FILE_4_4>
+	<FILE_5_4>EDevice3Preset2.wav</FILE_5_4>
+	<FILE_6_4>EDevice3Preset2.wav</FILE_6_4>
+
+
+
+</PATHS>

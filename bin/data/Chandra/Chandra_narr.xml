@@ -8,6 +8,15 @@
 	<spread>0</spread>
 	<pitch_>0</pitch_>
 	<direction>1</direction>
+		<Narration_Compressor>
+		<In_gain>3.0</In_gain>
+		<Threshold>0</Threshold>
+		<GR_meter>0</GR_meter>
+		<Attack__MS_>1</Attack__MS_>
+		<Release__MS_>50</Release__MS_>
+		<Knee>1</Knee>
+		<Ratio>10</Ratio>
+	</Narration_Compressor>
 </Narration>
 
 	

@@ -15,9 +15,9 @@
 		<Delay_connect_to>0</Delay_connect_to>
 	</Chorus_slot_1>
 	<Filter_slot_1>
-		<Freq>9035</Freq>
-		<Freq_Min>9035</Freq_Min>
-		<Freq_Max>16790</Freq_Max>
+		<Freq>15000</Freq>
+		<Freq_Min>15000</Freq_Min>
+		<Freq_Max>9000</Freq_Max>
 		<Freq_connect_to>6</Freq_connect_to>
 		<Reso>0.0895249</Reso>
 		<Reso_Min>0</Reso_Min>
@@ -55,12 +55,13 @@
 		<Mod_amount_Connect_To>0</Mod_amount_Connect_To>
 	</Reverb_slot_1>
 	<Compressor_slot_1>
-		<Threshold>0</Threshold>
+		<Threshold>-1.78571</Threshold>
 		<GR_meter>0</GR_meter>
-		<Attack__MS_>10</Attack__MS_>
+		<Attack__MS_>1</Attack__MS_>
 		<Release__MS_>50</Release__MS_>
 		<Knee>1</Knee>
 		<Ratio>10</Ratio>
+		<In_gain>2.0</In_gain>
 	</Compressor_slot_1>
 	<Bitcrusher_slot_1>
 		<Bits>16</Bits>
@@ -87,7 +88,7 @@
 		<Damping_Min>0</Damping_Min>
 		<Damping_Max>1</Damping_Max>
 		<Damping_Connect_To>0</Damping_Connect_To>
-		<feedback_>0.160953</feedback_>
+		<feedback_>0.290816</feedback_>
 		<feedback_Min>0</feedback_Min>
 		<feedback_Max>1</feedback_Max>
 		<feedback_COnnect_To>0</feedback_COnnect_To>
