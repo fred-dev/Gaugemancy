@@ -282,6 +282,39 @@ first needs a change). The Pi was not available, so numbers are Mac only.
   (the project lists every source file). Regenerating the project with the
   project generator also works.
 
+## Programming GUI layout, rebuilt 2026-11-11, branch `fable`
+
+Rule from Fred: muscle memory first, panels and controls do not move.
+`src/gui/ProgrammingGui.*` is now a fixed grid where nothing in the working
+layout collapses, scrolls or shifts:
+
+- top bar: profile, 12 fixed preset places, save / reload, Settings, Log
+- left column: 3D view, sensor faders (drag = simulated squeeze, fill = live
+  value, also for total / tilt / shake), squeeze ramp, performance buttons
+- tile row: Slot 1 to 6, Master, Narration (click = select; slot tiles also
+  audition and accept dropped files)
+- editor: Source panel, Parameters table (always 9 rows), Effects (always 8
+  places and 7 parameter rows). Tables are padded with blank rows and unused
+  controls are greyed out, never removed.
+- bottom bar: output meters, mode, sensor input, dropped buffers, last message
+- Settings (F7) and the Log (F10) take over the editor area; selecting a tile
+  closes them. Function keys are unchanged; Master has no key.
+
+Helpers: `PanelLayout::beginBar()` (bars without title; lifts ImGui's minimum
+window height, which grows with the display scale) and
+`GuiBuilder::beginParamTable / paramRow / endParamTable` (the fixed table:
+name, source, value or value at 0, value at 1, now).
+
+Changes in behaviour: the preset buttons follow preset changes made by OSC,
+the button or the hit gesture (the old dropdown went stale); a discrete
+parameter such as a waveform can now keep a sensor source (the old editor
+reset it to none when opened); the Narration tile is always there, so
+narration is switched on from its own editor.
+
+Limits: a chain shows its first 8 effects and a profile its first 12 presets;
+the Settings panel still uses collapsible groups; only checked by screenshot
+at 1920x1080 on the Mac, mouse interaction not tested.
+
 ## Done since the first handoff
 
 - Motion processing and smoothing bank, tilt/shake modulation sources.
