@@ -250,6 +250,68 @@ int runListAudio(const Options & options, const std::string & dataRoot) {
 
 // =================================================================== benchmark
 
+namespace {
+
+/// Which slot gates the benchmark holds open.
+enum class GateCase { AllOpen, AllClosed, OneOpen };
+
+struct BlockStats {
+	double averageCpu = 0.0; ///< percent of one core
+	double worstCpu = 0.0;   ///< worst block after the first
+	double firstCpu = 0.0;   ///< the first block pays one-off costs
+};
+
+std::array<SlotOverrides, kMaxSlots> overridesFor(GateCase gates) {
+	std::array<SlotOverrides, kMaxSlots> overrides {};
+	for (int i = 0; i < kMaxSlots; ++i) {
+		overrides[i].overrideGate = true;
+		overrides[i].gateOpen = gates == GateCase::AllOpen || (gates == GateCase::OneOpen && i == 0);
+	}
+	return overrides;
+}
+
+/// Render `blocks` buffers while every ball is squeezed up and down.
+BlockStats measure(AudioEngine & audio, const ProfileSettings & profile, const PresetSettings & preset, int blocks,
+	GateCase gates) {
+	const int bufferSize = profile.audio.bufferSize;
+	const double blockSeconds = static_cast<double>(bufferSize) / profile.audio.sampleRate;
+	std::vector<float> out(static_cast<size_t>(bufferSize) * 2);
+
+	SensorSimulator sim;
+	SensorSimulator::RampSettings ramp;
+	ramp.speed = 0.8f;
+	ramp.loop = true;
+	ramp.sensors.fill(true);
+	sim.setRamp(ramp);
+	sim.startRamp();
+	SensorProcessor processor;
+	processor.configure(profile.sensors, profile.motion);
+	processor.setZeroPoints({});
+	const std::array<SlotOverrides, kMaxSlots> overrides = overridesFor(gates);
+
+	double total = 0.0;
+	double worst = 0.0;
+	double first = 0.0;
+	for (int b = 0; b < blocks; ++b) {
+		ControlInputs inputs = processor.processNormalised(sim.update(static_cast<float>(blockSeconds)), sim.accel(),
+			static_cast<float>(blockSeconds));
+		auto t0 = std::chrono::steady_clock::now();
+		audio.update(preset, profile.narration, inputs, overrides, 1.0f);
+		audio.renderOffline(out.data(), bufferSize);
+		double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+		total += seconds;
+		if (b == 0) first = seconds;
+		else worst = std::max(worst, seconds);
+	}
+	BlockStats stats;
+	stats.averageCpu = 100.0 * total / (blocks * blockSeconds);
+	stats.worstCpu = 100.0 * worst / blockSeconds;
+	stats.firstCpu = 100.0 * first / blockSeconds;
+	return stats;
+}
+
+} // namespace
+
 int runBenchmark(const Options & options, const std::string & dataRoot) {
 	SettingsStore store(dataRoot);
 	LoadedProfile loaded = loadFor(options, store);
@@ -266,7 +328,6 @@ int runBenchmark(const Options & options, const std::string & dataRoot) {
 	AudioEngine audio;
 	audio.startOffline(sampleRate, bufferSize);
 	PathResolver resolve = [&](const std::string & f) { return store.audioPath(profile.name, f); };
-	std::vector<float> out(static_cast<size_t>(bufferSize) * 2);
 	int worstExit = 0;
 
 	for (size_t p = 0; p < loaded.presets.size(); ++p) {
@@ -275,39 +336,12 @@ int runBenchmark(const Options & options, const std::string & dataRoot) {
 			std::printf("  warning: %s\n", problem.c_str());
 		}
 
-		// Squeeze every ball up and down continuously, all slots open.
-		SensorSimulator sim;
-		SensorSimulator::RampSettings ramp;
-		ramp.speed = 0.8f;
-		ramp.loop = true;
-		ramp.sensors.fill(true);
-		sim.setRamp(ramp);
-		sim.startRamp();
-		SensorProcessor processor;
-		processor.configure(profile.sensors, profile.motion);
-		processor.setZeroPoints({});
-		std::array<SlotOverrides, kMaxSlots> overrides {};
-		for (auto & o : overrides) {
-			o.overrideGate = true;
-			o.gateOpen = true;
-		}
+		// Main case: every slot open. Then the idle costs: no slot open, and
+		// one slot open (what a performer squeezing one ball pays).
+		BlockStats open = measure(audio, profile, preset, blocks, GateCase::AllOpen);
+		BlockStats closed = measure(audio, profile, preset, blocks, GateCase::AllClosed);
+		BlockStats one = measure(audio, profile, preset, blocks, GateCase::OneOpen);
 
-		double total = 0.0;
-		double worst = 0.0;     // worst block after the first
-		double firstBlock = 0.0; // the first block after loading pays one-off costs
-		for (int b = 0; b < blocks; ++b) {
-			ControlInputs inputs = processor.processNormalised(sim.update(static_cast<float>(blockSeconds)), sim.accel(),
-				static_cast<float>(blockSeconds));
-			auto t0 = std::chrono::steady_clock::now();
-			audio.update(preset, profile.narration, inputs, overrides, 1.0f);
-			audio.renderOffline(out.data(), bufferSize);
-			double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
-			total += seconds;
-			if (b == 0) firstBlock = seconds;
-			else worst = std::max(worst, seconds);
-		}
-		double cpu = 100.0 * total / (blocks * blockSeconds);
-		double worstCpu = 100.0 * worst / blockSeconds;
 		int activeSlots = 0;
 		int effects = 0;
 		for (const SlotSettings & s : preset.slots) {
@@ -316,12 +350,14 @@ int runBenchmark(const Options & options, const std::string & dataRoot) {
 				effects += static_cast<int>(std::count_if(s.effects.begin(), s.effects.end(), [](const EffectSettings & e) { return e.enabled; }));
 			}
 		}
-		const char * verdict = cpu < 50.0 && worstCpu < 80.0 ? "ok" : (cpu < 80.0 ? "HIGH" : "TOO HIGH");
+		const char * verdict = open.averageCpu < 50.0 && open.worstCpu < 80.0 ? "ok" : (open.averageCpu < 80.0 ? "HIGH" : "TOO HIGH");
 		std::printf("preset %zu '%s': %d slot(s), %d slot effect(s), %zu master effect(s)\n", p + 1, preset.name.c_str(),
 			activeSlots, effects, preset.masterEffects.size());
-		std::printf("  average %.1f%%  worst block %.1f%%  first block after loading %.1f%%  -> %s\n", cpu, worstCpu,
-			100.0 * firstBlock / blockSeconds, verdict);
-		if (cpu >= 80.0) worstExit = 1;
+		std::printf("  average %.1f%%  worst block %.1f%%  first block after loading %.1f%%  -> %s\n", open.averageCpu,
+			open.worstCpu, open.firstCpu, verdict);
+		std::printf("  all gates closed: average %.2f%%  worst %.1f%%   one slot open: average %.2f%%  worst %.1f%%\n",
+			closed.averageCpu, closed.worstCpu, one.averageCpu, one.worstCpu);
+		if (open.averageCpu >= 80.0) worstExit = 1;
 	}
 	return worstExit;
 }
