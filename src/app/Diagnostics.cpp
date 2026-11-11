@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 #include <thread>
 #include <vector>
@@ -310,6 +311,115 @@ BlockStats measure(AudioEngine & audio, const ProfileSettings & profile, const P
 	return stats;
 }
 
+// ------------------------------------------------------------ preset change
+
+/// What a stretch of rendered audio looked like.
+struct RenderStats {
+	double averageCpu = 0.0;      ///< audio rendering only
+	double worstCpu = 0.0;        ///< worst audio block
+	double worstControlMs = 0.0;  ///< longest control frame (the old graph is freed in one)
+	float quietestWindowRms = 1.0e9f; ///< quietest ~100 ms window
+	float averageRms = 0.0f;
+	float largestStep = 0.0f;         ///< biggest sample-to-sample jump (a click is a big one)
+};
+
+/// Renders with every ball held at a steady squeeze and all gates open, so
+/// any silence or jump in the output comes from the engine, not the input.
+class SteadyRenderer {
+public:
+	SteadyRenderer(AudioEngine & audio, const ProfileSettings & profile)
+		: audio_(audio), profile_(profile), out_(static_cast<size_t>(profile.audio.bufferSize) * 2) {
+		for (int i = 0; i < kNumSensors; ++i) inputs_.setSensor(i, 0.8f);
+		inputs_.set(ModSource::Total, 0.8f);
+		inputs_.set(ModSource::TiltX, 0.5f);
+		inputs_.set(ModSource::TiltY, 0.5f);
+		overrides_ = overridesFor(GateCase::AllOpen);
+	}
+
+	RenderStats render(const PresetSettings & preset, double seconds) {
+		const int bufferSize = profile_.audio.bufferSize;
+		const double blockSeconds = static_cast<double>(bufferSize) / profile_.audio.sampleRate;
+		const int blocks = std::max(1, static_cast<int>(seconds / blockSeconds));
+		const int blocksPerWindow = std::max(1, static_cast<int>(0.1 / blockSeconds));
+		RenderStats stats;
+		double total = 0.0;
+		double worst = 0.0;
+		double squares = 0.0;
+		double windowSquares = 0.0;
+		for (int b = 0; b < blocks; ++b) {
+			// Timed apart: update() runs on the control thread, rendering on
+			// the audio thread, and only the second one can cause a dropout.
+			auto t0 = std::chrono::steady_clock::now();
+			audio_.update(preset, profile_.narration, inputs_, overrides_, 1.0f, static_cast<float>(blockSeconds));
+			auto t1 = std::chrono::steady_clock::now();
+			audio_.renderOffline(out_.data(), bufferSize);
+			double spent = std::chrono::duration<double>(std::chrono::steady_clock::now() - t1).count();
+			stats.worstControlMs = std::max(stats.worstControlMs, 1000.0 * std::chrono::duration<double>(t1 - t0).count());
+			total += spent;
+			worst = std::max(worst, spent);
+			for (int n = 0; n < bufferSize; ++n) {
+				float left = out_[static_cast<size_t>(n) * 2];
+				stats.largestStep = std::max(stats.largestStep, std::fabs(left - lastSample_));
+				lastSample_ = left;
+				windowSquares += static_cast<double>(left) * left;
+			}
+			if ((b + 1) % blocksPerWindow == 0) {
+				float rms = static_cast<float>(std::sqrt(windowSquares / (static_cast<double>(blocksPerWindow) * bufferSize)));
+				stats.quietestWindowRms = std::min(stats.quietestWindowRms, rms);
+				squares += windowSquares;
+				windowSquares = 0.0;
+			}
+		}
+		int fullWindows = blocks / blocksPerWindow;
+		if (fullWindows > 0) {
+			stats.averageRms = static_cast<float>(std::sqrt(squares / (static_cast<double>(fullWindows) * blocksPerWindow * bufferSize)));
+		}
+		stats.averageCpu = 100.0 * total / (blocks * blockSeconds);
+		stats.worstCpu = 100.0 * worst / blockSeconds;
+		return stats;
+	}
+
+private:
+	AudioEngine & audio_;
+	const ProfileSettings & profile_;
+	std::vector<float> out_;
+	ControlInputs inputs_;
+	std::array<SlotOverrides, kMaxSlots> overrides_ {};
+	float lastSample_ = 0.0f;
+};
+
+/// Crossfade from one preset to another and report cost, gaps and clicks.
+void benchmarkPresetChange(AudioEngine & audio, const ProfileSettings & profile, const LoadedProfile & loaded,
+	size_t from, size_t to, const PathResolver & resolve) {
+	const float fadeMs = static_cast<float>(profile.presetFadeMs);
+	SteadyRenderer renderer(audio, profile);
+	audio.loadPreset(loaded.presets[from], resolve);
+	RenderStats before = renderer.render(loaded.presets[from], 1.0);
+
+	auto t0 = std::chrono::steady_clock::now();
+	audio.loadPreset(loaded.presets[to], resolve, fadeMs);
+	double buildMs = 1000.0 * std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
+	RenderStats during = renderer.render(loaded.presets[to], fadeMs / 1000.0 + 0.2);
+	bool stillFading = audio.isFading();
+	RenderStats after = renderer.render(loaded.presets[to], 1.0);
+
+	// A gap: some 100 ms of the fade far quieter than both presets on their
+	// own. A click: a jump clearly bigger than either preset makes by itself.
+	float quietPreset = std::min(before.quietestWindowRms, after.quietestWindowRms);
+	bool gap = during.quietestWindowRms < 0.25f * quietPreset;
+	bool click = during.largestStep > 1.5f * std::max(before.largestStep, after.largestStep) + 0.02f;
+	std::printf("preset %zu -> %zu: build %.0f ms (control loop waits, sound continues), fade %.0f ms\n", from + 1, to + 1,
+		buildMs, fadeMs);
+	std::printf("  audio during the fade: average %.1f%%  worst block %.1f%%   (before %.1f%%, after %.1f%%)\n",
+		during.averageCpu, during.worstCpu, before.averageCpu, after.averageCpu);
+	std::printf("  longest control frame during the fade: %.1f ms (freeing the old preset)\n", during.worstControlMs);
+	std::printf("  quietest 100 ms: before %.4f  fade %.4f  after %.4f -> %s\n", before.quietestWindowRms,
+		during.quietestWindowRms, after.quietestWindowRms, gap ? "SILENT GAP" : "no gap");
+	std::printf("  largest step:    before %.4f  fade %.4f  after %.4f -> %s\n", before.largestStep, during.largestStep,
+		after.largestStep, click ? "CLICK" : "no click");
+	if (stillFading) std::printf("  WARNING: the old preset was still connected 0.2 s after the fade\n");
+}
+
 } // namespace
 
 int runBenchmark(const Options & options, const std::string & dataRoot) {
@@ -358,6 +468,13 @@ int runBenchmark(const Options & options, const std::string & dataRoot) {
 		std::printf("  all gates closed: average %.2f%%  worst %.1f%%   one slot open: average %.2f%%  worst %.1f%%\n",
 			closed.averageCpu, closed.worstCpu, one.averageCpu, one.worstCpu);
 		if (open.averageCpu >= 80.0) worstExit = 1;
+	}
+
+	if (loaded.presets.size() > 1) {
+		std::printf("\nPreset changes (every ball held at a steady squeeze, both presets play during the fade)\n");
+		for (size_t p = 0; p < loaded.presets.size(); ++p) {
+			benchmarkPresetChange(audio, profile, loaded, p, (p + 1) % loaded.presets.size(), resolve);
+		}
 	}
 	return worstExit;
 }

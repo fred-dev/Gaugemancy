@@ -3,23 +3,25 @@
 // -----------------------------------------------------------------------------
 // AudioEngine: owns the whole sound graph.
 //
-//   slot 1..6 ──┐
-//               ├─> master EffectChain -> idle gate ─┐
-//               ┘                                    ├─> master gain -> audio out L/R
-//   narration ───────────────────────────────────────┘
+//   playing PresetGraph  (slots + master chain, fading out) ─┐
+//   incoming PresetGraph (slots + master chain, fading in) ──┼─> master gain -> audio out L/R
+//   narration ───────────────────────────────────────────────┘
 //
-// Only slots that are enabled AND playable are connected; pdsp only processes
-// what is connected to the output, so unused slots cost no CPU. A connected
-// slot that is silent stops its effect chain once the tail has died away,
-// and so does the master chain when every slot has stopped (see IdleGate.h).
+// Most of the time there is one PresetGraph. A preset change builds a second
+// one WITHOUT the patch lock (it is not connected yet, so audio keeps
+// playing), connects it silently under a very short lock, then crossfades
+// with equal power on the control thread. The old graph is disconnected and
+// destroyed when its fade has reached zero. See PresetGraph.h.
 //
-// Thread safety: structural changes (load, rebuild, connect) take the pdsp
-// patch lock; per-frame parameter updates use atomic controls only.
+// Thread safety: structural changes to a connected graph take the pdsp patch
+// lock; per-frame parameter updates use atomic controls only.
 // -----------------------------------------------------------------------------
 
 #include "GrainSlot.h"
 #include "NarrationVoice.h"
+#include "PresetGraph.h"
 
+#include "../core/Crossfade.h"
 #include "../core/Settings.h"
 
 #include "ofxPDSP.h"
@@ -31,9 +33,6 @@
 #include <vector>
 
 namespace gm {
-
-/// Turns a file name from the settings into a full path.
-using PathResolver = std::function<std::string(const std::string &)>;
 
 class AudioEngine {
 public:
@@ -64,9 +63,14 @@ public:
 
 	// ---- content -------------------------------------------------------------
 
-	/// Load every slot's sample and build the chains for a preset. Files are
-	/// decoded before the patch lock is taken. Returns one line per problem.
-	std::vector<std::string> loadPreset(const PresetSettings & preset, const PathResolver & resolve);
+	/// Build a new graph for `preset` (slow, but audio keeps playing) and
+	/// crossfade to it over `fadeMs` (0 = switch at once). If a fade is still
+	/// running it is cut short first, so callers that care should wait for
+	/// isFading() to be false. Returns one line per problem.
+	std::vector<std::string> loadPreset(const PresetSettings & preset, const PathResolver & resolve, float fadeMs = 0.0f);
+
+	/// True while the previous preset is still fading out.
+	bool isFading() const { return outgoing_ != nullptr; }
 
 	/// Load the narration file (if enabled). Returns problems, if any.
 	std::vector<std::string> loadNarration(const NarrationSettings & settings, const PathResolver & resolve);
@@ -90,9 +94,11 @@ public:
 
 	void muteAll();
 
-	GrainSlot & slot(int index) { return *slots_[index]; }
+	/// Slots and master chain of the current (incoming, during a fade) preset.
+	/// Do not keep these references across a preset change.
+	GrainSlot & slot(int index) { return current_->slot(index); }
 	NarrationVoice & narration() { return narration_; }
-	EffectChain & master() { return master_; }
+	EffectChain & master() { return current_->master(); }
 
 	/// Final output level after every slot and narration are summed and the
 	/// master chain/gain applied - channel 0 = left, 1 = right. Thread-safe.
@@ -106,15 +112,21 @@ public:
 	int bufferSize() const { return bufferSize_; }
 
 private:
-	void connectOutputs(const PresetSettings & preset);
+	/// Put `fresh` on the output (silent when fading) and make it current.
+	void connectIncoming(std::unique_ptr<PresetGraph> fresh, bool fade);
+	void advanceFade(const ControlInputs & inputs, const std::array<SlotOverrides, kMaxSlots> & overrides,
+		float dtSeconds);
+	/// Disconnect the outgoing graph under the lock, destroy it after.
+	void retireOutgoing();
 
 	pdsp::Engine engine_;
-	std::array<std::unique_ptr<GrainSlot>, kMaxSlots> slots_;
-	std::array<bool, kMaxSlots> slotConnected_ {};
+	std::unique_ptr<PresetGraph> current_;  ///< always set
+	std::unique_ptr<PresetGraph> outgoing_; ///< only during a fade
+	Crossfade fade_;
+	float fadeSettledSeconds_ = 0.0f; ///< time since the fade reached its end
+	bool hasPreset_ = false;          ///< false until the first loadPreset()
 	NarrationVoice narration_;
 	bool narrationConnected_ = false;
-	EffectChain master_;
-	IdleGate masterIdle_;
 	bool scopesEnabled_ = false;
 	std::array<pdsp::Amp, 2> masterAmp_;
 	pdsp::ValueControl masterGain_;

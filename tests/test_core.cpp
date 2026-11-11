@@ -4,6 +4,7 @@
 #include "TestFramework.h"
 
 #include "core/ButtonClickDetector.h"
+#include "core/Crossfade.h"
 #include "core/Curve.h"
 #include "core/HitGestureDetector.h"
 #include "core/IdleDetector.h"
@@ -749,4 +750,52 @@ TEST(idle_detector_ignores_a_stalled_frame) {
 	d.setHoldSeconds(1.0f);
 	d.update(true, 0.5f, 0.01f);
 	CHECK(d.update(false, 0.0f, 5.0f)); // one long frame counts as 0.1 s only
+}
+
+// ==================================================================== crossfade
+
+TEST(crossfade_is_finished_until_started) {
+	Crossfade f;
+	CHECK(f.done());
+	CHECK_NEAR(f.incomingGain(), 1.0f, 1e-6);
+	CHECK_NEAR(f.outgoingGain(), 0.0f, 1e-6);
+}
+
+TEST(crossfade_keeps_equal_power_and_ends_exactly) {
+	Crossfade f;
+	f.start(1.0f);
+	CHECK_NEAR(f.incomingGain(), 0.0f, 1e-6);
+	CHECK_NEAR(f.outgoingGain(), 1.0f, 1e-6);
+	for (int i = 0; i < 99; ++i) {
+		f.advance(0.01f);
+		float power = f.incomingGain() * f.incomingGain() + f.outgoingGain() * f.outgoingGain();
+		CHECK_NEAR(power, 1.0f, 1e-4);
+		CHECK(!f.done() || i >= 98);
+	}
+	for (int i = 0; i < 3; ++i) f.advance(0.01f);
+	CHECK(f.done());
+	CHECK(f.incomingGain() == 1.0f);
+	CHECK(f.outgoingGain() == 0.0f);
+}
+
+TEST(crossfade_zero_length_is_a_cut_and_stalls_do_not_jump) {
+	Crossfade cut;
+	cut.start(0.0f);
+	CHECK(cut.done());
+	Crossfade f;
+	f.start(2.0f);
+	f.advance(30.0f); // a stalled frame counts as 0.1 s
+	CHECK_NEAR(f.progress(), 0.05f, 1e-5);
+}
+
+TEST(profile_json_keeps_preset_fade) {
+	ProfileSettings p;
+	CHECK(p.presetFadeMs == 1500);
+	p.presetFadeMs = 2750;
+	Warnings w;
+	ProfileSettings back = profileFromJson(toJson(p), w);
+	CHECK(back.presetFadeMs == 2750);
+	Json j = toJson(p);
+	j["presetFadeMs"] = 999999;
+	CHECK(profileFromJson(j, w).presetFadeMs <= 10000);
 }

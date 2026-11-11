@@ -609,6 +609,7 @@ void ProgrammingGui::drawProfileSection() {
 		builder_.floatSlider("accumulated playhead speed", instrument_.preset().playheadSpeed, 0.0f, 0.2f);
 		builder_.intSlider("control rate (Hz)", p.controlRateHz, 20, 500);
 		builder_.intSlider("min ms between preset changes", p.presetSwitchMinIntervalMs, 0, 20000);
+		builder_.intSlider("preset crossfade (ms)", p.presetFadeMs, 0, 10000);
 		builder_.endGroup();
 	}
 

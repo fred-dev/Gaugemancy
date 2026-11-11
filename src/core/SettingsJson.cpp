@@ -197,6 +197,7 @@ Json toJson(const ProfileSettings & p) {
 	j["playMode"] = playModeId(p.playMode);
 	j["controlRateHz"] = p.controlRateHz;
 	j["presetSwitchMinIntervalMs"] = p.presetSwitchMinIntervalMs;
+	j["presetFadeMs"] = p.presetFadeMs;
 	j["presets"] = p.presetFiles;
 
 	j["sensors"] = {
@@ -457,6 +458,7 @@ ProfileSettings profileFromJson(const Json & json, Warnings & warnings) {
 	if (!playMode.empty()) p.playMode = playModeFromId(playMode);
 	r.read("controlRateHz", p.controlRateHz, 10, 1000);
 	r.read("presetSwitchMinIntervalMs", p.presetSwitchMinIntervalMs, 0, 60000);
+	r.read("presetFadeMs", p.presetFadeMs, 0, 10000);
 
 	const Json & presets = r.raw("presets");
 	if (presets.is_array()) {

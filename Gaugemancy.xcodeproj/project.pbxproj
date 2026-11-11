@@ -322,6 +322,10 @@
 			"name": "Processor.cpp",
 			"sourceTree": "<group>"
 		},
+		"0D1E192C-BE61-4E19-AF2B-39D63877C4F9": {
+			"fileRef": "41BD30DF-CEDA-49C0-BE8D-23C4B33AF904",
+			"isa": "PBXBuildFile"
+		},
 		"0D238C6C-8578-4FC2-BE86-C6292B543700": {
 			"fileEncoding": "4",
 			"isa": "PBXFileReference",
@@ -348,7 +352,8 @@
 				"A2B5E139-204E-4B7E-BDC2-C7A7FCB0F5E1",
 				"CC30A741-B9A7-4019-A70F-B08742300EDE",
 				"1733CBCA-4028-4B6D-BC43-880204BFA34B",
-				"3B61C349-2321-43E0-9900-C654035F8A2D"
+				"3B61C349-2321-43E0-9900-C654035F8A2D",
+				"41BD30DF-CEDA-49C0-BE8D-23C4B33AF904"
 			],
 			"isa": "PBXGroup",
 			"name": "audio",
@@ -1840,6 +1845,13 @@
 			"isa": "PBXFileReference",
 			"lastKnownFileType": "sourcecode.cpp.h",
 			"name": "VAFilter.h",
+			"sourceTree": "<group>"
+		},
+		"41BD30DF-CEDA-49C0-BE8D-23C4B33AF904": {
+			"fileEncoding": "4",
+			"isa": "PBXFileReference",
+			"lastKnownFileType": "sourcecode.cpp.cpp",
+			"name": "PresetGraph.cpp",
 			"sourceTree": "<group>"
 		},
 		"42542EFC-8258-4469-A69C-F4841707CB44": {
@@ -5873,7 +5885,7 @@
 			"files": [],
 			"inputPaths": [],
 			"isa": "PBXShellScriptBuildPhase",
-			"name": "Run Script — Compile OF",
+			"name": "Run Script \u2014 Compile OF",
 			"outputPaths": [],
 			"runOnlyForDeploymentPostprocessing": "0",
 			"shellPath": "/bin/sh",
@@ -6220,7 +6232,8 @@
 				"01D35934-036F-4B50-9D30-361D7D744EC1",
 				"A000FD3F-6825-4175-9003-A2C57ACDFC70",
 				"BC3EFCB1-8092-4FBA-999B-AD3DE6CC0AA0",
-				"88A5E466-A86F-4DF8-A2FB-7680A86F0A6B"
+				"88A5E466-A86F-4DF8-A2FB-7680A86F0A6B",
+				"0D1E192C-BE61-4E19-AF2B-39D63877C4F9"
 			],
 			"isa": "PBXSourcesBuildPhase",
 			"runOnlyForDeploymentPostprocessing": "0"

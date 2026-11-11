@@ -131,6 +131,7 @@ private:
 	void applyLogLevel(const std::string & level);
 	void openSensors(SensorMode mode, const std::string & replayFile);
 	void loadCurrentPreset();
+	void startPendingPreset();
 	void readSensors(uint64_t nowMs, float dt);
 	void handleButton(uint64_t nowMs);
 	void handleGesture(uint64_t nowMs);
@@ -144,6 +145,7 @@ private:
 	SettingsStore store_;
 	LoadedProfile loaded_;
 	int presetIndex_ = 0;
+	int pendingPreset_ = -1; ///< preset asked for during a crossfade (-1 = none)
 
 	AudioEngine audio_;
 	bool audioOpen_ = false;

@@ -243,6 +243,7 @@ struct ProfileSettings {
 	PlayMode playMode = PlayMode::Multi;
 	int controlRateHz = 100;          ///< sensor read / parameter update rate
 	int presetSwitchMinIntervalMs = 4000;
+	int presetFadeMs = 1500;          ///< crossfade length of a preset change (0 = cut)
 	std::vector<std::string> presetFiles = { "presets/preset_1.json" };
 	SensorSettings sensors;
 	MotionSettings motion;

@@ -20,15 +20,13 @@ ofSoundDevice::Api apiFromName(const std::string & name) {
 	return ofSoundDevice::DEFAULT;
 }
 
+// After a fade reaches its end, wait this long before removing the old graph:
+// its fade gain is smoothed and must have settled on exactly 0.
+constexpr float kFadeSettleSeconds = 0.1f;
+
 std::string lower(std::string text) {
 	std::transform(text.begin(), text.end(), text.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
 	return text;
-}
-
-/// A synth source always has something to play; granular still needs a
-/// loaded sample.
-bool isPlayable(const SlotSettings & settings, const GrainSlot & slot) {
-	return settings.enabled && (settings.sourceType != "granular" || slot.hasSample());
 }
 
 std::vector<ofSoundDevice> outputDevices(ofSoundDevice::Api api) {
@@ -45,18 +43,14 @@ std::vector<ofSoundDevice> outputDevices(ofSoundDevice::Api api) {
 } // namespace
 
 AudioEngine::AudioEngine() {
-	for (auto & slot : slots_) {
-		slot = std::make_unique<GrainSlot>();
-	}
+	current_ = std::make_unique<PresetGraph>();
 	masterGain_.enableSmoothing(50.0f);
 	masterGain_.set(1.0f);
 	for (int ch = 0; ch < 2; ++ch) {
 		masterGain_ >> masterAmp_[ch].in_mod();
-		master_.out(ch) >> masterIdle_.in(ch);
-		masterIdle_.out(ch) >> masterAmp_[ch];
+		current_->out(ch) >> masterAmp_[ch];
 		masterAmp_[ch] >> engine_.audio_out(ch);
 	}
-	master_.build({});
 }
 
 AudioEngine::~AudioEngine() {
@@ -153,35 +147,81 @@ void AudioEngine::stop() {
 
 // -------------------------------------------------------------------- content
 
-std::vector<std::string> AudioEngine::loadPreset(const PresetSettings & preset, const PathResolver & resolve) {
-	std::vector<std::string> problems;
-
-	// 1. Decode every file first, without blocking audio.
-	std::array<std::unique_ptr<pdsp::SampleBuffer>, kMaxSlots> decoded;
-	for (int i = 0; i < kMaxSlots; ++i) {
-		const SlotSettings & s = preset.slots[i];
-		if (!s.enabled || s.file.empty()) continue;
-		std::string error;
-		decoded[i] = GrainSlot::loadSampleFile(resolve(s.file), error);
-		if (!decoded[i]) {
-			problems.push_back("slot " + std::to_string(i + 1) + ": " + error);
-		}
+std::vector<std::string> AudioEngine::loadPreset(const PresetSettings & preset, const PathResolver & resolve, float fadeMs) {
+	if (outgoing_) {
+		fade_.finish();
+		retireOutgoing();
 	}
+	// 1. Build the whole new graph. It is not connected to anything yet, so
+	//    this needs no lock and the playing preset is not interrupted.
+	auto fresh = std::make_unique<PresetGraph>();
+	std::vector<std::string> problems = fresh->build(preset, resolve);
 
-	// 2. Swap them in and rebuild under the lock (pointer swaps only).
-	std::array<std::unique_ptr<pdsp::SampleBuffer>, kMaxSlots> old;
+	// 2. Connect it (pointer operations only) and start the fade. The very
+	//    first preset has nothing to fade from.
+	bool fade = hasPreset_ && fadeMs > 0.0f;
+	connectIncoming(std::move(fresh), fade);
+	if (fade) {
+		fade_.start(fadeMs / 1000.0f);
+		fadeSettledSeconds_ = 0.0f;
+	}
+	hasPreset_ = true;
+	return problems;
+}
+
+void AudioEngine::connectIncoming(std::unique_ptr<PresetGraph> fresh, bool fade) {
+	std::unique_ptr<PresetGraph> replaced; // destroyed after the lock is released
 	{
 		auto lock = engine_.lockPatching();
-		for (int i = 0; i < kMaxSlots; ++i) {
-			slots_[i]->mute();
-			old[i] = slots_[i]->setSample(std::move(decoded[i]), preset.slots[i].file);
-			slots_[i]->rebuild(preset.slots[i]);
+		fresh->setFade(fade ? 0.0f : 1.0f);
+		for (int ch = 0; ch < 2; ++ch) {
+			fresh->out(ch) >> masterAmp_[ch];
 		}
-		master_.build(preset.masterEffects);
-		connectOutputs(preset);
+		if (scopesEnabled_) {
+			fresh->connectScopes(engine_.blackhole());
+			current_->disconnectScopes();
+		}
+		if (fade) {
+			outgoing_ = std::move(current_);
+		} else {
+			for (int ch = 0; ch < 2; ++ch) {
+				current_->out(ch).disconnectOut();
+			}
+			replaced = std::move(current_);
+		}
+		current_ = std::move(fresh);
 	}
-	// 3. `old` goes out of scope here, after the lock: buffers freed safely.
-	return problems;
+}
+
+void AudioEngine::advanceFade(const ControlInputs & inputs, const std::array<SlotOverrides, kMaxSlots> & overrides,
+	float dtSeconds) {
+	if (!outgoing_) return;
+	// The old preset keeps answering the sensors while it fades, so a held
+	// squeeze crossfades from the old sound to the new one.
+	outgoing_->updateWithBuiltSettings(inputs, overrides, dtSeconds);
+	fade_.advance(dtSeconds);
+	current_->setFade(fade_.incomingGain());
+	outgoing_->setFade(fade_.outgoingGain());
+	if (fade_.done()) {
+		fadeSettledSeconds_ += dtSeconds;
+		if (fadeSettledSeconds_ >= kFadeSettleSeconds) {
+			retireOutgoing();
+		}
+	}
+}
+
+void AudioEngine::retireOutgoing() {
+	if (!outgoing_) return;
+	current_->setFade(1.0f);
+	std::unique_ptr<PresetGraph> retired;
+	{
+		auto lock = engine_.lockPatching();
+		for (int ch = 0; ch < 2; ++ch) {
+			outgoing_->out(ch).disconnectOut();
+		}
+		retired = std::move(outgoing_);
+	}
+	// `retired` (samples, effects) is freed here, after the lock.
 }
 
 std::vector<std::string> AudioEngine::loadNarration(const NarrationSettings & settings, const PathResolver & resolve) {
@@ -217,63 +257,30 @@ std::string AudioEngine::loadSlotSample(int slot, const std::string & path, cons
 	std::unique_ptr<pdsp::SampleBuffer> old;
 	{
 		auto lock = engine_.lockPatching();
-		slots_[slot]->mute();
-		old = slots_[slot]->setSample(std::move(decoded), displayName);
+		current_->slot(slot).mute();
+		old = current_->slot(slot).setSample(std::move(decoded), displayName);
 	}
 	// A slot that had no sample is connected by the caller's syncStructure(),
 	// which knows whether the slot is enabled.
 	return "";
 }
 
-void AudioEngine::connectOutputs(const PresetSettings & preset) {
-	for (int i = 0; i < kMaxSlots; ++i) {
-		bool playable = isPlayable(preset.slots[i], *slots_[i]);
-		if (playable == slotConnected_[i]) continue;
-		for (int ch = 0; ch < 2; ++ch) {
-			if (playable) {
-				slots_[i]->out(ch) >> master_.in(ch);
-			} else {
-				slots_[i]->out(ch).disconnectOut();
-			}
-		}
-		slotConnected_[i] = playable;
-	}
-}
-
 void AudioEngine::syncStructure(const PresetSettings & preset, const NarrationSettings & narration) {
-	bool slotChanges = false;
-	for (int i = 0; i < kMaxSlots; ++i) {
-		bool playable = isPlayable(preset.slots[i], *slots_[i]);
-		slotChanges |= slots_[i]->needsRebuild(preset.slots[i]) || playable != slotConnected_[i];
-	}
-	bool masterChanged = !master_.matches(preset.masterEffects);
+	bool presetChanged = current_->needsSync(preset);
 	bool narrationChanged = narration_.isLoaded() && narration_.needsRebuild(narration);
-	if (!slotChanges && !masterChanged && !narrationChanged) {
+	if (!presetChanged && !narrationChanged) {
 		return;
 	}
 	auto lock = engine_.lockPatching();
-	for (int i = 0; i < kMaxSlots; ++i) {
-		if (slots_[i]->needsRebuild(preset.slots[i])) slots_[i]->rebuild(preset.slots[i]);
-	}
-	if (masterChanged) master_.build(preset.masterEffects);
+	if (presetChanged) current_->syncStructure(preset);
 	if (narrationChanged) narration_.rebuild(narration);
-	connectOutputs(preset);
 }
 
 void AudioEngine::update(const PresetSettings & preset, const NarrationSettings & narration,
 	const ControlInputs & inputs, const std::array<SlotOverrides, kMaxSlots> & overrides, float masterGain,
 	float dtSeconds) {
-	bool anySlotRunning = false;
-	for (int i = 0; i < kMaxSlots; ++i) {
-		if (slotConnected_[i]) {
-			slots_[i]->update(preset.slots[i], inputs, overrides[i], dtSeconds);
-			anySlotRunning |= slots_[i]->chainRunning();
-		} else {
-			slots_[i]->updateIdle(dtSeconds);
-		}
-	}
-	masterIdle_.update(anySlotRunning, dtSeconds);
-	master_.apply(preset.masterEffects, inputs);
+	current_->update(preset, inputs, overrides, dtSeconds);
+	advanceFade(inputs, overrides, dtSeconds);
 	if (narrationConnected_) {
 		narration_.update(narration, inputs);
 	}
@@ -283,18 +290,13 @@ void AudioEngine::update(const PresetSettings & preset, const NarrationSettings 
 void AudioEngine::enableScopes() {
 	if (scopesEnabled_) return;
 	auto lock = engine_.lockPatching();
-	for (auto & slot : slots_) {
-		// The scope's own output is deliberately silent; patching it into
-		// the blackhole is just what makes pdsp actually process it.
-		slot->scopeTap() >> engine_.blackhole();
-	}
+	current_->connectScopes(engine_.blackhole());
 	scopesEnabled_ = true;
 }
 
 void AudioEngine::muteAll() {
-	for (auto & slot : slots_) {
-		slot->mute();
-	}
+	current_->mute();
+	if (outgoing_) outgoing_->mute();
 	narration_.stop();
 }
 

@@ -169,7 +169,9 @@ PathResolver Instrument::audioResolver() const {
 void Instrument::loadCurrentPreset() {
 	const PresetSettings & p = preset();
 	note("preset " + std::to_string(presetIndex_ + 1) + " '" + p.name + "'");
-	for (const std::string & problem : audio_.loadPreset(p, audioResolver())) {
+	pendingPreset_ = -1;
+	float fadeMs = static_cast<float>(loaded_.profile.presetFadeMs);
+	for (const std::string & problem : audio_.loadPreset(p, audioResolver(), fadeMs)) {
 		note(problem, true);
 	}
 	playhead_.rewind();
@@ -179,9 +181,24 @@ void Instrument::loadCurrentPreset() {
 void Instrument::selectPreset(int index) {
 	int count = static_cast<int>(loaded_.presets.size());
 	if (count == 0) return;
-	presetIndex_ = ((index % count) + count) % count;
+	index = ((index % count) + count) % count;
+	if (audio_.isFading()) {
+		// One crossfade at a time: remember the request (the latest wins)
+		// and start it when the running fade has finished.
+		pendingPreset_ = index;
+		note("preset " + std::to_string(index + 1) + " queued until the crossfade ends");
+		return;
+	}
+	presetIndex_ = index;
 	lastPresetSwitchMs_ = nowMs_;
 	loadCurrentPreset();
+}
+
+void Instrument::startPendingPreset() {
+	if (pendingPreset_ < 0 || audio_.isFading()) return;
+	int index = pendingPreset_;
+	pendingPreset_ = -1;
+	selectPreset(index);
 }
 
 void Instrument::nextPreset(bool respectMinInterval) {
@@ -190,7 +207,8 @@ void Instrument::nextPreset(bool respectMinInterval) {
 		note("preset change ignored (too soon after the last one)");
 		return;
 	}
-	selectPreset(presetIndex_ + 1);
+	// Step on from a queued preset, so two quick requests move two presets.
+	selectPreset((pendingPreset_ >= 0 ? pendingPreset_ : presetIndex_) + 1);
 }
 
 void Instrument::skipNarration() {
@@ -336,6 +354,7 @@ void Instrument::update(uint64_t nowMs) {
 	playhead_.advance(dt, pressed, preset().playheadSpeed);
 
 	sendToAudio(dt);
+	startPendingPreset();
 	panel_.update(nowMs);
 	if (remote_.telemetryDue(nowMs)) {
 		remote_.sendTelemetry(telemetry());
