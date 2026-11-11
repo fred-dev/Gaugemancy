@@ -1,0 +1,708 @@
+{
+  "version": 1,
+  "name": "Glass Choir",
+  "playheadSpeed": 0.012,
+  "slots": [
+    {
+      "enabled": true,
+      "sourceType": "fm_operator",
+      "file": "",
+      "window": "hann",
+      "gate": "sensor1",
+      "voices": 4,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.9,
+          "max": 0.9,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "synth": {
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.42,
+          "source": "sensor1"
+        },
+        "pitch": {
+          "value": 50.0,
+          "min": 50.0,
+          "max": 50.0,
+          "source": "none"
+        },
+        "ratio": {
+          "value": 2.0,
+          "min": 2.0,
+          "max": 2.0,
+          "source": "none"
+        },
+        "fmAmount": {
+          "value": 0.1,
+          "min": 0.1,
+          "max": 2.2,
+          "source": "sensor1"
+        },
+        "feedback": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.05,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "sourceType": "fm_operator",
+      "file": "",
+      "window": "hann",
+      "gate": "sensor2",
+      "voices": 4,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.9,
+          "max": 0.9,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "synth": {
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.42,
+          "source": "sensor2"
+        },
+        "pitch": {
+          "value": 57.0,
+          "min": 57.0,
+          "max": 57.0,
+          "source": "none"
+        },
+        "ratio": {
+          "value": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "source": "none"
+        },
+        "fmAmount": {
+          "value": 0.1,
+          "min": 0.1,
+          "max": 2.2,
+          "source": "sensor2"
+        },
+        "feedback": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.05,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "sourceType": "fm_operator",
+      "file": "",
+      "window": "hann",
+      "gate": "sensor3",
+      "voices": 4,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.9,
+          "max": 0.9,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "synth": {
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.42,
+          "source": "sensor3"
+        },
+        "pitch": {
+          "value": 62.0,
+          "min": 62.0,
+          "max": 62.0,
+          "source": "none"
+        },
+        "ratio": {
+          "value": 3.5,
+          "min": 3.5,
+          "max": 3.5,
+          "source": "none"
+        },
+        "fmAmount": {
+          "value": 0.1,
+          "min": 0.1,
+          "max": 2.2,
+          "source": "sensor3"
+        },
+        "feedback": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.05,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "sourceType": "fm_operator",
+      "file": "",
+      "window": "hann",
+      "gate": "sensor4",
+      "voices": 4,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.9,
+          "max": 0.9,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "synth": {
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.42,
+          "source": "sensor4"
+        },
+        "pitch": {
+          "value": 65.0,
+          "min": 65.0,
+          "max": 65.0,
+          "source": "none"
+        },
+        "ratio": {
+          "value": 2.0,
+          "min": 2.0,
+          "max": 2.0,
+          "source": "none"
+        },
+        "fmAmount": {
+          "value": 0.1,
+          "min": 0.1,
+          "max": 2.2,
+          "source": "sensor4"
+        },
+        "feedback": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.05,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "sourceType": "fm_operator",
+      "file": "",
+      "window": "hann",
+      "gate": "sensor5",
+      "voices": 4,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.9,
+          "max": 0.9,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "synth": {
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.42,
+          "source": "sensor5"
+        },
+        "pitch": {
+          "value": 69.0,
+          "min": 69.0,
+          "max": 69.0,
+          "source": "none"
+        },
+        "ratio": {
+          "value": 5.0,
+          "min": 5.0,
+          "max": 5.0,
+          "source": "none"
+        },
+        "fmAmount": {
+          "value": 0.1,
+          "min": 0.1,
+          "max": 2.2,
+          "source": "sensor5"
+        },
+        "feedback": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.05,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "sourceType": "fm_operator",
+      "file": "",
+      "window": "hann",
+      "gate": "sensor6",
+      "voices": 4,
+      "grain": {
+        "length": {
+          "value": 500.0,
+          "min": 500.0,
+          "max": 500.0,
+          "source": "none"
+        },
+        "density": {
+          "value": 0.9,
+          "min": 0.9,
+          "max": 0.9,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 20.0,
+          "min": 20.0,
+          "max": 20.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "position": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "synth": {
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.42,
+          "source": "sensor6"
+        },
+        "pitch": {
+          "value": 76.0,
+          "min": 76.0,
+          "max": 76.0,
+          "source": "none"
+        },
+        "ratio": {
+          "value": 7.0,
+          "min": 7.0,
+          "max": 7.0,
+          "source": "none"
+        },
+        "fmAmount": {
+          "value": 0.1,
+          "min": 0.1,
+          "max": 2.2,
+          "source": "sensor6"
+        },
+        "feedback": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.05,
+          "source": "none"
+        }
+      },
+      "effects": []
+    }
+  ],
+  "master": {
+    "gain": 1.0,
+    "effects": [
+      {
+        "type": "chorus",
+        "enabled": true,
+        "params": {
+          "speed": {
+            "value": 0.3,
+            "min": 0.3,
+            "max": 0.3,
+            "source": "none"
+          },
+          "depth": {
+            "value": 4.0,
+            "min": 4.0,
+            "max": 4.0,
+            "source": "none"
+          },
+          "delay": {
+            "value": 18.0,
+            "min": 18.0,
+            "max": 18.0,
+            "source": "none"
+          }
+        }
+      },
+      {
+        "type": "reverb",
+        "enabled": true,
+        "params": {
+          "mix": {
+            "value": 0.25,
+            "min": 0.25,
+            "max": 0.7,
+            "source": "tilt"
+          },
+          "time": {
+            "value": 9.0,
+            "min": 9.0,
+            "max": 9.0,
+            "source": "none"
+          },
+          "density": {
+            "value": 0.7,
+            "min": 0.7,
+            "max": 0.7,
+            "source": "none"
+          },
+          "damping": {
+            "value": 0.3,
+            "min": 0.3,
+            "max": 0.3,
+            "source": "none"
+          },
+          "hiCut": {
+            "value": 7000.0,
+            "min": 7000.0,
+            "max": 7000.0,
+            "source": "none"
+          },
+          "modFreq": {
+            "value": 0.3,
+            "min": 0.3,
+            "max": 0.3,
+            "source": "none"
+          },
+          "modAmount": {
+            "value": 0.4,
+            "min": 0.4,
+            "max": 0.4,
+            "source": "none"
+          }
+        }
+      },
+      {
+        "type": "compressor",
+        "enabled": true,
+        "params": {
+          "gain": {
+            "value": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "source": "none"
+          },
+          "threshold": {
+            "value": -12.0,
+            "min": -12.0,
+            "max": -12.0,
+            "source": "none"
+          },
+          "ratio": {
+            "value": 8.0,
+            "min": 8.0,
+            "max": 8.0,
+            "source": "none"
+          },
+          "attack": {
+            "value": 5.0,
+            "min": 5.0,
+            "max": 5.0,
+            "source": "none"
+          },
+          "release": {
+            "value": 120.0,
+            "min": 120.0,
+            "max": 120.0,
+            "source": "none"
+          },
+          "knee": {
+            "value": 6.0,
+            "min": 6.0,
+            "max": 6.0,
+            "source": "none"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,600 @@
+{
+  "version": 1,
+  "name": "Metal Rain",
+  "playheadSpeed": 0.012,
+  "slots": [
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "HARD_1.wav",
+      "window": "triangular",
+      "gate": "sensor1",
+      "voices": 12,
+      "grain": {
+        "length": {
+          "value": 110.0,
+          "min": 110.0,
+          "max": 22.0,
+          "source": "sensor1"
+        },
+        "density": {
+          "value": 0.2,
+          "min": 0.2,
+          "max": 1.0,
+          "source": "sensor1"
+        },
+        "distanceJitter": {
+          "value": 700.0,
+          "min": 700.0,
+          "max": 40.0,
+          "source": "sensor1"
+        },
+        "pitchJitter": {
+          "value": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": -12.0,
+          "min": -12.0,
+          "max": -12.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.85,
+          "source": "sensor1"
+        },
+        "position": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.6,
+          "source": "tiltY"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 44100.0,
+              "min": 44100.0,
+              "max": 6000.0,
+              "source": "shake"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "HARD_2.wav",
+      "window": "triangular",
+      "gate": "sensor2",
+      "voices": 12,
+      "grain": {
+        "length": {
+          "value": 110.0,
+          "min": 110.0,
+          "max": 22.0,
+          "source": "sensor2"
+        },
+        "density": {
+          "value": 0.2,
+          "min": 0.2,
+          "max": 1.0,
+          "source": "sensor2"
+        },
+        "distanceJitter": {
+          "value": 700.0,
+          "min": 700.0,
+          "max": 40.0,
+          "source": "sensor2"
+        },
+        "pitchJitter": {
+          "value": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": -7.0,
+          "min": -7.0,
+          "max": -7.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.85,
+          "source": "sensor2"
+        },
+        "position": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.6,
+          "source": "tiltY"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 44100.0,
+              "min": 44100.0,
+              "max": 6000.0,
+              "source": "shake"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "HARD_3.wav",
+      "window": "triangular",
+      "gate": "sensor3",
+      "voices": 12,
+      "grain": {
+        "length": {
+          "value": 110.0,
+          "min": 110.0,
+          "max": 22.0,
+          "source": "sensor3"
+        },
+        "density": {
+          "value": 0.2,
+          "min": 0.2,
+          "max": 1.0,
+          "source": "sensor3"
+        },
+        "distanceJitter": {
+          "value": 700.0,
+          "min": 700.0,
+          "max": 40.0,
+          "source": "sensor3"
+        },
+        "pitchJitter": {
+          "value": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.85,
+          "source": "sensor3"
+        },
+        "position": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.6,
+          "source": "tiltY"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 44100.0,
+              "min": 44100.0,
+              "max": 6000.0,
+              "source": "shake"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "HARD_4.wav",
+      "window": "triangular",
+      "gate": "sensor4",
+      "voices": 12,
+      "grain": {
+        "length": {
+          "value": 110.0,
+          "min": 110.0,
+          "max": 22.0,
+          "source": "sensor4"
+        },
+        "density": {
+          "value": 0.2,
+          "min": 0.2,
+          "max": 1.0,
+          "source": "sensor4"
+        },
+        "distanceJitter": {
+          "value": 700.0,
+          "min": 700.0,
+          "max": 40.0,
+          "source": "sensor4"
+        },
+        "pitchJitter": {
+          "value": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.85,
+          "source": "sensor4"
+        },
+        "position": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.6,
+          "source": "tiltY"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 44100.0,
+              "min": 44100.0,
+              "max": 6000.0,
+              "source": "shake"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "HARD_5.wav",
+      "window": "triangular",
+      "gate": "sensor5",
+      "voices": 12,
+      "grain": {
+        "length": {
+          "value": 110.0,
+          "min": 110.0,
+          "max": 22.0,
+          "source": "sensor5"
+        },
+        "density": {
+          "value": 0.2,
+          "min": 0.2,
+          "max": 1.0,
+          "source": "sensor5"
+        },
+        "distanceJitter": {
+          "value": 700.0,
+          "min": 700.0,
+          "max": 40.0,
+          "source": "sensor5"
+        },
+        "pitchJitter": {
+          "value": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 7.0,
+          "min": 7.0,
+          "max": 7.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.85,
+          "source": "sensor5"
+        },
+        "position": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.6,
+          "source": "tiltY"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 44100.0,
+              "min": 44100.0,
+              "max": 6000.0,
+              "source": "shake"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "HARD_6.wav",
+      "window": "triangular",
+      "gate": "sensor6",
+      "voices": 12,
+      "grain": {
+        "length": {
+          "value": 110.0,
+          "min": 110.0,
+          "max": 22.0,
+          "source": "sensor6"
+        },
+        "density": {
+          "value": 0.2,
+          "min": 0.2,
+          "max": 1.0,
+          "source": "sensor6"
+        },
+        "distanceJitter": {
+          "value": 700.0,
+          "min": 700.0,
+          "max": 40.0,
+          "source": "sensor6"
+        },
+        "pitchJitter": {
+          "value": 3.0,
+          "min": 3.0,
+          "max": 3.0,
+          "source": "none"
+        },
+        "pitch": {
+          "value": 12.0,
+          "min": 12.0,
+          "max": 12.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.5,
+          "min": 0.5,
+          "max": 0.5,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.85,
+          "source": "sensor6"
+        },
+        "position": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.6,
+          "source": "tiltY"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": [
+        {
+          "type": "decimator",
+          "enabled": true,
+          "params": {
+            "rate": {
+              "value": 44100.0,
+              "min": 44100.0,
+              "max": 6000.0,
+              "source": "shake"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "master": {
+    "gain": 3.0,
+    "effects": [
+      {
+        "type": "delay",
+        "enabled": true,
+        "params": {
+          "mix": {
+            "value": 0.35,
+            "min": 0.35,
+            "max": 0.35,
+            "source": "none"
+          },
+          "time": {
+            "value": 330.0,
+            "min": 330.0,
+            "max": 330.0,
+            "source": "none"
+          },
+          "feedback": {
+            "value": 0.2,
+            "min": 0.2,
+            "max": 0.9,
+            "source": "total"
+          },
+          "damping": {
+            "value": 0.3,
+            "min": 0.3,
+            "max": 0.3,
+            "source": "none"
+          }
+        }
+      },
+      {
+        "type": "reverb",
+        "enabled": true,
+        "params": {
+          "mix": {
+            "value": 0.2,
+            "min": 0.2,
+            "max": 0.2,
+            "source": "none"
+          },
+          "time": {
+            "value": 2.2,
+            "min": 2.2,
+            "max": 2.2,
+            "source": "none"
+          },
+          "density": {
+            "value": 0.4,
+            "min": 0.4,
+            "max": 0.4,
+            "source": "none"
+          },
+          "damping": {
+            "value": 0.6,
+            "min": 0.6,
+            "max": 0.6,
+            "source": "none"
+          },
+          "hiCut": {
+            "value": 10000.0,
+            "min": 10000.0,
+            "max": 10000.0,
+            "source": "none"
+          },
+          "modFreq": {
+            "value": 0.2,
+            "min": 0.2,
+            "max": 0.2,
+            "source": "none"
+          },
+          "modAmount": {
+            "value": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "source": "none"
+          }
+        }
+      },
+      {
+        "type": "compressor",
+        "enabled": true,
+        "params": {
+          "gain": {
+            "value": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "source": "none"
+          },
+          "threshold": {
+            "value": -12.0,
+            "min": -12.0,
+            "max": -12.0,
+            "source": "none"
+          },
+          "ratio": {
+            "value": 8.0,
+            "min": 8.0,
+            "max": 8.0,
+            "source": "none"
+          },
+          "attack": {
+            "value": 5.0,
+            "min": 5.0,
+            "max": 5.0,
+            "source": "none"
+          },
+          "release": {
+            "value": 120.0,
+            "min": 120.0,
+            "max": 120.0,
+            "source": "none"
+          },
+          "knee": {
+            "value": 6.0,
+            "min": 6.0,
+            "max": 6.0,
+            "source": "none"
+          }
+        }
+      }
+    ]
+  }
+}

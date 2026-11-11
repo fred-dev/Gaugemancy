@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "name": "fable",
+  "logLevel": "notice",
+  "playMode": "multi",
+  "controlRateHz": 100,
+  "presetSwitchMinIntervalMs": 1000,
+  "presetFadeMs": 3000,
+  "presets": [
+    "presets/preset_1.json",
+    "presets/preset_2.json",
+    "presets/preset_3.json",
+    "presets/preset_4.json",
+    "presets/preset_5.json",
+    "presets/preset_6.json",
+    "presets/preset_7.json",
+    "presets/preset_8.json",
+    "presets/preset_9.json",
+    "presets/preset_10.json"
+  ],
+  "audio": {
+    "sampleRate": 44100,
+    "bufferSize": 512,
+    "numBuffers": 3,
+    "masterGain": 0.8
+  },
+  "narration": {
+    "enabled": false
+  }
+}

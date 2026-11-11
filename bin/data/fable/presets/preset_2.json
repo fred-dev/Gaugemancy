@@ -1,0 +1,522 @@
+{
+  "version": 1,
+  "name": "Bird Cloud",
+  "playheadSpeed": 0.012,
+  "slots": [
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "BIRDS_1.wav",
+      "window": "gaussian",
+      "gate": "sensor1",
+      "voices": 10,
+      "grain": {
+        "length": {
+          "value": 60.0,
+          "min": 60.0,
+          "max": 260.0,
+          "source": "sensor1"
+        },
+        "density": {
+          "value": 0.85,
+          "min": 0.85,
+          "max": 0.85,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 120.0,
+          "min": 120.0,
+          "max": 120.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 9.0,
+          "source": "shake"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.08,
+          "min": 0.08,
+          "max": 0.08,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.8,
+          "source": "sensor1"
+        },
+        "position": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.95,
+          "source": "sensor1"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "BIRDS_2.wav",
+      "window": "gaussian",
+      "gate": "sensor2",
+      "voices": 10,
+      "grain": {
+        "length": {
+          "value": 60.0,
+          "min": 60.0,
+          "max": 260.0,
+          "source": "sensor2"
+        },
+        "density": {
+          "value": 0.85,
+          "min": 0.85,
+          "max": 0.85,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 120.0,
+          "min": 120.0,
+          "max": 120.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 9.0,
+          "source": "shake"
+        },
+        "pitch": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.08,
+          "min": 0.08,
+          "max": 0.08,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.8,
+          "source": "sensor2"
+        },
+        "position": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.95,
+          "source": "sensor2"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "BIRDS_3.wav",
+      "window": "gaussian",
+      "gate": "sensor3",
+      "voices": 10,
+      "grain": {
+        "length": {
+          "value": 60.0,
+          "min": 60.0,
+          "max": 260.0,
+          "source": "sensor3"
+        },
+        "density": {
+          "value": 0.85,
+          "min": 0.85,
+          "max": 0.85,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 120.0,
+          "min": 120.0,
+          "max": 120.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 9.0,
+          "source": "shake"
+        },
+        "pitch": {
+          "value": 5.0,
+          "min": 5.0,
+          "max": 5.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.08,
+          "min": 0.08,
+          "max": 0.08,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.8,
+          "source": "sensor3"
+        },
+        "position": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.95,
+          "source": "sensor3"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "BIRDS_4.wav",
+      "window": "gaussian",
+      "gate": "sensor4",
+      "voices": 10,
+      "grain": {
+        "length": {
+          "value": 60.0,
+          "min": 60.0,
+          "max": 260.0,
+          "source": "sensor4"
+        },
+        "density": {
+          "value": 0.85,
+          "min": 0.85,
+          "max": 0.85,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 120.0,
+          "min": 120.0,
+          "max": 120.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 9.0,
+          "source": "shake"
+        },
+        "pitch": {
+          "value": -5.0,
+          "min": -5.0,
+          "max": -5.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.08,
+          "min": 0.08,
+          "max": 0.08,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.8,
+          "source": "sensor4"
+        },
+        "position": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.95,
+          "source": "sensor4"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "BIRDS_5.wav",
+      "window": "gaussian",
+      "gate": "sensor5",
+      "voices": 10,
+      "grain": {
+        "length": {
+          "value": 60.0,
+          "min": 60.0,
+          "max": 260.0,
+          "source": "sensor5"
+        },
+        "density": {
+          "value": 0.85,
+          "min": 0.85,
+          "max": 0.85,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 120.0,
+          "min": 120.0,
+          "max": 120.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 9.0,
+          "source": "shake"
+        },
+        "pitch": {
+          "value": 7.0,
+          "min": 7.0,
+          "max": 7.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.08,
+          "min": 0.08,
+          "max": 0.08,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.8,
+          "source": "sensor5"
+        },
+        "position": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.95,
+          "source": "sensor5"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": []
+    },
+    {
+      "enabled": true,
+      "sourceType": "granular",
+      "file": "BIRDS_6.wav",
+      "window": "gaussian",
+      "gate": "sensor6",
+      "voices": 10,
+      "grain": {
+        "length": {
+          "value": 60.0,
+          "min": 60.0,
+          "max": 260.0,
+          "source": "sensor6"
+        },
+        "density": {
+          "value": 0.85,
+          "min": 0.85,
+          "max": 0.85,
+          "source": "none"
+        },
+        "distanceJitter": {
+          "value": 120.0,
+          "min": 120.0,
+          "max": 120.0,
+          "source": "none"
+        },
+        "pitchJitter": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 9.0,
+          "source": "shake"
+        },
+        "pitch": {
+          "value": 12.0,
+          "min": 12.0,
+          "max": 12.0,
+          "source": "none"
+        },
+        "spread": {
+          "value": 0.08,
+          "min": 0.08,
+          "max": 0.08,
+          "source": "none"
+        },
+        "volume": {
+          "value": 0.0,
+          "min": 0.0,
+          "max": 0.8,
+          "source": "sensor6"
+        },
+        "position": {
+          "value": 0.05,
+          "min": 0.05,
+          "max": 0.95,
+          "source": "sensor6"
+        },
+        "direction": {
+          "value": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "source": "none"
+        }
+      },
+      "effects": []
+    }
+  ],
+  "master": {
+    "gain": 2.5,
+    "effects": [
+      {
+        "type": "delay",
+        "enabled": true,
+        "params": {
+          "mix": {
+            "value": 0.3,
+            "min": 0.3,
+            "max": 0.3,
+            "source": "none"
+          },
+          "time": {
+            "value": 180.0,
+            "min": 180.0,
+            "max": 620.0,
+            "source": "tiltX"
+          },
+          "feedback": {
+            "value": 0.5,
+            "min": 0.5,
+            "max": 0.5,
+            "source": "none"
+          },
+          "damping": {
+            "value": 0.4,
+            "min": 0.4,
+            "max": 0.4,
+            "source": "none"
+          }
+        }
+      },
+      {
+        "type": "reverb",
+        "enabled": true,
+        "params": {
+          "mix": {
+            "value": 0.3,
+            "min": 0.3,
+            "max": 0.3,
+            "source": "none"
+          },
+          "time": {
+            "value": 4.0,
+            "min": 4.0,
+            "max": 4.0,
+            "source": "none"
+          },
+          "density": {
+            "value": 0.6,
+            "min": 0.6,
+            "max": 0.6,
+            "source": "none"
+          },
+          "damping": {
+            "value": 0.4,
+            "min": 0.4,
+            "max": 0.4,
+            "source": "none"
+          },
+          "hiCut": {
+            "value": 9000.0,
+            "min": 9000.0,
+            "max": 9000.0,
+            "source": "none"
+          },
+          "modFreq": {
+            "value": 0.2,
+            "min": 0.2,
+            "max": 0.2,
+            "source": "none"
+          },
+          "modAmount": {
+            "value": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "source": "none"
+          }
+        }
+      },
+      {
+        "type": "compressor",
+        "enabled": true,
+        "params": {
+          "gain": {
+            "value": 1.0,
+            "min": 1.0,
+            "max": 1.0,
+            "source": "none"
+          },
+          "threshold": {
+            "value": -12.0,
+            "min": -12.0,
+            "max": -12.0,
+            "source": "none"
+          },
+          "ratio": {
+            "value": 8.0,
+            "min": 8.0,
+            "max": 8.0,
+            "source": "none"
+          },
+          "attack": {
+            "value": 5.0,
+            "min": 5.0,
+            "max": 5.0,
+            "source": "none"
+          },
+          "release": {
+            "value": 120.0,
+            "min": 120.0,
+            "max": 120.0,
+            "source": "none"
+          },
+          "knee": {
+            "value": 6.0,
+            "min": 6.0,
+            "max": 6.0,
+            "source": "none"
+          }
+        }
+      }
+    ]
+  }
+}
