@@ -4,6 +4,9 @@ This file is the running status of the refactor so a new session (local on
 Mac/Windows/Linux, or on the Raspberry Pi over SSH) can pick up where the last
 one stopped. **Update it after every major milestone.**
 
+**Next session: start with `tests/HANDOFF.md`** (Mac paths, phase 1 code
+review and optimisation, phase 2 preset crossfade design, later ideas).
+
 Last updated: 2026-11-03 (local Mac session: first macOS build/run).
 
 ## Ground rules from the owner (Fred)
