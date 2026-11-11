@@ -217,8 +217,33 @@ first needs a change). The Pi was not available, so numbers are Mac only.
 - Main finding: a closed gate skips the grain engine (0.03% with no effects)
   but every effect in the slot's chain keeps running on silence, so a preset
   with many slot effects costs nearly the same idle as played (2.6 of 3.1).
-  Bypassing a chain whose input is silent and whose tail has died away is
-  the biggest available saving for the Pi. Not done yet.
+  Fixed with the idle gate below.
+- Idle gate (`src/audio/IdleGate.h`, logic in `src/core/IdleDetector.h`,
+  unit tested): an Amp after each slot's effect chain and after the master
+  chain. When nothing goes in and the output has stayed below -80 dB for
+  2.5 s (longer than the 2 s maximum delay time), its gain goes to 0 and
+  pdsp stops processing the chain behind it. It reopens at once when the
+  slot plays. `AudioEngine::update()` now takes the control frame's dt.
+- Live scopes are only patched to the blackhole by `AudioEngine::enableScopes()`,
+  which the GUI calls; the headless Pi never runs them. They tap the slot
+  output after the idle gate.
+- After (same machine, all open / all closed / one slot open): Demo STRESS
+  2.5 / 0.27 / 0.42 (was 3.1 / 2.61 / 2.67); one effect per slot
+  1.3 / 0.12 / 0.29 (was 1.3 / 0.57 / 0.82); Fred about 4.1 / 0.4 to 0.7 / 0.6
+  (was 4.2 / 3.3 / 3.5); Clement 1.0 / 0.07 / 0.4 (was 1.2 / 0.48 / 0.6).
+  The closed figure still includes the 2.5 s the tails are given to die.
+- Small fixes: telemetry is only built when a packet is due;
+  `restartAudio()` respects `--no-audio`; a sample dropped on a disabled slot
+  no longer connects it; the benchmark counts synth slots.
+- Not listened to yet: the idle gate closing and reopening on real effects
+  (check for a cut-off tail or a click on the first squeeze after a pause).
+- Still open from the review: `loadPreset()` builds chains under the audio
+  lock and decodes on the control thread (belongs to Phase 2);
+  `startDevice()` reports success without checking the stream (needs a
+  state getter in the ofxPDSP fork); `SampleBuffer::load()` holds two copies
+  of a sample while loading (ofxPDSP fork); `GrainSlot::update()` string
+  compares per frame (not measured); GUI per-frame costs and the fork diffs
+  are not reviewed; nothing measured on the Pi.
 
 ## Done since the first handoff
 
