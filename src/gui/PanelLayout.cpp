@@ -23,6 +23,19 @@ bool PanelLayout::begin(const std::string & title, const ofRectangle & rect, boo
 	return ImGui::Begin(title.c_str(), open, flags);
 }
 
+bool PanelLayout::beginBar(const std::string & id, const ofRectangle & rect) const {
+	ImGui::SetNextWindowPos(ImVec2(rect.x, rect.y), ImGuiCond_Always);
+	ImGui::SetNextWindowSize(ImVec2(rect.width, rect.height), ImGuiCond_Always);
+	constexpr ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse
+		| ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+	// A bar is lower than ImGui's minimum window height (which also grows
+	// with the display scale), so lift that limit for this one window.
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(8.0f, 8.0f));
+	bool open = ImGui::Begin(id.c_str(), nullptr, flags);
+	ImGui::PopStyleVar();
+	return open;
+}
+
 void PanelLayout::end() const {
 	ImGui::End();
 }

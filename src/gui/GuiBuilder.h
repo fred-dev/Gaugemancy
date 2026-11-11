@@ -55,12 +55,32 @@ public:
 	/// min/max/source controls when allowSources is true.
 	bool modulated(const ParamSpec & spec, ModulatedParam & target, Callback onChange = {}, bool allowSources = true);
 
+	// ---- fixed parameter table ------------------------------------------------
+	// One row per parameter, in columns that never move:
+	//   name | source | value (fixed) or min (source at 0) | max (source at 1) | now
+	// Always the same number of rows (unused ones are left blank), so a
+	// parameter is in the same place whatever is selected.
+	//
+	//   if (b.beginParamTable("grain")) {
+	//       b.paramRow(spec, param, param.resolve(inputs));
+	//       b.endParamTable(9);
+	//   }
+
+	bool beginParamTable(const std::string & id);
+	/// `now` is the value this frame (shown in the last column).
+	bool paramRow(const ParamSpec & spec, ModulatedParam & target, float now, bool allowSources = true);
+	/// Pads with blank rows up to `totalRows` and closes the table.
+	void endParamTable(int totalRows);
+
 	/// Labels of every modulation source, in enum order.
 	static std::vector<std::string> sourceNames();
 
 	/// Copy `path` into `baseDir` if it is not already there; returns the file
 	/// name to store in the settings, or "" on failure.
 	static std::string adoptFile(const std::string & path, const std::string & baseDir, std::string & error);
+
+private:
+	int tableRows_ = 0; ///< rows drawn since beginParamTable()
 };
 
 } // namespace gm

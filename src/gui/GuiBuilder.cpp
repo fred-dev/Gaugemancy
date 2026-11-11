@@ -118,6 +118,87 @@ bool GuiBuilder::pathField(const std::string & label, std::string & target, cons
 	return changed;
 }
 
+// ----------------------------------------------------------- parameter table
+
+bool GuiBuilder::beginParamTable(const std::string & id) {
+	constexpr ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_SizingStretchProp;
+	if (!ImGui::BeginTable(id.c_str(), 5, flags)) return false;
+	ImGui::TableSetupColumn("parameter", ImGuiTableColumnFlags_WidthStretch, 1.5f);
+	ImGui::TableSetupColumn("source", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+	ImGui::TableSetupColumn("value, or at 0", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+	ImGui::TableSetupColumn("at 1", ImGuiTableColumnFlags_WidthStretch, 2.0f);
+	ImGui::TableSetupColumn("now", ImGuiTableColumnFlags_WidthStretch, 0.7f);
+	ImGui::TableHeadersRow();
+	tableRows_ = 0;
+	return true;
+}
+
+bool GuiBuilder::paramRow(const ParamSpec & spec, ModulatedParam & target, float now, bool allowSources) {
+	static const std::vector<std::string> sources = sourceNames();
+	bool changed = false;
+	bool discrete = !spec.choices.empty();
+	ImGui::TableNextRow();
+	ImGui::PushID(spec.id);
+
+	ImGui::TableNextColumn();
+	ImGui::AlignTextToFramePadding();
+	ImGui::TextUnformatted(spec.label);
+
+	ImGui::TableNextColumn();
+	if (allowSources) {
+		int source = static_cast<int>(target.source);
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		if (choice("##source", source, sources)) {
+			target.source = static_cast<ModSource>(source);
+			changed = true;
+		}
+	}
+
+	bool modulatedNow = allowSources && target.isModulated();
+	ImGui::TableNextColumn();
+	ImGui::SetNextItemWidth(-FLT_MIN);
+	if (modulatedNow) {
+		changed |= ImGui::SliderFloat("##min", &target.min, spec.lowest, spec.highest);
+	} else if (discrete) {
+		std::vector<std::string> names(spec.choices.begin(), spec.choices.end());
+		int index = std::clamp(static_cast<int>(std::lround(target.value - spec.lowest)), 0, static_cast<int>(names.size()) - 1);
+		if (choice("##value", index, names)) {
+			target.value = spec.lowest + static_cast<float>(index);
+			changed = true;
+		}
+	} else {
+		changed |= ImGui::SliderFloat("##value", &target.value, spec.lowest, spec.highest);
+	}
+
+	ImGui::TableNextColumn();
+	if (modulatedNow) {
+		ImGui::SetNextItemWidth(-FLT_MIN);
+		changed |= ImGui::SliderFloat("##max", &target.max, spec.lowest, spec.highest);
+	}
+
+	ImGui::TableNextColumn();
+	ImGui::AlignTextToFramePadding();
+	if (discrete) {
+		int index = std::clamp(static_cast<int>(now - spec.lowest), 0, static_cast<int>(spec.choices.size()) - 1);
+		ImGui::TextUnformatted(spec.choices[static_cast<size_t>(index)]);
+	} else {
+		ImGui::Text("%.4g", now);
+	}
+
+	ImGui::PopID();
+	++tableRows_;
+	return changed;
+}
+
+void GuiBuilder::endParamTable(int totalRows) {
+	for (; tableRows_ < totalRows; ++tableRows_) {
+		ImGui::TableNextRow(0, ImGui::GetFrameHeight());
+		ImGui::TableNextColumn();
+		ImGui::Dummy(ImVec2(1.0f, ImGui::GetFrameHeight()));
+	}
+	ImGui::EndTable();
+}
+
 std::vector<std::string> GuiBuilder::sourceNames() {
 	std::vector<std::string> names;
 	for (int i = 0; i < kNumModSources; ++i) {

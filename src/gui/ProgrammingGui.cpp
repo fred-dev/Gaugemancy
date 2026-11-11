@@ -17,14 +17,51 @@ constexpr const char * kFontPath = "/System/Library/Fonts/Supplemental/Arial.ttf
 constexpr float kFontSize = 19.0f;
 constexpr float kStyleScale = 1.2f;
 
-// The fixed grid, as fractions of the canvas (the window, minus the menu
-// bar): every number here is a panel's permanent share of the screen. This
-// is the one place panel sizes are decided - see PanelLayout.h.
-constexpr float kLeftColumnFrac = 0.19f; // Transport/Simulation/Master
-constexpr float kRightColumnFrac = 0.27f; // Inspector
-constexpr float kTransportFrac = 0.22f; // share of the left column's height
-constexpr float kSimulationFrac = 0.40f; // Master gets the rest (0.38)
-constexpr float kHeaderHeight = 20.0f; // one-line status strip above the slot grid
+// The fixed grid. Bars have a fixed height; everything else is a share of
+// the window, decided in layout() - the one place panel sizes are set.
+constexpr float kTopBarHeight = 48.0f;
+constexpr float kBottomBarHeight = 44.0f;
+constexpr float kLeftColumnFrac = 0.19f;  // the instrument column
+constexpr float kDeviceFrac = 0.36f;      // share of the column's height: 3D view
+constexpr float kSensorsFrac = 0.22f;     // sensor faders
+constexpr float kRampFrac = 0.21f;        // squeeze ramp (performance gets the rest)
+constexpr float kTileFrac = 0.12f;        // height of the tile row
+constexpr float kSourceFrac = 0.27f;      // width of the Source panel in the editor
+constexpr float kParametersFrac = 0.45f;  // height of Parameters (Effects gets the rest)
+
+// Fixed numbers of places, so nothing shifts when a list grows.
+constexpr int kPresetPlaces = 12;
+constexpr int kEffectPlaces = 8;
+constexpr int kParameterRows = 9;       // the grain engine has 9; synths have fewer
+constexpr int kEffectParameterRows = 7; // the reverb has 7; others have fewer
+
+const ImVec4 kSelectedColor(0.95f, 0.65f, 0.15f, 1.0f);
+const ImVec4 kSelectedText(0.08f, 0.08f, 0.08f, 1.0f);
+
+/// A button that is highlighted while `selected`.
+bool selectableButton(const std::string & label, bool selected, const ImVec2 & size) {
+	if (selected) {
+		ImGui::PushStyleColor(ImGuiCol_Button, kSelectedColor);
+		ImGui::PushStyleColor(ImGuiCol_Text, kSelectedText);
+	}
+	bool clicked = ImGui::Button(label.c_str(), size);
+	if (selected) ImGui::PopStyleColor(2);
+	return clicked;
+}
+
+/// Width a button with this label takes, including the gap after it.
+float buttonWidth(const char * label) {
+	const ImGuiStyle & style = ImGui::GetStyle();
+	return ImGui::CalcTextSize(label, nullptr, true).x + 2.0f * style.FramePadding.x + style.ItemSpacing.x;
+}
+
+/// A vertical level meter filling the last drawn item from the bottom.
+void overlayLevel(float level, ImU32 colour) {
+	ImVec2 lo = ImGui::GetItemRectMin();
+	ImVec2 hi = ImGui::GetItemRectMax();
+	float top = hi.y - (hi.y - lo.y) * std::clamp(level, 0.0f, 1.0f);
+	ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(lo.x, top), hi, colour);
+}
 
 std::vector<std::string> windowNames() {
 	std::vector<std::string> names;
@@ -39,14 +76,6 @@ std::vector<std::string> curveNames() {
 }
 
 const std::vector<std::string> kAxisIds = { "+z", "-z", "+x", "-x", "+y", "-y" };
-
-std::vector<std::string> effectNames() {
-	std::vector<std::string> names;
-	for (const EffectInfo & info : EffectCatalog::all()) {
-		names.push_back(info.label + " (cpu " + std::to_string(info.cpuCost) + ")");
-	}
-	return names;
-}
 
 std::vector<std::string> sourceTypeNames() {
 	std::vector<std::string> names;
@@ -137,61 +166,59 @@ void ProgrammingGui::setup() {
 	instrument_.audio().enableScopes(); // live scopes are only drawn here
 	ofSetWindowTitle("Gaugemancy");
 	ofBackground(18);
-	// A new file name (not the old "imgui.ini"): window positions saved
-	// under the old, smaller font/layout no longer fit this one, so this
-	// starts everyone fresh on the new layout once; from here on it's
-	// remembered exactly like before.
-	gui_.iniFileName = ofToDataPath("imgui_v2.ini");
+	// A new file name per layout generation: positions saved for an older
+	// layout must not be applied to this one.
+	gui_.iniFileName = ofToDataPath("imgui_v3.ini");
 	gui_.setup(nullptr, false);
 	applyAccessibleTheme();
 	if (gui_.addFont(kFontPath, kFontSize, nullptr, nullptr, true) != nullptr) {
 		ImGui::GetStyle().ScaleAllSizes(kStyleScale);
 	}
 	ramp_ = instrument_.simulator().ramp();
-	presetChoice_ = instrument_.presetIndex();
 	layout();
 }
 
 void ProgrammingGui::layout() {
-	float w = static_cast<float>(ofGetWidth());
-	float h = static_cast<float>(ofGetHeight());
+	const float w = static_cast<float>(ofGetWidth());
+	const float h = static_cast<float>(ofGetHeight());
+	const float m = kMargin;
 
-	// The one fixed grid everything else reads from: a canvas below the menu
-	// bar, carved into permanent fractional regions (PanelLayout). Every
-	// panel's share of the screen is decided here, once, each frame.
-	ofRectangle canvas(kMargin, menuBarHeight_ + kMargin, std::max(w - 2.0f * kMargin, 100.0f), std::max(h - menuBarHeight_ - 2.0f * kMargin, 100.0f));
-	panels_.setCanvas(canvas);
+	topRect_.set(m, m, std::max(w - 2.0f * m, 100.0f), kTopBarHeight);
+	bottomRect_.set(m, h - m - kBottomBarHeight, topRect_.width, kBottomBarHeight);
+	const float top = topRect_.getBottom() + m;
+	const float height = std::max(bottomRect_.y - m - top, 100.0f);
 
-	ofRectangle leftColumn = panels_.region(0.0f, 0.0f, kLeftColumnFrac, 1.0f);
-	transportRect_ = PanelLayout::inset(ofRectangle(leftColumn.x, leftColumn.y, leftColumn.width, leftColumn.height * kTransportFrac), kMargin * 0.5f);
-	simulationRect_ = PanelLayout::inset(ofRectangle(leftColumn.x, leftColumn.y + leftColumn.height * kTransportFrac,
-										leftColumn.width, leftColumn.height * kSimulationFrac), kMargin * 0.5f);
-	masterRect_ = PanelLayout::inset(ofRectangle(leftColumn.x, leftColumn.y + leftColumn.height * (kTransportFrac + kSimulationFrac),
-									leftColumn.width, leftColumn.height * (1.0f - kTransportFrac - kSimulationFrac)), kMargin * 0.5f);
-	inspectorRect_ = PanelLayout::inset(panels_.region(1.0f - kRightColumnFrac, 0.0f, 1.0f, 1.0f), kMargin * 0.5f);
-	centerRect_ = PanelLayout::inset(panels_.region(kLeftColumnFrac, 0.0f, 1.0f - kRightColumnFrac, 1.0f), kMargin * 0.5f);
+	// Left column: the instrument, top to bottom.
+	const float leftW = std::max(w * kLeftColumnFrac, 300.0f);
+	float y = top;
+	auto take = [&](float fraction) {
+		ofRectangle rect(m, y, leftW, height * fraction - m);
+		y += height * fraction;
+		return rect;
+	};
+	deviceView_.setRect(take(kDeviceFrac));
+	sensorsRect_ = take(kSensorsFrac);
+	rampRect_ = take(kRampFrac);
+	performanceRect_.set(m, y, leftW, top + height - y);
 
-	// Centre content (OF-drawn, not ImGui: the slot grid, narration waveform,
-	// 3D view, sensor bars, log) fills centerRect_, with a one-line header
-	// strip reserved at the top.
-	float contentTop = centerRect_.y + kHeaderHeight;
-	float slotW = std::min((centerRect_.width - 2.0f * kMargin) / 3.0f, 300.0f);
-	float slotH = std::min(100.0f, h * 0.12f);
-	for (int i = 0; i < kMaxSlots; ++i) {
-		int row = i / 3;
-		int col = i % 3;
-		slotViews_[i].setRect(ofRectangle(centerRect_.x + col * (slotW + kMargin), contentTop + row * (slotH + kMargin), slotW, slotH));
-	}
-	float y = contentTop + 2.0f * (slotH + kMargin);
-	narrationView_.setRect(ofRectangle(centerRect_.x, y, centerRect_.width, slotH * 0.7f));
-	y += slotH * 0.7f + kMargin;
-	// Bottom row: the 3D instrument on the left; sensor bars and messages right.
-	float deviceSize = std::max(std::min({ centerRect_.getBottom() - y - kMargin, centerRect_.width * 0.45f, 420.0f }), 200.0f);
-	deviceView_.setRect(ofRectangle(centerRect_.x, y, deviceSize, deviceSize));
-	float rightX = centerRect_.x + deviceSize + kMargin;
-	float rightW = std::max(centerRect_.width - deviceSize - kMargin, 200.0f);
-	sensorView_.setRect(ofRectangle(rightX, y, rightW, 150.0f));
-	statusRect_.set(rightX, y + 150.0f + kMargin, rightW, std::max(centerRect_.getBottom() - y - 150.0f - 2.0f * kMargin, 60.0f));
+	// Tile row: eight equal tiles across the rest of the window.
+	const float editorX = m + leftW + m;
+	const float editorW = std::max(w - editorX - m, 200.0f);
+	const float tileH = std::clamp(height * kTileFrac, 70.0f, 140.0f);
+	const float tileW = (editorW - (kTargets - 1) * m) / kTargets;
+	auto tile = [&](int index) { return ofRectangle(editorX + index * (tileW + m), top, tileW, tileH); };
+	for (int i = 0; i < kMaxSlots; ++i) slotViews_[i].setRect(tile(i));
+	masterTileRect_ = tile(kMaxSlots);
+	narrationView_.setRect(tile(kMaxSlots + 1));
+
+	// Editor: Source on the left, Parameters above Effects on the right.
+	editorRect_.set(editorX, top + tileH + m, editorW, height - tileH - m);
+	const float sourceW = std::max(editorW * kSourceFrac, 320.0f);
+	const float parametersH = editorRect_.height * kParametersFrac;
+	sourceRect_.set(editorRect_.x, editorRect_.y, sourceW, editorRect_.height);
+	parametersRect_.set(editorRect_.x + sourceW + m, editorRect_.y, editorW - sourceW - m, parametersH - m * 0.5f);
+	effectsRect_.set(parametersRect_.x, editorRect_.y + parametersH + m * 0.5f, parametersRect_.width,
+		editorRect_.height - parametersH - m * 0.5f);
 }
 
 void ProgrammingGui::windowResized(int, int) {
@@ -202,375 +229,448 @@ std::string ProgrammingGui::audioDir() const {
 	return instrument_.store().audioDir(instrument_.profile().name);
 }
 
-// ===================================================================== menu
-
-float ProgrammingGui::drawMenuBar() {
-	ImGui::BeginMainMenuBar();
-	ImGui::MenuItem("Settings (F7)", nullptr, &showSettings_);
-	ImGui::MenuItem("Message log (F10)", nullptr, &showLog_);
-	ImGui::EndMainMenuBar();
-	return static_cast<float>(gui_.getMenuHeight());
+void ProgrammingGui::select(Target target, int slot) {
+	target_ = target;
+	if (target == Target::Slot) selectedSlot_ = std::clamp(slot, 0, kMaxSlots - 1);
+	// Picking something to edit always brings the editor back.
+	showSettings_ = false;
+	showLog_ = false;
 }
 
-// ================================================================== transport
-
-void ProgrammingGui::drawTransportWindow() {
-	panels_.begin("Gaugemancy - " + instrument_.profile().name, transportRect_);
-
-	if (builder_.group("Presets")) {
-		std::vector<std::string> presetNames;
-		for (size_t i = 0; i < instrument_.presets().size(); ++i) {
-			presetNames.push_back(std::to_string(i + 1) + ": " + instrument_.presets()[i].name);
-		}
-		if (builder_.choice("preset", presetChoice_, presetNames)) presetChanged_ = true;
-		if (builder_.button("next preset")) {
-			presetChoice_ = (instrument_.presetIndex() + 1) % static_cast<int>(instrument_.presets().size());
-			presetChanged_ = true;
-		}
-		if (builder_.button("add preset (copy of this one)")) {
-			ProfileSettings & profile = instrument_.profile();
-			instrument_.presets().push_back(instrument_.preset());
-			profile.presetFiles.push_back("presets/preset_" + std::to_string(instrument_.presets().size()) + ".json");
-			instrument_.note("added preset " + std::to_string(instrument_.presets().size()) + " (save to keep it)");
-			presetChoice_ = static_cast<int>(instrument_.presets().size()) - 1;
-			presetChanged_ = true;
-		}
-		builder_.endGroup();
-	}
-
-	if (builder_.group("Files")) {
-		if (builder_.button("save everything (F12)")) {
-			std::string error;
-			instrument_.saveToDisk(error);
-		}
-		if (builder_.button("save this preset")) {
-			std::string error;
-			instrument_.savePresetToDisk(error);
-		}
-		if (builder_.button("reload from disk (discard edits)")) {
-			instrument_.reloadFromDisk();
-			presetChoice_ = instrument_.presetIndex();
-		}
-		builder_.endGroup();
-	}
-
-	if (builder_.group("Performance")) {
-		if (builder_.button("skip narration")) instrument_.skipNarration();
-		if (builder_.button("recalibrate sensors")) instrument_.recalibrate();
-		sourceChoice_ = instrument_.sensorSourceName() == "hardware" ? 1 : 0;
-		if (builder_.choice("sensor input", sourceChoice_, { "Simulation", "Hardware" })) {
-			instrument_.useSensorMode(sourceChoice_ == 1 ? SensorMode::Hardware : SensorMode::Simulation);
-		}
-		builder_.text("record file", recordFile_);
-		if (builder_.button("start / stop recording")) {
-			if (instrument_.isRecording()) instrument_.stopRecording();
-			else instrument_.startRecording(ofToDataPath(recordFile_, true));
-		}
-		builder_.endGroup();
-	}
-
-	ImGui::End();
+int ProgrammingGui::targetIndex() const {
+	if (target_ == Target::Master) return kMaxSlots;
+	if (target_ == Target::Narration) return kMaxSlots + 1;
+	return selectedSlot_;
 }
 
-// ================================================================= simulation
-
-void ProgrammingGui::drawSimulationWindow() {
-	panels_.begin("Simulation", simulationRect_);
-	SensorSimulator & sim = instrument_.simulator();
-
-	if (builder_.group("Squeeze by hand")) {
-		for (int i = 0; i < kNumSensors; ++i) {
-			ImGui::PushID(i);
-			simLevels_[i] = sim.manual(i);
-			if (builder_.floatSlider("sensor " + std::to_string(i + 1), simLevels_[i], 0.0f, 1.0f)) {
-				instrument_.simulator().setManual(i, simLevels_[i]);
-			}
-			ImGui::PopID();
-		}
-		builder_.endGroup();
-	}
-
-	if (builder_.group("Squeeze ramp (F9)")) {
-		builder_.floatSlider("speed", ramp_.speed, 0.05f, 5.0f);
-		builder_.floatSlider("peak", ramp_.extent, 0.0f, 1.0f);
-		builder_.toggle("loop", ramp_.loop);
-		// One "include sensor" heading plus a compact grid of numbered boxes,
-		// instead of 6 full-width "include sensor N" rows - the whole panel
-		// then fits without scrolling at 1920x1080.
-		builder_.label("include sensor:");
-		constexpr int kPerRow = 3;
-		for (int i = 0; i < kNumSensors; ++i) {
-			ImGui::PushID(i);
-			builder_.toggle(std::to_string(i + 1), ramp_.sensors[i]);
-			ImGui::PopID();
-			if (i + 1 < kNumSensors && (i + 1) % kPerRow != 0) ImGui::SameLine();
-		}
-		if (builder_.button("start / stop ramp")) {
-			SensorSimulator & s = instrument_.simulator();
-			if (s.rampRunning()) {
-				s.stopRamp();
-			} else {
-				s.setRamp(ramp_);
-				s.startRamp();
-			}
-		}
-		builder_.endGroup();
-	}
-
-	ImGui::End();
+EffectChainSettings & ProgrammingGui::selectedChain() {
+	if (target_ == Target::Master) return instrument_.preset().masterEffects;
+	if (target_ == Target::Narration) return instrument_.profile().narration.effects;
+	return instrument_.preset().slots[selectedSlot_].effects;
 }
 
-// ====================================================================== master
+// ===================================================================== top bar
 
-void ProgrammingGui::drawMasterWindow() {
-	// Always visible, fixed in the left column with Transport/Simulation -
-	// not part of the Inspector's single-open accordion, so selecting a slot
-	// never hides the one place you can see and fix the overall output level.
-	panels_.begin("Master output", masterRect_);
-	drawMasterSection();
-	ImGui::End();
-}
+void ProgrammingGui::drawTopBar() {
+	panels_.beginBar("##top", topRect_);
+	ImGui::AlignTextToFramePadding();
+	ImGui::TextUnformatted(instrument_.profile().name.c_str());
+	ImGui::SameLine();
+	ImGui::TextDisabled("preset");
 
-// =================================================================== settings
-
-void ProgrammingGui::drawSettingsWindow() {
-	if (!showSettings_) return;
-	// A different context from the always-on working layout (profile
-	// switching, device/hardware/network/calibration), so it is hidden by
-	// default - but still a fixed panel, not a free-floating window: it
-	// takes over exactly the centre region the slot grid would otherwise
-	// use (which draw() skips while this is open), so it never overlaps
-	// Transport/Simulation/Master/Inspector, which all stay visible and usable.
-	panels_.begin("Settings - profile: " + instrument_.profile().name, centerRect_);
-	drawProfileSection();
-	ImGui::End();
-}
-
-// ===================================================================== editor
-
-void ProgrammingGui::drawInspectorWindow() {
-	panels_.begin("Inspector", inspectorRect_);
-
-	for (int i = 0; i < kMaxSlots; ++i) {
-		bool active = target_ == Target::Slot && selectedSlot_ == i;
+	// A fixed row of places: preset 3 is always the third button.
+	const int count = static_cast<int>(instrument_.presets().size());
+	const float place = ImGui::GetFrameHeight() * 1.35f;
+	for (int i = 0; i < kPresetPlaces; ++i) {
+		ImGui::SameLine();
 		ImGui::PushID(i);
-		drawInspectorSection("Slot " + std::to_string(i + 1) + " (F" + std::to_string(i + 1) + ")", active,
-			[this, i]() { select(Target::Slot, i); });
-		if (active) drawSlotEditor(instrument_.preset().slots[i], i);
+		ImGui::BeginDisabled(i >= count);
+		if (selectableButton(std::to_string(i + 1), i == instrument_.presetIndex(), ImVec2(place, 0))) {
+			presetRequest_ = i;
+		}
+		if (i < count && ImGui::IsItemHovered()) ImGui::SetTooltip("%s", instrument_.presets()[i].name.c_str());
+		ImGui::EndDisabled();
 		ImGui::PopID();
 	}
-
-	// Narration is a legacy feature: only list it here once a profile
-	// actually has it enabled, so it doesn't clutter every other profile.
-	if (instrument_.profile().narration.enabled) {
-		drawInspectorSection("Narration (F8)", target_ == Target::Narration, [this]() { select(Target::Narration); });
-		if (target_ == Target::Narration) drawNarrationEditor(instrument_.profile().narration);
-	} else if (target_ == Target::Narration) {
-		select(Target::Slot, 0);
+	ImGui::SameLine();
+	if (ImGui::Button("+ copy")) {
+		ProfileSettings & profile = instrument_.profile();
+		instrument_.presets().push_back(instrument_.preset());
+		profile.presetFiles.push_back("presets/preset_" + std::to_string(instrument_.presets().size()) + ".json");
+		instrument_.note("added preset " + std::to_string(instrument_.presets().size()) + " (save to keep it)");
+		presetRequest_ = static_cast<int>(instrument_.presets().size()) - 1;
 	}
+	ImGui::SameLine();
+	ImGui::TextUnformatted((instrument_.preset().name + (instrument_.audio().isFading() ? "  (crossfading)" : "")).c_str());
 
-	ImGui::End();
+	// Right-aligned: files and the two occasional panels, always in this order.
+	const char * labels[] = { "Save all (F12)", "Save preset", "Reload (discard edits)", "Settings (F7)", "Log (F10)" };
+	float width = 0.0f;
+	for (const char * label : labels) width += buttonWidth(label);
+	ImGui::SameLine(std::max(ImGui::GetWindowWidth() - width - ImGui::GetStyle().WindowPadding.x, ImGui::GetCursorPosX()));
+	std::string error;
+	if (ImGui::Button(labels[0])) instrument_.saveToDisk(error);
+	ImGui::SameLine();
+	if (ImGui::Button(labels[1])) instrument_.savePresetToDisk(error);
+	ImGui::SameLine();
+	if (ImGui::Button(labels[2])) instrument_.reloadFromDisk();
+	ImGui::SameLine();
+	if (selectableButton(labels[3], showSettings_, ImVec2(0, 0))) {
+		showSettings_ = !showSettings_;
+		showLog_ = false;
+	}
+	ImGui::SameLine();
+	if (selectableButton(labels[4], showLog_, ImVec2(0, 0))) {
+		showLog_ = !showLog_;
+		showSettings_ = false;
+	}
+	panels_.end();
 }
 
-void ProgrammingGui::drawInspectorSection(const std::string & title, bool active, const std::function<void()> & onSelect) {
-	if (active) {
-		ImGui::TextColored(ImVec4(1.0f, 0.85f, 0.3f, 1.0f), "%s", title.c_str());
-	} else if (ImGui::Selectable(title.c_str())) {
-		onSelect();
+// ================================================================== bottom bar
+
+void ProgrammingGui::drawBottomBar() {
+	panels_.beginBar("##bottom", bottomRect_);
+	const float meterW = ImGui::GetFrameHeight() * 5.0f;
+	ImGui::AlignTextToFramePadding();
+	ImGui::TextDisabled("out");
+	ImGui::SameLine();
+	ImGui::ProgressBar(std::clamp(instrument_.audio().masterMeter(0), 0.0f, 1.0f), ImVec2(meterW, 0), "L");
+	ImGui::SameLine();
+	ImGui::ProgressBar(std::clamp(instrument_.audio().masterMeter(1), 0.0f, 1.0f), ImVec2(meterW, 0), "R");
+	ImGui::SameLine();
+	ImGui::Text("%s  |  sensors: %s  |  dropped buffers: %llu%s", modeName(instrument_.mode()),
+		instrument_.sensorSourceName().c_str(), static_cast<unsigned long long>(instrument_.audio().skippedCallbacks()),
+		instrument_.isRecording() ? "  |  RECORDING" : "");
+	if (!instrument_.messages().empty()) {
+		ImGui::SameLine();
+		ImGui::TextDisabled("|  %s", instrument_.messages().back().c_str());
 	}
-	ImGui::Separator();
+	panels_.end();
 }
 
-void ProgrammingGui::drawMasterSection() {
-	if (builder_.group("Master", false)) {
-		builder_.floatSlider("preset gain", instrument_.preset().masterGain, 0.0f, 4.0f);
-		builder_.label("effects on the mix of all slots:");
-		builder_.endGroup();
+// ========================================================== instrument column
+
+void ProgrammingGui::drawSensorsPanel() {
+	panels_.begin("Sensors (drag = simulate, fill = live)", sensorsRect_);
+	SensorSimulator & sim = instrument_.simulator();
+	const ControlInputs & inputs = instrument_.inputs();
+	const ImU32 live = ImGui::GetColorU32(ImVec4(0.2f, 0.75f, 0.95f, 0.55f));
+	const char * extraNames[] = { "all", "tx", "ty", "tilt", "shk" };
+	const ModSource extras[] = { ModSource::Total, ModSource::TiltX, ModSource::TiltY, ModSource::Tilt, ModSource::Shake };
+	const int columns = kNumSensors + 5;
+
+	if (ImGui::BeginTable("sensors", columns, ImGuiTableFlags_SizingStretchSame)) {
+		float barH = std::max(ImGui::GetContentRegionAvail().y - ImGui::GetTextLineHeightWithSpacing() - 8.0f, 40.0f);
+		ImGui::TableNextRow();
+		for (int i = 0; i < kNumSensors; ++i) {
+			ImGui::TableNextColumn();
+			ImGui::PushID(i);
+			simLevels_[i] = sim.manual(i);
+			// The fader sets the simulated squeeze; the fill shows what the
+			// instrument actually reads (also from hardware or a replay).
+			if (ImGui::VSliderFloat("##fader", ImVec2(ImGui::GetContentRegionAvail().x, barH), &simLevels_[i], 0.0f, 1.0f, "")) {
+				sim.setManual(i, simLevels_[i]);
+			}
+			overlayLevel(inputs.sensor(i), live);
+			ImGui::PopID();
+		}
+		for (int i = 0; i < 5; ++i) {
+			ImGui::TableNextColumn();
+			ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x, barH));
+			ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImGui::GetColorU32(ImGuiCol_Border));
+			overlayLevel(inputs.get(extras[i]), live);
+		}
+		ImGui::TableNextRow();
+		for (int i = 0; i < columns; ++i) {
+			ImGui::TableNextColumn();
+			if (i < kNumSensors) ImGui::Text("%d", i + 1);
+			else ImGui::TextDisabled("%s", extraNames[i - kNumSensors]);
+		}
+		ImGui::EndTable();
 	}
-	if (builder_.group("Output level", true)) {
-		float left = instrument_.audio().masterMeter(0);
-		float right = instrument_.audio().masterMeter(1);
-		ImGui::ProgressBar(std::clamp(left, 0.0f, 1.0f), ImVec2(-1, 0), "L");
-		ImGui::ProgressBar(std::clamp(right, 0.0f, 1.0f), ImVec2(-1, 0), "R");
-		builder_.endGroup();
-	}
-	drawEffectChainEditor("master", instrument_.preset().masterEffects);
+	panels_.end();
 }
 
-void ProgrammingGui::drawSlotEditor(SlotSettings & slot, int index) {
+void ProgrammingGui::drawRampPanel() {
+	panels_.begin("Squeeze ramp (F9)", rampRect_);
+	SensorSimulator & sim = instrument_.simulator();
+	if (selectableButton(sim.rampRunning() ? "stop ramp" : "start ramp", sim.rampRunning(), ImVec2(-FLT_MIN, 0))) {
+		if (sim.rampRunning()) {
+			sim.stopRamp();
+		} else {
+			sim.setRamp(ramp_);
+			sim.startRamp();
+		}
+	}
+	builder_.floatSlider("speed", ramp_.speed, 0.05f, 5.0f);
+	builder_.floatSlider("peak", ramp_.extent, 0.0f, 1.0f);
+	builder_.toggle("loop", ramp_.loop);
+	ImGui::AlignTextToFramePadding();
+	ImGui::TextDisabled("balls");
+	for (int i = 0; i < kNumSensors; ++i) {
+		ImGui::SameLine();
+		ImGui::PushID(i);
+		if (selectableButton(std::to_string(i + 1), ramp_.sensors[i], ImVec2(ImGui::GetFrameHeight(), 0))) {
+			ramp_.sensors[i] = !ramp_.sensors[i];
+		}
+		ImGui::PopID();
+	}
+	panels_.end();
+}
+
+void ProgrammingGui::drawPerformancePanel() {
+	panels_.begin("Performance", performanceRect_);
+	const float half = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
+	if (ImGui::Button("recalibrate", ImVec2(half, 0))) instrument_.recalibrate();
+	ImGui::SameLine();
+	if (ImGui::Button("skip narration", ImVec2(half, 0))) instrument_.skipNarration();
+	sourceChoice_ = instrument_.sensorSourceName() == "hardware" ? 1 : 0;
+	if (builder_.choice("sensors", sourceChoice_, { "Simulation", "Hardware" })) {
+		instrument_.useSensorMode(sourceChoice_ == 1 ? SensorMode::Hardware : SensorMode::Simulation);
+	}
+	builder_.text("file", recordFile_);
+	if (selectableButton(instrument_.isRecording() ? "stop recording" : "record sensors", instrument_.isRecording(),
+			ImVec2(-FLT_MIN, 0))) {
+		if (instrument_.isRecording()) instrument_.stopRecording();
+		else instrument_.startRecording(ofToDataPath(recordFile_, true));
+	}
+	panels_.end();
+}
+
+// ====================================================================== source
+
+void ProgrammingGui::drawSourcePanel() {
+	std::string title = target_ == Target::Master ? "Master" : target_ == Target::Narration ? "Narration"
+		: "Slot " + std::to_string(selectedSlot_ + 1) + " source";
+	panels_.begin(title + "###source", sourceRect_);
+	if (target_ == Target::Master) drawMasterSource();
+	else if (target_ == Target::Narration) drawNarrationSource(instrument_.profile().narration);
+	else drawSlotSource(instrument_.preset().slots[selectedSlot_], selectedSlot_);
+	panels_.end();
+}
+
+void ProgrammingGui::drawSlotSource(SlotSettings & slot, int index) {
+	ImGui::PushID(index);
 	bool granular = slot.sourceType == "granular";
-
-	if (builder_.group("Source")) {
-		int sourceIndex = sourceTypeIndex(slot.sourceType);
-		if (builder_.choice("type", sourceIndex, sourceTypeNames())) {
-			slot.sourceType = SourceCatalog::all()[sourceIndex].id;
-			slot.synthParams = SourceCatalog::makeParams(slot.sourceType);
-			granular = slot.sourceType == "granular";
-			if (freeRun_[index]) {
-				// The toggle below only exists for a synth source; switching
-				// away from one must not leave it stuck audibly "on" with no
-				// way left on screen to turn it back off.
-				freeRun_[index] = false;
-				instrument_.setAudition(index, false, 0.0f);
-			}
-			structureChanged();
-		}
-		if (const SourceInfo * info = SourceCatalog::find(slot.sourceType)) {
-			builder_.label(info->description);
-		}
-		if (!granular) {
-			if (builder_.toggle("free run (play continuously - for tuning by ear)", freeRun_[index])) {
-				instrument_.setAudition(index, freeRun_[index], 0.0f);
-			}
-		}
-		builder_.endGroup();
-	}
-
 	if (!slot.enabled) {
-		// No separate "enabled" switch any more - it duplicated "heard" below
-		// but silenced the slot outright, which is easy to flip by accident
-		// and then forget about. "heard" is now the one place that decides.
+		// There is no separate "enabled" switch: "heard" below decides.
 		slot.enabled = true;
 		structureChanged();
 	}
 
-	if (builder_.group("Playback")) {
-		std::vector<std::string> gates = { "Auto (while its sensors are pressed)", "Always" };
-		for (int i = 1; i < kNumModSources; ++i) gates.push_back("While " + modSourceLabel(static_cast<ModSource>(i)));
-		int gateIndex = slot.gate == GateMode::Auto ? 0 : slot.gate == GateMode::Always ? 1 : 1 + static_cast<int>(slot.gateSource);
-		if (builder_.choice("heard", gateIndex, gates)) {
-			if (gateIndex == 0) slot.gate = GateMode::Auto;
-			else if (gateIndex == 1) slot.gate = GateMode::Always;
-			else {
-				slot.gate = GateMode::Source;
-				slot.gateSource = static_cast<ModSource>(gateIndex - 1);
+	int sourceIndex = sourceTypeIndex(slot.sourceType);
+	if (builder_.choice("type", sourceIndex, sourceTypeNames())) {
+		slot.sourceType = SourceCatalog::all()[sourceIndex].id;
+		slot.synthParams = SourceCatalog::makeParams(slot.sourceType);
+		granular = slot.sourceType == "granular";
+		if (freeRun_[index]) {
+			// Free run only exists for a synth source; never leave it stuck on.
+			freeRun_[index] = false;
+			instrument_.setAudition(index, false, 0.0f);
+		}
+		structureChanged();
+	}
+
+	std::vector<std::string> gates = { "Auto (while its sensors are pressed)", "Always" };
+	for (int i = 1; i < kNumModSources; ++i) gates.push_back("While " + modSourceLabel(static_cast<ModSource>(i)));
+	int gateIndex = slot.gate == GateMode::Auto ? 0 : slot.gate == GateMode::Always ? 1 : 1 + static_cast<int>(slot.gateSource);
+	if (builder_.choice("heard", gateIndex, gates)) {
+		if (gateIndex == 0) slot.gate = GateMode::Auto;
+		else if (gateIndex == 1) slot.gate = GateMode::Always;
+		else {
+			slot.gate = GateMode::Source;
+			slot.gateSource = static_cast<ModSource>(gateIndex - 1);
+		}
+	}
+
+	// Sample rows: greyed out, not removed, for a synth source.
+	ImGui::BeginDisabled(!granular);
+	if (builder_.pathField("file", slot.file, audioDir())) samplesToReload_.push_back(index);
+	int windowIndex = static_cast<int>(slot.window);
+	if (builder_.choice("grain window", windowIndex, windowNames())) {
+		slot.window = static_cast<WindowType>(windowIndex);
+		structureChanged();
+	}
+	builder_.intSlider("grain voices (cpu)", slot.voices, 1, 32, [this]() { structureChanged(); });
+	ImGui::EndDisabled();
+
+	// Free run row: greyed out for the granular source.
+	ImGui::BeginDisabled(granular);
+	if (builder_.toggle("free run (play continuously)", freeRun_[index])) {
+		instrument_.setAudition(index, freeRun_[index], 0.0f);
+	}
+	ImGui::EndDisabled();
+
+	ImGui::Separator();
+	if (const SourceInfo * info = SourceCatalog::find(slot.sourceType)) builder_.label(info->description);
+	ImGui::PopID();
+}
+
+void ProgrammingGui::drawMasterSource() {
+	builder_.floatSlider("preset gain", instrument_.preset().masterGain, 0.0f, 4.0f);
+	builder_.floatSlider("profile gain", instrument_.profile().audio.masterGain, 0.0f, 4.0f);
+	ImGui::ProgressBar(std::clamp(instrument_.audio().masterMeter(0), 0.0f, 1.0f), ImVec2(-FLT_MIN, 0), "L");
+	ImGui::ProgressBar(std::clamp(instrument_.audio().masterMeter(1), 0.0f, 1.0f), ImVec2(-FLT_MIN, 0), "R");
+	ImGui::Separator();
+	builder_.label("The effects on the right are applied to the mix of all six slots. Preset gain is saved with the "
+				   "preset, profile gain with the profile.");
+}
+
+void ProgrammingGui::drawNarrationSource(NarrationSettings & n) {
+	builder_.toggle("enabled", n.enabled, [this]() { reloadNarration_ = true; });
+	ImGui::BeginDisabled(!n.enabled);
+	builder_.toggle("skip (start straight in granular)", n.skip, [this]() { reloadNarration_ = true; });
+	if (builder_.pathField("file", n.file, audioDir())) reloadNarration_ = true;
+	builder_.floatSlider("volume", n.volume, 0.0f, 4.0f);
+	builder_.toggle("start when a ball is squeezed", n.startWithSensor);
+	builder_.intSlider("else start after (ms)", n.autoStartDelayMs, 0, 60000);
+	builder_.floatSlider("glitch threshold", n.glitchThreshold, 0.0f, 1.0f);
+	builder_.floatSlider("glitch reach (of file)", n.glitchStrand, 0.0f, 0.2f);
+	int windowIndex = static_cast<int>(n.window);
+	if (builder_.choice("glitch window", windowIndex, windowNames())) {
+		n.window = static_cast<WindowType>(windowIndex);
+		structureChanged();
+	}
+	ImGui::EndDisabled();
+	ImGui::Separator();
+	builder_.label("Drag in the narration tile to glitch by hand. The parameters on the right shape the glitch grains.");
+}
+
+// ================================================================== parameters
+
+void ProgrammingGui::drawParametersPanel() {
+	panels_.begin("Parameters###parameters", parametersRect_);
+	const ControlInputs & inputs = instrument_.inputs();
+	if (builder_.beginParamTable("parameters")) {
+		ImGui::PushID(targetIndex());
+		if (target_ == Target::Slot) {
+			SlotSettings & slot = instrument_.preset().slots[selectedSlot_];
+			if (slot.sourceType == "granular") {
+				const auto & specs = grainParamSpecs();
+				for (int i = 0; i < GrainSettings::count(); ++i) {
+					builder_.paramRow(specs[i], slot.grain.at(i), slot.grain.at(i).resolve(inputs));
+				}
+			} else if (const SourceInfo * info = SourceCatalog::find(slot.sourceType)) {
+				for (size_t i = 0; i < info->params.size() && i < slot.synthParams.size(); ++i) {
+					builder_.paramRow(info->params[i], slot.synthParams[i], slot.synthParams[i].resolve(inputs));
+				}
 			}
-		}
-		builder_.endGroup();
-	}
-
-	// File/window/voices are all granular-only - a synth source has nothing
-	// to load or window, so showing them next to it is just clutter/confusion.
-	if (granular && builder_.group("Sample")) {
-		if (builder_.pathField("file", slot.file, audioDir())) samplesToReload_.push_back(index);
-		int windowIndex = static_cast<int>(slot.window);
-		if (builder_.choice("grain window", windowIndex, windowNames())) {
-			slot.window = static_cast<WindowType>(windowIndex);
-			structureChanged();
-		}
-		builder_.intSlider("grain voices (cpu)", slot.voices, 1, 32, [this]() { structureChanged(); });
-		builder_.endGroup();
-	}
-
-	if (slot.sourceType == "granular") {
-		if (builder_.group("Grain parameters")) {
+		} else if (target_ == Target::Narration) {
+			// The glitch grain uses fixed values; its position and volume
+			// come from the glitch itself.
+			NarrationSettings & n = instrument_.profile().narration;
 			const auto & specs = grainParamSpecs();
 			for (int i = 0; i < GrainSettings::count(); ++i) {
-				ImGui::PushID(i);
-				builder_.modulated(specs[i], slot.grain.at(i));
-				ImGui::PopID();
+				if (std::string(specs[i].id) == "position" || std::string(specs[i].id) == "volume") continue;
+				builder_.paramRow(specs[i], n.grain.at(i), n.grain.at(i).value, false);
 			}
-			builder_.endGroup();
 		}
-	} else if (const SourceInfo * info = SourceCatalog::find(slot.sourceType)) {
-		if (builder_.group(info->label + " parameters")) {
-			for (size_t i = 0; i < info->params.size() && i < slot.synthParams.size(); ++i) {
-				ImGui::PushID(static_cast<int>(i));
-				builder_.modulated(info->params[i], slot.synthParams[i]);
-				ImGui::PopID();
-			}
-			builder_.endGroup();
-		}
+		ImGui::PopID();
+		builder_.endParamTable(kParameterRows);
 	}
-
-	drawEffectChainEditor("slot" + std::to_string(index), slot.effects);
+	panels_.end();
 }
 
-void ProgrammingGui::drawNarrationEditor(NarrationSettings & n) {
-	if (builder_.group("Narration")) {
-		builder_.toggle("enabled", n.enabled, [this]() { reloadNarration_ = true; });
-		builder_.toggle("skip (sticks: starts straight in granular)", n.skip, [this]() { reloadNarration_ = true; });
-		if (builder_.pathField("file", n.file, audioDir())) reloadNarration_ = true;
-		builder_.floatSlider("volume", n.volume, 0.0f, 4.0f);
-		builder_.toggle("start when a ball is squeezed", n.startWithSensor);
-		builder_.intSlider("else start after (ms)", n.autoStartDelayMs, 0, 60000);
-		builder_.floatSlider("glitch threshold", n.glitchThreshold, 0.0f, 1.0f);
-		builder_.floatSlider("glitch reach (of file)", n.glitchStrand, 0.0f, 0.2f);
-		int windowIndex = static_cast<int>(n.window);
-		if (builder_.choice("glitch window", windowIndex, windowNames())) {
-			n.window = static_cast<WindowType>(windowIndex);
-			structureChanged();
-		}
-		builder_.label("drag in the narration view to glitch");
-		builder_.endGroup();
-	}
+// ===================================================================== effects
 
-	if (builder_.group("Glitch grain")) {
-		const auto & specs = grainParamSpecs();
-		for (int i = 0; i < GrainSettings::count(); ++i) {
-			if (std::string(specs[i].id) == "position" || std::string(specs[i].id) == "volume") continue;
-			ImGui::PushID(i);
-			builder_.modulated(specs[i], n.grain.at(i), {}, false);
-			ImGui::PopID();
-		}
-		builder_.endGroup();
-	}
+void ProgrammingGui::drawEffectsPanel() {
+	panels_.begin("Effects, in order###effects", effectsRect_);
+	EffectChainSettings & chain = selectedChain();
+	int & selected = selectedEffect_[targetIndex()];
+	selected = std::clamp(selected, 0, std::max(static_cast<int>(chain.size()) - 1, 0));
+	ImGui::PushID(targetIndex());
 
-	drawEffectChainEditor("narration", n.effects);
-}
+	drawEffectPlaces(chain, selected);
+	drawEffectControls(chain, selected);
 
-void ProgrammingGui::drawEffectChainEditor(const std::string & idScope, EffectChainSettings & chain) {
-	ImGui::PushID(idScope.c_str());
-	if (builder_.group("Effects (in order)", true)) {
-		for (size_t e = 0; e < chain.size(); ++e) {
-			EffectSettings & effect = chain[e];
-			const EffectInfo * info = effect.info();
-			if (info == nullptr) continue;
-			ImGui::PushID(static_cast<int>(e));
-			if (builder_.group(std::to_string(e + 1) + ". " + info->label, true)) {
-				builder_.label(info->description);
-				builder_.toggle("enabled", effect.enabled, [this]() { structureChanged(); });
-				for (size_t p = 0; p < info->params.size() && p < effect.params.size(); ++p) {
-					ImGui::PushID(static_cast<int>(p));
-					builder_.modulated(info->params[p], effect.params[p]);
-					ImGui::PopID();
-				}
-				if (builder_.button("move up") && e > 0) {
-					std::swap(chain[e], chain[e - 1]);
-					structureChanged();
-				}
-				ImGui::SameLine();
-				if (builder_.button("move down") && e + 1 < chain.size()) {
-					std::swap(chain[e], chain[e + 1]);
-					structureChanged();
-				}
-				ImGui::SameLine();
-				if (builder_.button("remove")) {
-					chain.erase(chain.begin() + static_cast<long>(e));
-					structureChanged();
-					// Close every group/ID this frame opened before bailing:
-					// this effect's own group, its PushID, the outer "Effects
-					// (in order)" group, and the idScope PushID - leaving any
-					// of those unclosed corrupts ImGui's stack for the rest
-					// of the frame. Stop walking `chain`: it just resized.
-					builder_.endGroup();
-					ImGui::PopID();
-					builder_.endGroup();
-					ImGui::PopID();
-					return;
-				}
-				builder_.endGroup();
+	bool hasEffect = selected < static_cast<int>(chain.size());
+	const EffectInfo * info = hasEffect ? chain[selected].info() : nullptr;
+	if (builder_.beginParamTable("effect")) {
+		if (info != nullptr) {
+			EffectSettings & effect = chain[selected];
+			ImGui::PushID(selected);
+			for (size_t p = 0; p < info->params.size() && p < effect.params.size(); ++p) {
+				builder_.paramRow(info->params[p], effect.params[p], effect.params[p].resolve(instrument_.inputs()));
 			}
 			ImGui::PopID();
 		}
-		builder_.choice("new effect", addEffectChoice_, effectNames());
-		if (builder_.button("add effect at the end")) {
-			chain.push_back(EffectSettings::make(EffectCatalog::all()[addEffectChoice_].id));
-			structureChanged();
-		}
-		builder_.endGroup();
+		builder_.endParamTable(kEffectParameterRows);
 	}
 	ImGui::PopID();
+	panels_.end();
+}
+
+void ProgrammingGui::drawEffectPlaces(EffectChainSettings & chain, int & selected) {
+	// Eight places, always: effect 3 is always the third button.
+	const float spacing = ImGui::GetStyle().ItemSpacing.x;
+	const float placeW = (ImGui::GetContentRegionAvail().x - (kEffectPlaces - 1) * spacing) / kEffectPlaces;
+	const int count = static_cast<int>(chain.size());
+	for (int i = 0; i < kEffectPlaces; ++i) {
+		if (i > 0) ImGui::SameLine();
+		ImGui::PushID(i);
+		if (i < count) {
+			const EffectInfo * info = chain[i].info();
+			std::string label = std::to_string(i + 1) + " " + (info != nullptr ? info->label : chain[i].type)
+				+ (chain[i].enabled ? "" : " (off)");
+			if (selectableButton(label, i == selected, ImVec2(placeW, 0))) selected = i;
+		} else if (i == count) {
+			if (ImGui::Button("+ add", ImVec2(placeW, 0))) ImGui::OpenPopup("add effect");
+			if (ImGui::BeginPopup("add effect")) {
+				for (const EffectInfo & info : EffectCatalog::all()) {
+					std::string label = info.label + "  (cpu " + std::to_string(info.cpuCost) + ")";
+					if (ImGui::Selectable(label.c_str())) {
+						chain.push_back(EffectSettings::make(info.id));
+						selected = static_cast<int>(chain.size()) - 1;
+						structureChanged();
+					}
+				}
+				ImGui::EndPopup();
+			}
+		} else {
+			ImGui::BeginDisabled();
+			ImGui::Button("##empty", ImVec2(placeW, 0));
+			ImGui::EndDisabled();
+		}
+		ImGui::PopID();
+	}
+}
+
+void ProgrammingGui::drawEffectControls(EffectChainSettings & chain, int & selected) {
+	// One fixed row of controls and one line of description, above the
+	// parameter rows so they never move with the number of parameters.
+	const int count = static_cast<int>(chain.size());
+	bool hasEffect = selected < count;
+	bool enabled = hasEffect ? chain[selected].enabled : false;
+	enum class Action { None, Left, Right, Remove } action = Action::None;
+
+	ImGui::BeginDisabled(!hasEffect);
+	if (ImGui::Checkbox("on", &enabled) && hasEffect) {
+		chain[selected].enabled = enabled;
+		structureChanged();
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("move left")) action = Action::Left;
+	ImGui::SameLine();
+	if (ImGui::Button("move right")) action = Action::Right;
+	ImGui::SameLine();
+	if (ImGui::Button("remove")) action = Action::Remove;
+	ImGui::EndDisabled();
+
+	const EffectInfo * info = hasEffect ? chain[selected].info() : nullptr;
+	ImGui::SameLine();
+	ImGui::TextDisabled("%s", info != nullptr ? info->description.c_str() : "no effect here: use + add");
+
+	if (!hasEffect) return;
+	if (action == Action::Left && selected > 0) {
+		std::swap(chain[selected], chain[selected - 1]);
+		--selected;
+		structureChanged();
+	} else if (action == Action::Right && selected + 1 < count) {
+		std::swap(chain[selected], chain[selected + 1]);
+		++selected;
+		structureChanged();
+	} else if (action == Action::Remove) {
+		chain.erase(chain.begin() + selected);
+		selected = std::max(std::min(selected, static_cast<int>(chain.size()) - 1), 0);
+		structureChanged();
+	}
+}
+
+// ============================================================ settings and log
+
+void ProgrammingGui::drawSettingsPanel() {
+	panels_.begin("Settings - profile: " + instrument_.profile().name + "###settings", editorRect_);
+	drawProfileSection();
+	panels_.end();
+}
+
+void ProgrammingGui::drawLogPanel() {
+	panels_.begin("Message log###log", editorRect_);
+	for (const std::string & line : instrument_.messages()) {
+		ImGui::TextWrapped("%s", line.c_str());
+	}
+	panels_.end();
 }
 
 // ==================================================================== profile
@@ -707,7 +807,7 @@ void ProgrammingGui::drawProfileSection() {
 
 	if (builder_.group("Narration (legacy)", false)) {
 		builder_.toggle("enabled", p.narration.enabled, [this]() { reloadNarration_ = true; });
-		builder_.label("turn on to show its own section below, with the file/grain/effects editor");
+		builder_.label("the Narration tile (F8) has the file, glitch grain and effects");
 		builder_.endGroup();
 	}
 
@@ -725,11 +825,11 @@ void ProgrammingGui::update() {
 	lastUpdateMs_ = now;
 	bool simulating = instrument_.sensorSourceName() == "simulation";
 	deviceView_.update(dt, simulating, instrument_.simulator(), instrument_.lastAccel());
-	if (presetChanged_) {
-		presetChanged_ = false;
-		if (presetChoice_ != instrument_.presetIndex()) {
-			instrument_.selectPreset(presetChoice_);
+	if (presetRequest_ >= 0) {
+		if (presetRequest_ != instrument_.presetIndex()) {
+			instrument_.selectPreset(presetRequest_);
 		}
+		presetRequest_ = -1;
 	}
 	for (int slot : samplesToReload_) {
 		instrument_.reloadSlotSample(slot);
@@ -749,57 +849,42 @@ void ProgrammingGui::update() {
 
 void ProgrammingGui::draw() {
 	ofBackground(18);
-	// Recompute the fixed grid every frame, off menuBarHeight_ as of last
-	// frame (see the comment below) - cheap, and keeps every panel's rect
-	// exactly in sync with the current window size.
-	layout();
+	layout(); // cheap; keeps every rect in step with the window size
 
-	// Settings is a different context that takes over this centre region
-	// (see drawSettingsWindow()): skip drawing what it would otherwise
-	// overlap, rather than overlap it.
-	if (!showSettings_) {
-		ofSetColor(220);
-		std::string header = instrument_.profile().name + " | preset " + std::to_string(instrument_.presetIndex() + 1) + ": " +
-			instrument_.preset().name + " | " + modeName(instrument_.mode()) + " | sensors: " + instrument_.sensorSourceName() +
-			(instrument_.isRecording() ? " | RECORDING" : "");
-		size_t headerChars = static_cast<size_t>(std::max(slotViews_[2].rect().getRight() - slotViews_[0].rect().x, 8.0f) / 8.0f);
-		if (header.size() > headerChars) header = header.substr(0, headerChars - 1) + "~";
-		ofDrawBitmapString(header, centerRect_.x, centerRect_.y + 14.0f);
-
-		drawSlots();
-		drawNarration();
-		const ProfileSettings & p = instrument_.profile();
-		sensorView_.draw(instrument_.inputs(), p.sensors.curve, p.sensors.activeThreshold);
-		deviceView_.draw(instrument_.inputs());
-		// Hidden by default (toggle: menu bar or F10) - troubleshooting detail,
-		// not something you need in view while playing or editing.
-		if (showLog_) drawStatus();
-	}
+	drawSlotTiles();
+	drawMasterTile();
+	drawNarrationTile();
+	deviceView_.draw(instrument_.inputs());
 
 	gui_.begin();
-	drawTransportWindow();
-	drawSimulationWindow();
-	drawMasterWindow();
-	drawInspectorWindow();
-	drawSettingsWindow();
-	// menuBarHeight_ is only known once this frame's menu bar is fully
-	// submitted and measured, in gui_.end() (one-frame lag feeding next
-	// frame's layout() - not visible in practice). Drawn last so it paints
-	// on top of the fixed panels below it, as a menu bar should.
-	menuBarHeight_ = drawMenuBar();
+	drawTopBar();
+	drawSensorsPanel();
+	drawRampPanel();
+	drawPerformancePanel();
+	if (showSettings_) {
+		drawSettingsPanel();
+	} else if (showLog_) {
+		drawLogPanel();
+	} else {
+		drawSourcePanel();
+		drawParametersPanel();
+		drawEffectsPanel();
+	}
+	drawBottomBar();
 	gui_.end();
 	gui_.draw();
 }
 
-void ProgrammingGui::drawSlots() {
+void ProgrammingGui::drawSlotTiles() {
 	bool accumulated = instrument_.profile().playMode == PlayMode::Accumulated;
 	for (int i = 0; i < kMaxSlots; ++i) {
 		GrainSlot & slot = instrument_.audio().slot(i);
 		const SlotSettings & settings = instrument_.preset().slots[i];
 		bool granular = settings.sourceType == "granular";
+		const SourceInfo * source = SourceCatalog::find(settings.sourceType);
 		std::string what = granular ? (settings.file.empty() ? "(empty)" : settings.file)
-			: SourceCatalog::find(settings.sourceType) != nullptr ? SourceCatalog::find(settings.sourceType)->label : settings.sourceType;
-		std::string title = std::to_string(i + 1) + ": " + what + (accumulated && i > 0 ? "  [unused in accumulated mode]" : "");
+			: source != nullptr ? source->label : settings.sourceType;
+		std::string title = std::to_string(i + 1) + ": " + what + (accumulated && i > 0 ? " [unused]" : "");
 		bool selected = target_ == Target::Slot && selectedSlot_ == i;
 		if (granular) {
 			GrainMeter meter {
@@ -809,18 +894,38 @@ void ProgrammingGui::drawSlots() {
 			};
 			slotViews_[i].draw(slot.sample(), title, meter, slot.currentPosition(), slot.currentVolume(), selected, slot.gateOpen());
 		} else {
-			// No sample to plot for a synth/generator source - trace its
-			// actual output instead, so the box still shows something live.
+			// No sample to plot for a synth source: trace its output instead.
 			slotViews_[i].drawLive(slot.scopeBuffer(), title, slot.currentVolume(), selected, slot.gateOpen());
 		}
 	}
 }
 
-void ProgrammingGui::drawNarration() {
-	// Legacy feature: don't clutter the centre area with it unless this
-	// profile actually has narration turned on.
-	if (!instrument_.profile().narration.enabled) return;
+void ProgrammingGui::drawMasterTile() {
+	const ofRectangle & r = masterTileRect_;
+	bool selected = target_ == Target::Master;
+	ofPushStyle();
+	// Two output meters, left and right, filling the tile from the bottom.
+	ofFill();
+	ofSetColor(0, 140, 140);
+	for (int ch = 0; ch < 2; ++ch) {
+		float level = std::clamp(instrument_.audio().masterMeter(ch), 0.0f, 1.0f);
+		float barW = r.width * 0.5f - 12.0f;
+		float x = r.x + 8.0f + ch * (barW + 8.0f);
+		float barH = (r.height - 30.0f) * level;
+		ofDrawRectangle(x, r.getBottom() - 6.0f - barH, barW, barH);
+	}
+	ofNoFill();
+	ofSetColor(selected ? ofColor(255, 190, 40) : ofColor(0, 140, 140));
+	ofSetLineWidth(selected ? 3.0f : 1.0f);
+	ofDrawRectangle(r);
+	ofSetColor(230);
+	ofDrawBitmapString("Master", r.x + 6.0f, r.y + 14.0f);
+	ofPopStyle();
+}
+
+void ProgrammingGui::drawNarrationTile() {
 	NarrationVoice & n = instrument_.audio().narration();
+	const NarrationSettings & settings = instrument_.profile().narration;
 	GrainMeter meter {
 		[&n]() { return n.glitchVoices(); },
 		[&n](int v) { return n.glitchGrainPosition(v); },
@@ -828,32 +933,9 @@ void ProgrammingGui::drawNarration() {
 	};
 	bool glitch = instrument_.mode() == Mode::NarrationGlitch;
 	float head = glitch ? instrument_.glitchPosition() : n.position();
-	const NarrationSettings & settings = instrument_.profile().narration;
-	std::string title = "narration: ";
-	if (!settings.enabled) {
-		title += "(this profile has no narration)";
-	} else if (settings.skip) {
-		title += "(no narration - skipped)";
-	} else {
-		title += settings.file;
-	}
-	narrationView_.draw(n.sample(), title, meter, head, 1.0f, target_ == Target::Narration, glitch);
-}
-
-void ProgrammingGui::drawStatus() {
-	ofPushStyle();
-	ofSetColor(40);
-	ofDrawRectangle(statusRect_);
-	ofSetColor(200);
-	float y = statusRect_.y + 16;
-	// Bitmap font: 8 px per character; long lines are cut to fit the box.
-	size_t maxChars = static_cast<size_t>(std::max(statusRect_.width - 12.0f, 8.0f) / 8.0f);
-	for (const std::string & line : instrument_.messages()) {
-		if (y > statusRect_.getBottom()) break;
-		ofDrawBitmapString(line.size() > maxChars ? line.substr(0, maxChars - 1) + "~" : line, statusRect_.x + 6, y);
-		y += 14;
-	}
-	ofPopStyle();
+	std::string title = !settings.enabled ? "Narration (off)" : settings.skip ? "Narration (skipped)" : "N: " + settings.file;
+	// The tile keeps its place even when this profile has no narration.
+	narrationView_.draw(settings.enabled ? n.sample() : nullptr, title, meter, head, 1.0f, target_ == Target::Narration, glitch);
 }
 
 // ====================================================================== input
@@ -863,6 +945,7 @@ void ProgrammingGui::keyPressed(int key) {
 		select(Target::Slot, key - OF_KEY_F1);
 	} else if (key == OF_KEY_F7) {
 		showSettings_ = !showSettings_;
+		showLog_ = false;
 	} else if (key == OF_KEY_F8) {
 		select(Target::Narration);
 	} else if (key == OF_KEY_F9) {
@@ -871,6 +954,7 @@ void ProgrammingGui::keyPressed(int key) {
 		s.startRamp();
 	} else if (key == OF_KEY_F10) {
 		showLog_ = !showLog_;
+		showSettings_ = false;
 	} else if (key == OF_KEY_F11) {
 		ofToggleFullscreen();
 	} else if (key == OF_KEY_F12) {
@@ -882,21 +966,23 @@ void ProgrammingGui::keyPressed(int key) {
 void ProgrammingGui::mouseMoved(int, int) {}
 
 void ProgrammingGui::mousePressed(int x, int y, int) {
-	// The centre content isn't drawn while Settings covers that region (see
-	// draw()), so it shouldn't react to clicks there either.
-	if (showSettings_) return;
 	if (deviceView_.mousePressed(x, y)) return;
 	for (int i = 0; i < kMaxSlots; ++i) {
 		if (slotViews_[i].inside(x, y)) {
-			if (target_ != Target::Slot || selectedSlot_ != i) select(Target::Slot, i);
+			select(Target::Slot, i);
 			auditionSlot_ = i;
 			instrument_.setAudition(i, true, slotViews_[i].positionAt(x));
 			return;
 		}
 	}
-	if (narrationView_.inside(x, y)) {
-		glitchByMouse_ = true;
-		instrument_.setManualGlitch(true, narrationView_.positionAt(x));
+	if (masterTileRect_.inside(x, y)) {
+		select(Target::Master);
+	} else if (narrationView_.inside(x, y)) {
+		select(Target::Narration);
+		if (instrument_.profile().narration.enabled) {
+			glitchByMouse_ = true;
+			instrument_.setManualGlitch(true, narrationView_.positionAt(x));
+		}
 	}
 }
 
@@ -925,7 +1011,7 @@ void ProgrammingGui::mouseReleased(int x, int y, int) {
 }
 
 void ProgrammingGui::dragEvent(const ofDragInfo & info) {
-	if (info.files.empty() || showSettings_) return;
+	if (info.files.empty()) return;
 	for (int i = 0; i < kMaxSlots; ++i) {
 		if (!slotViews_[i].inside(info.position.x, info.position.y)) continue;
 		std::string error;

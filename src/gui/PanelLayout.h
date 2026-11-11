@@ -46,6 +46,10 @@ public:
 	/// resize, no collapse. Mirrors ImGui::Begin's bool return (always true
 	/// unless `open` is given and closed). Pair with end().
 	bool begin(const std::string & title, const ofRectangle & rect, bool * open = nullptr) const;
+
+	/// The same, without a title bar and without scrolling: for the thin
+	/// bars at the top and bottom of the window. Pair with end().
+	bool beginBar(const std::string & id, const ofRectangle & rect) const;
 	void end() const;
 
 private:
