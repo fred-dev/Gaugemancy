@@ -245,6 +245,43 @@ first needs a change). The Pi was not available, so numbers are Mac only.
   compares per frame (not measured); GUI per-frame costs and the fork diffs
   are not reviewed; nothing measured on the Pi.
 
+## Smooth preset changes (Phase 2), 2026-11-11, branch `fable`
+
+- `src/audio/PresetGraph.*`: the 6 slots, master chain, idle gate and a fade
+  gain of ONE preset. `AudioEngine` holds `current_` and, during a fade,
+  `outgoing_`; narration stays outside both.
+- `AudioEngine::loadPreset(preset, resolve, fadeMs)` builds the new graph with
+  no lock (it is not connected yet), connects it at gain 0 under a short
+  lock, and `update()` then runs an equal-power fade
+  (`src/core/Crossfade.h`, unit tested). The old graph keeps answering the
+  sensors while it fades, is disconnected under a short lock 0.1 s after the
+  fade ends, and is destroyed after the lock is released. The first preset
+  after startup, and `fadeMs` 0, switch at once.
+- New profile setting `presetFadeMs` (default 1500, 0 to 10000), in JSON and
+  in the GUI under "Playing".
+- A preset asked for during a fade is queued in `Instrument` (one place, the
+  latest request wins) and starts when the fade ends. Calling
+  `AudioEngine::loadPreset()` directly during a fade cuts the fade short.
+- GUI code must not keep `audio().slot(i)` references across a preset change:
+  they belong to the current graph.
+- `--benchmark` ends with a "Preset changes" section: every ball held at a
+  steady squeeze, each preset crossfaded to the next, reporting build time,
+  audio CPU during the fade, the longest control frame, the quietest 100 ms
+  (gap check) and the largest sample step (click check).
+- Mac results: no gap and no click on Demo, Clement and Fred. Audio CPU
+  during the fade is about the sum of both presets (Fred: 7.8% average,
+  16% worst block, against 4.1% for one preset). Build takes 3 to 11 ms.
+  Freeing the old preset takes one control frame of 5 to 17 ms; this is on
+  the control thread and does not interrupt audio, but expect it to be much
+  longer on the Pi 3B+ (measure there).
+- Not done: listening test with a real sound device (the checks above are
+  offline renders); the glide optimisation for slots that keep their sample
+  and effect order (design item 8); decoding on a worker thread, so the
+  control loop still waits while a preset's files are read.
+- Xcode: `PresetGraph.cpp` was added to `Gaugemancy.xcodeproj` by script
+  (the project lists every source file). Regenerating the project with the
+  project generator also works.
+
 ## Done since the first handoff
 
 - Motion processing and smoothing bank, tilt/shake modulation sources.
