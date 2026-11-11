@@ -315,6 +315,23 @@ Limits: a chain shows its first 8 effects and a profile its first 12 presets;
 the Settings panel still uses collapsible groups; only checked by screenshot
 at 1920x1080 on the Mac, mouse interaction not tested.
 
+## Crash on launch with the GUI and real audio, fixed 2026-11-12
+
+Heap corruption ("memory corruption of free block") a few seconds after
+launch, only with the GUI, a real sound device and a running audio thread.
+Cause: since Phase 2 a `GrainSlot` (and its `pdsp::Scope`) is created while
+the engine runs. `pdsp::Scope` prepares itself in its constructor with a
+buffer of one audio block, and `Scope::set(1024)` then only changed
+`bufferLen`, so `process()` wrote past the end of the shorter buffer. The
+GUI is what patches the scopes, so headless runs and `--no-audio` did not
+show it.
+
+**The app now needs `fred-dev/ofxPDSP` on branch `fable`** (commit "Scope:
+set() resizes a buffer that was already prepared"), not `ai-refactor`.
+Lesson for new code: any pdsp unit configured with a setter after it was
+constructed must be checked for "already prepared" when it is created at
+run time. Test GUI changes with a real audio device, not only `--no-audio`.
+
 ## Done since the first handoff
 
 - Motion processing and smoothing bank, tilt/shake modulation sources.
