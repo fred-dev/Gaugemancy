@@ -4,7 +4,7 @@ This file is the running status of the refactor so a new session (local on
 Mac/Windows/Linux, or on the Raspberry Pi over SSH) can pick up where the last
 one stopped. **Update it after every major milestone.**
 
-Last updated: 2026-11-03 (local Mac session: first macOS build/run).
+Last updated: 2026-11-11 (local Mac session: review baseline on branch `fable`).
 
 ## Ground rules from the owner (Fred)
 
@@ -197,6 +197,28 @@ Cloud-session tricks: no sound card or GPIO in the container, so use
   ("not created by the build system"). If a change does not seem to take
   effect, check whether the binary's mtime actually moved after the build;
   rerunning `build` again (no clean needed) was enough to get a real relink.
+
+## Review and optimisation pass, started 2026-11-11 (branch `fable`)
+
+Fred's rule for this pass: every change goes on a new branch called `fable`
+in each repo (app: cut from `main`; forks: cut from `ai-refactor` when a fork
+first needs a change). The Pi was not available, so numbers are Mac only.
+
+- Xcode on this Mac now refuses deployment targets below 12.0, so
+  `Project.xcconfig` moved from 11.5 to 12.0.
+- `--benchmark` now prints two extra cases per preset: all gates closed, and
+  one slot open.
+- Baseline (Apple M3 Ultra, arm64 Release, 20 s per preset, percent of one
+  core, all gates open / all gates closed):
+  - Demo: one effect per slot 1.3 / 0.57, STRESS (42 effects) 3.1 / 2.61,
+    light master reverb 0.7 / 0.27, no effects 0.3 / 0.03
+  - Fred (buffer 128, 42 effects): about 4.2 / 3.3, worst block 7 to 10
+  - Clement: about 1.2 / 0.48; Emi 0.6 to 0.8; Chandra and Miguel 0.6
+- Main finding: a closed gate skips the grain engine (0.03% with no effects)
+  but every effect in the slot's chain keeps running on silence, so a preset
+  with many slot effects costs nearly the same idle as played (2.6 of 3.1).
+  Bypassing a chain whose input is silent and whose tail has died away is
+  the biggest available saving for the Pi. Not done yet.
 
 ## Done since the first handoff
 
