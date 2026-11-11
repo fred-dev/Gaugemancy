@@ -6,6 +6,7 @@
 #include "core/ButtonClickDetector.h"
 #include "core/Curve.h"
 #include "core/HitGestureDetector.h"
+#include "core/IdleDetector.h"
 #include "core/LedPattern.h"
 #include "core/MotionProcessor.h"
 #include "core/Smoother.h"
@@ -709,4 +710,43 @@ TEST(options_report_mistakes) {
 
 int main() {
 	return testing::runAll();
+}
+
+// ================================================================ idle detector
+
+TEST(idle_detector_starts_stopped_and_runs_with_input) {
+	IdleDetector d;
+	CHECK(!d.running());
+	CHECK(d.update(true, 0.0f, 0.01f));
+	CHECK(d.running());
+}
+
+TEST(idle_detector_stops_after_the_hold_time_of_silence) {
+	IdleDetector d;
+	d.setHoldSeconds(1.0f);
+	d.update(true, 0.5f, 0.01f);
+	for (int i = 0; i < 99; ++i) CHECK(d.update(false, 0.0f, 0.01f));
+	for (int i = 0; i < 2; ++i) d.update(false, 0.0f, 0.01f);
+	CHECK(!d.running());
+	CHECK(d.update(true, 0.0f, 0.01f)); // new input starts it again at once
+}
+
+TEST(idle_detector_waits_for_the_tail) {
+	IdleDetector d;
+	d.setHoldSeconds(0.5f);
+	d.update(true, 0.5f, 0.01f);
+	// A tail (or a delay echo) keeps restarting the silence timer.
+	for (int i = 0; i < 400; ++i) {
+		float tail = (i % 40 == 0) ? 0.01f : 0.0f;
+		CHECK(d.update(false, tail, 0.01f));
+	}
+	for (int i = 0; i < 60; ++i) d.update(false, -0.00001f, 0.01f);
+	CHECK(!d.running());
+}
+
+TEST(idle_detector_ignores_a_stalled_frame) {
+	IdleDetector d;
+	d.setHoldSeconds(1.0f);
+	d.update(true, 0.5f, 0.01f);
+	CHECK(d.update(false, 0.0f, 5.0f)); // one long frame counts as 0.1 s only
 }

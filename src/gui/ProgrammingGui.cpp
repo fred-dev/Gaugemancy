@@ -134,6 +134,7 @@ ProgrammingGui::ProgrammingGui(Instrument & instrument) : instrument_(instrument
 // ======================================================================= setup
 
 void ProgrammingGui::setup() {
+	instrument_.audio().enableScopes(); // live scopes are only drawn here
 	ofSetWindowTitle("Gaugemancy");
 	ofBackground(18);
 	// A new file name (not the old "imgui.ini"): window positions saved

@@ -60,8 +60,12 @@ public:
 	/// Commands received since the last call.
 	std::vector<RemoteCommand> poll();
 
-	/// Send telemetry if enabled and due (rate limited).
-	void sendTelemetry(const Telemetry & telemetry, uint64_t nowMs);
+	/// True when telemetry is enabled and the next packet is due (rate
+	/// limited). Check this first so the Telemetry is only built when sent.
+	bool telemetryDue(uint64_t nowMs);
+
+	/// Send telemetry now (call after telemetryDue() returned true).
+	void sendTelemetry(const Telemetry & telemetry);
 
 	/// Answer a /gm/status request.
 	void replyStatus(const std::string & host, const Telemetry & telemetry);

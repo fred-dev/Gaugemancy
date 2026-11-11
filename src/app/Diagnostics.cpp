@@ -296,7 +296,7 @@ BlockStats measure(AudioEngine & audio, const ProfileSettings & profile, const P
 		ControlInputs inputs = processor.processNormalised(sim.update(static_cast<float>(blockSeconds)), sim.accel(),
 			static_cast<float>(blockSeconds));
 		auto t0 = std::chrono::steady_clock::now();
-		audio.update(preset, profile.narration, inputs, overrides, 1.0f);
+		audio.update(preset, profile.narration, inputs, overrides, 1.0f, static_cast<float>(blockSeconds));
 		audio.renderOffline(out.data(), bufferSize);
 		double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count();
 		total += seconds;
@@ -345,7 +345,7 @@ int runBenchmark(const Options & options, const std::string & dataRoot) {
 		int activeSlots = 0;
 		int effects = 0;
 		for (const SlotSettings & s : preset.slots) {
-			if (s.enabled && !s.file.empty()) {
+			if (s.enabled && (s.sourceType != "granular" || !s.file.empty())) {
 				++activeSlots;
 				effects += static_cast<int>(std::count_if(s.effects.begin(), s.effects.end(), [](const EffectSettings & e) { return e.enabled; }));
 			}

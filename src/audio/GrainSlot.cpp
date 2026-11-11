@@ -114,12 +114,17 @@ GrainSlot::GrainSlot() {
 	}
 	volume_.set(0.0f);
 
-	// Live scope: taps the end of the chain (post-effects, channel 0) so a
-	// synth/generator slot (no sample to plot) can still show something
-	// moving in its box. out_signal() is deliberately silent - AudioEngine
-	// patches it into the shared engine's blackhole so it actually ticks.
+	for (int ch = 0; ch < 2; ++ch) {
+		chain_.out(ch) >> idle_.in(ch);
+	}
+
+	// Live scope: taps the slot output (post-effects, after the idle gate so
+	// it never keeps an idle chain running, channel 0) so a synth/generator
+	// slot (no sample to plot) can still show something moving in its box.
+	// It only ticks once AudioEngine::enableScopes() patches it into the
+	// engine's blackhole.
 	scope_.set(1024);
-	chain_.out(0) >> scope_;
+	idle_.out(0) >> scope_;
 }
 
 GrainSlot::~GrainSlot() = default;
@@ -226,7 +231,8 @@ bool GrainSlot::gateFor(const SlotSettings & settings, const ControlInputs & inp
 	return !anyModulated;
 }
 
-void GrainSlot::update(const SlotSettings & settings, const ControlInputs & inputs, const SlotOverrides & overrides) {
+void GrainSlot::update(const SlotSettings & settings, const ControlInputs & inputs, const SlotOverrides & overrides,
+	float dtSeconds) {
 	const GrainSettings & g = settings.grain;
 	length_.set(g.length.resolve(inputs));
 	density_.set(g.density.resolve(inputs));
@@ -262,6 +268,7 @@ void GrainSlot::update(const SlotSettings & settings, const ControlInputs & inpu
 	bool audible = settings.enabled && lastGate_ && (settings.sourceType != "granular" || sample_);
 	lastVolume_ = audible ? volume : 0.0f;
 	volume_.set(lastVolume_);
+	idle_.update(lastVolume_ > 0.0f, dtSeconds);
 
 	cloudGainCtrl_.set(settings.sourceType == "granular" ? 1.0f : 0.0f);
 	fmGainCtrl_.set(settings.sourceType == "fm_operator" ? 1.0f : 0.0f);

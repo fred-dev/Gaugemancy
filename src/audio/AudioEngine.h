@@ -4,12 +4,14 @@
 // AudioEngine: owns the whole sound graph.
 //
 //   slot 1..6 ──┐
-//               ├─> master EffectChain ─┐
-//               ┘                       ├─> master gain -> audio out L/R
-//   narration ──────────────────────────┘
+//               ├─> master EffectChain -> idle gate ─┐
+//               ┘                                    ├─> master gain -> audio out L/R
+//   narration ───────────────────────────────────────┘
 //
-// Only slots that are enabled AND have a sample are connected; pdsp only
-// processes what is connected to the output, so idle slots cost no CPU.
+// Only slots that are enabled AND playable are connected; pdsp only processes
+// what is connected to the output, so unused slots cost no CPU. A connected
+// slot that is silent stops its effect chain once the tail has died away,
+// and so does the master chain when every slot has stopped (see IdleGate.h).
 //
 // Thread safety: structural changes (load, rebuild, connect) take the pdsp
 // patch lock; per-frame parameter updates use atomic controls only.
@@ -73,10 +75,15 @@ public:
 	/// added in the GUI, voice count changed...). Cheap when nothing changed.
 	void syncStructure(const PresetSettings & preset, const NarrationSettings & narration);
 
-	/// Per control frame: resolve and send every parameter.
+	/// Per control frame: resolve and send every parameter. `dtSeconds` is the
+	/// time since the last control frame.
 	void update(const PresetSettings & preset, const NarrationSettings & narration,
 		const ControlInputs & inputs, const std::array<SlotOverrides, kMaxSlots> & overrides,
-		float masterGain);
+		float masterGain, float dtSeconds);
+
+	/// Start feeding the slots' live scopes (GUI only: it costs a little CPU
+	/// per slot, so the headless instrument never calls this).
+	void enableScopes();
 
 	/// Replace one slot's sample (e.g. dragged in from the GUI).
 	std::string loadSlotSample(int slot, const std::string & path, const std::string & displayName);
@@ -107,6 +114,8 @@ private:
 	NarrationVoice narration_;
 	bool narrationConnected_ = false;
 	EffectChain master_;
+	IdleGate masterIdle_;
+	bool scopesEnabled_ = false;
 	std::array<pdsp::Amp, 2> masterAmp_;
 	pdsp::ValueControl masterGain_;
 	bool running_ = false;

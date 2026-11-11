@@ -47,15 +47,13 @@ std::vector<ofSoundDevice> outputDevices(ofSoundDevice::Api api) {
 AudioEngine::AudioEngine() {
 	for (auto & slot : slots_) {
 		slot = std::make_unique<GrainSlot>();
-		// The scope's own output is deliberately silent; patching it into
-		// the blackhole is just what makes pdsp actually process it.
-		slot->scopeTap() >> engine_.blackhole();
 	}
 	masterGain_.enableSmoothing(50.0f);
 	masterGain_.set(1.0f);
 	for (int ch = 0; ch < 2; ++ch) {
 		masterGain_ >> masterAmp_[ch].in_mod();
-		master_.out(ch) >> masterAmp_[ch];
+		master_.out(ch) >> masterIdle_.in(ch);
+		masterIdle_.out(ch) >> masterAmp_[ch];
 		masterAmp_[ch] >> engine_.audio_out(ch);
 	}
 	master_.build({});
@@ -221,12 +219,9 @@ std::string AudioEngine::loadSlotSample(int slot, const std::string & path, cons
 		auto lock = engine_.lockPatching();
 		slots_[slot]->mute();
 		old = slots_[slot]->setSample(std::move(decoded), displayName);
-		// The slot may have been disconnected for lack of a sample.
-		if (!slotConnected_[slot]) {
-			for (int ch = 0; ch < 2; ++ch) slots_[slot]->out(ch) >> master_.in(ch);
-			slotConnected_[slot] = true;
-		}
 	}
+	// A slot that had no sample is connected by the caller's syncStructure(),
+	// which knows whether the slot is enabled.
 	return "";
 }
 
@@ -266,17 +261,34 @@ void AudioEngine::syncStructure(const PresetSettings & preset, const NarrationSe
 }
 
 void AudioEngine::update(const PresetSettings & preset, const NarrationSettings & narration,
-	const ControlInputs & inputs, const std::array<SlotOverrides, kMaxSlots> & overrides, float masterGain) {
+	const ControlInputs & inputs, const std::array<SlotOverrides, kMaxSlots> & overrides, float masterGain,
+	float dtSeconds) {
+	bool anySlotRunning = false;
 	for (int i = 0; i < kMaxSlots; ++i) {
 		if (slotConnected_[i]) {
-			slots_[i]->update(preset.slots[i], inputs, overrides[i]);
+			slots_[i]->update(preset.slots[i], inputs, overrides[i], dtSeconds);
+			anySlotRunning |= slots_[i]->chainRunning();
+		} else {
+			slots_[i]->updateIdle(dtSeconds);
 		}
 	}
+	masterIdle_.update(anySlotRunning, dtSeconds);
 	master_.apply(preset.masterEffects, inputs);
 	if (narrationConnected_) {
 		narration_.update(narration, inputs);
 	}
 	masterGain_.set(masterGain * preset.masterGain);
+}
+
+void AudioEngine::enableScopes() {
+	if (scopesEnabled_) return;
+	auto lock = engine_.lockPatching();
+	for (auto & slot : slots_) {
+		// The scope's own output is deliberately silent; patching it into
+		// the blackhole is just what makes pdsp actually process it.
+		slot->scopeTap() >> engine_.blackhole();
+	}
+	scopesEnabled_ = true;
 }
 
 void AudioEngine::muteAll() {

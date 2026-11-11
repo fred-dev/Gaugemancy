@@ -74,11 +74,16 @@ ofxOscMessage RemoteControl::stateMessage(const Telemetry & t) const {
 	return m;
 }
 
-void RemoteControl::sendTelemetry(const Telemetry & telemetry, uint64_t nowMs) {
-	if (!sender_) return;
+bool RemoteControl::telemetryDue(uint64_t nowMs) {
+	if (!sender_) return false;
 	uint64_t interval = 1000 / static_cast<uint64_t>(std::max(settings_.telemetryRateHz, 1));
-	if (nowMs - lastTelemetryMs_ < interval) return;
+	if (nowMs - lastTelemetryMs_ < interval) return false;
 	lastTelemetryMs_ = nowMs;
+	return true;
+}
+
+void RemoteControl::sendTelemetry(const Telemetry & telemetry) {
+	if (!sender_) return;
 	sender_->sendMessage(sensorsMessage(telemetry), false);
 	sender_->sendMessage(stateMessage(telemetry), false);
 }

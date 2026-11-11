@@ -135,7 +135,7 @@ private:
 	void handleButton(uint64_t nowMs);
 	void handleGesture(uint64_t nowMs);
 	void handleRemote();
-	void sendToAudio();
+	void sendToAudio(float dtSeconds);
 	void updateLeds();
 	Telemetry telemetry() const;
 	PathResolver audioResolver() const;

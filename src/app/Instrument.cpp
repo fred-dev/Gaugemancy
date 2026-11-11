@@ -260,6 +260,8 @@ void Instrument::reloadSlotSample(int slot) {
 	const std::string & file = preset().slots[slot].file;
 	std::string error = audio_.loadSlotSample(slot, store_.audioPath(loaded_.profile.name, file), file);
 	if (!error.empty()) note("slot " + std::to_string(slot + 1) + ": " + error, true);
+	// Connects the slot if it was waiting for a sample (and is enabled).
+	audio_.syncStructure(preset(), loaded_.profile.narration);
 }
 
 void Instrument::reloadNarration() {
@@ -271,6 +273,9 @@ void Instrument::reloadNarration() {
 
 bool Instrument::restartAudio() {
 	audio_.stop();
+	if (options_.noAudio) {
+		return false; // --no-audio: never open a device, also not on reload
+	}
 	std::string report;
 	audioOpen_ = audio_.startDevice(resolveAudioSettings(loaded_.profile.audio), report);
 	note(report, !audioOpen_);
@@ -330,9 +335,11 @@ void Instrument::update(uint64_t nowMs) {
 	bool pressed = inputs_.get(ModSource::Total) > 0.0f;
 	playhead_.advance(dt, pressed, preset().playheadSpeed);
 
-	sendToAudio();
+	sendToAudio(dt);
 	panel_.update(nowMs);
-	remote_.sendTelemetry(telemetry(), nowMs);
+	if (remote_.telemetryDue(nowMs)) {
+		remote_.sendTelemetry(telemetry());
+	}
 }
 
 void Instrument::readSensors(uint64_t nowMs, float dt) {
@@ -438,7 +445,7 @@ void Instrument::handleRemote() {
 	}
 }
 
-void Instrument::sendToAudio() {
+void Instrument::sendToAudio(float dtSeconds) {
 	std::array<SlotOverrides, kMaxSlots> overrides = audition_;
 	if (loaded_.profile.playMode == PlayMode::Accumulated) {
 		// Accumulated mode plays slot 1 only; the playhead replaces its position.
@@ -465,7 +472,7 @@ void Instrument::sendToAudio() {
 			}
 		}
 	}
-	audio_.update(preset(), loaded_.profile.narration, inputs_, overrides, loaded_.profile.audio.masterGain);
+	audio_.update(preset(), loaded_.profile.narration, inputs_, overrides, loaded_.profile.audio.masterGain, dtSeconds);
 }
 
 void Instrument::updateLeds() {

@@ -9,6 +9,10 @@
 //    running)   LFO (4 waveforms)-> lfoWaveGain[0-3] -/
 //               BitNoise ---------> noiseGain --------/
 //
+// An IdleGate sits between the EffectChain and out(ch): when the slot has been
+// silent long enough for its effect tails to die, the whole chain stops
+// running (see IdleGate.h).
+//
 // Every source - and every waveform of the two multi-waveform oscillators -
 // is always patched and always running; which one is actually heard is just
 // which single gain is set to the resolved volume (every other one to 0) for
@@ -29,6 +33,7 @@
 // -----------------------------------------------------------------------------
 
 #include "EffectChain.h"
+#include "IdleGate.h"
 
 #include "../core/Settings.h"
 
@@ -74,14 +79,23 @@ public:
 	/// True when rebuild() is needed for these settings.
 	bool needsRebuild(const SlotSettings & settings) const;
 
-	/// Resolve and send this frame's parameters.
-	void update(const SlotSettings & settings, const ControlInputs & inputs, const SlotOverrides & overrides);
+	/// Resolve and send this frame's parameters. `dtSeconds` is the time since
+	/// the last control frame (used to time the idle gate).
+	void update(const SlotSettings & settings, const ControlInputs & inputs, const SlotOverrides & overrides,
+		float dtSeconds);
+
+	/// A control frame for a slot that is not playing at all (not connected):
+	/// lets its effect chain run out and stop.
+	void updateIdle(float dtSeconds) { idle_.update(false, dtSeconds); }
+
+	/// True while the effect chain is running (playing or tail dying away).
+	bool chainRunning() const { return idle_.running(); }
 
 	/// Silence immediately (volume to 0).
 	void mute();
 
-	/// Stereo output of the slot (after its effect chain).
-	pdsp::PatchNode & out(int channel) { return chain_.out(channel); }
+	/// Stereo output of the slot (after its effect chain and idle gate).
+	pdsp::PatchNode & out(int channel) { return idle_.out(channel); }
 
 	bool hasSample() const { return sample_ != nullptr; }
 	const std::string & sampleName() const { return sampleName_; }
@@ -98,12 +112,12 @@ public:
 
 	/// Live samples at the end of the slot's chain (post-effects, channel 0) -
 	/// a synth/generator source has no sample to plot, so its slot box draws
-	/// this instead. Only ticks while something downstream (see AudioEngine's
-	/// constructor) keeps it patched to the engine's blackhole.
+	/// this instead. Only ticks after AudioEngine::enableScopes() has patched
+	/// it to the engine's blackhole (the GUI does that; the Pi never does).
 	const std::vector<float> & scopeBuffer() const { return scope_.getBuffer(); }
 
-	/// For AudioEngine to patch once, into the engine's blackhole, so the
-	/// scope above actually gets processed every block.
+	/// For AudioEngine::enableScopes() to patch into the engine's blackhole,
+	/// so the scope above gets processed every block.
 	pdsp::Patchable & scopeTap() { return scope_; }
 
 	/// Pure helper: is the slot audible this frame? (exposed for tests)
@@ -118,6 +132,7 @@ private:
 	std::string sampleName_;
 	std::array<pdsp::Amp, 2> amp_;
 	EffectChain chain_;
+	IdleGate idle_;
 	pdsp::Scope scope_;
 
 	// One control per grain parameter except volume, which drives the amps.
