@@ -37,6 +37,9 @@
 # performance data, not build output, and belong in the repo so every
 # machine/USB stick converges on the same copy.
 !bin/data/*/audio/*.wav
+# ...but not the demo profiles' tones: tools/make_test_data.py generates them.
+bin/data/Demo/audio/
+bin/data/DemoAccumulated/audio/
 
 
 # Folders
