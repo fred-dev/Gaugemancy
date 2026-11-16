@@ -119,6 +119,8 @@ From the Mac/Linux machine:
 scripts/remote.sh pi@gaugemancy.local build       # sync this checkout, build
 scripts/remote.sh pi@gaugemancy.local selftest
 scripts/remote.sh pi@gaugemancy.local log
+scripts/remote.sh pi@gaugemancy.local fable     # switch the Pi to the fable branches, test, build
+scripts/remote.sh pi@gaugemancy.local crossfade # preset crossfade test, writes crossfade_test.log
 tools/gm-ctl.py --host gaugemancy.local status    # OSC: state + sensor levels
 tools/gm-ctl.py --host gaugemancy.local watch     # live levels
 tools/gm-ctl.py --host gaugemancy.local next      # next preset

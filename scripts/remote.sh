@@ -13,6 +13,8 @@
 #   restart     restart the systemd service
 #   log         follow the service log (Ctrl-C to stop)
 #   stop/start  stop or start the service (stop it before running by hand)
+#   fable       switch the Pi to the fable branches and rebuild (no sync)
+#   crossfade   run the crossfade test on the Pi (PROFILE=<name> to choose)
 #   ssh         open a shell in the app folder
 #
 # Environment: GM_REMOTE_DIR (default ~/openFrameworks/apps/myApps/Gaugemancy)
@@ -40,6 +42,8 @@ case "$CMD" in
 	stop) ssh "$HOST" systemctl --user stop gaugemancy ;;
 	start) ssh "$HOST" systemctl --user start gaugemancy ;;
 	log) ssh -t "$HOST" journalctl --user -u gaugemancy -f ;;
+	fable) run "scripts/pi/update_to_fable.sh" ;;
+	crossfade) run "PROFILE=${PROFILE:-fable} scripts/pi/crossfade_test.sh" ;;
 	ssh) ssh -t "$HOST" "cd $DIR && exec \$SHELL -l" ;;
 	*) echo "unknown command '$CMD'"; exit 2 ;;
 esac

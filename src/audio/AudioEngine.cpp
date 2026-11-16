@@ -319,7 +319,9 @@ void AudioEngine::update(const PresetSettings & preset, const NarrationSettings 
 	if (narrationConnected_) {
 		narration_.update(narration, inputs);
 	}
-	masterGain_.set(masterGain * preset.masterGain);
+	// The preset's own gain is applied inside its PresetGraph, so that two
+	// crossfading presets each keep their level.
+	masterGain_.set(masterGain);
 }
 
 void AudioEngine::enableScopes() {

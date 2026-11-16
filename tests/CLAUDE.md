@@ -387,6 +387,32 @@ xdotool mousemove 191 128 click 1        # click ball 1 in the 3D view
 tools/gm-ctl.py status                   # prints the output level
 ```
 
+## Crossfade level bug and Pi crossfade tools, 2026-11-16 (cloud, branch `fable`)
+
+- BUG FIXED: a preset's own master gain (`master.gain`, 1.0 to 4.0 in the
+  `fable` profile) was applied after the two crossfading graphs were summed,
+  so at the start of every fade the OUTGOING preset jumped to the INCOMING
+  preset's gain (up to 4x louder or quieter for the whole fade). The gain is
+  now applied inside each `PresetGraph` (fade level x preset gain on the same
+  Amp); `AudioEngine::masterGain_` carries only the profile's `audio.masterGain`.
+  Side effect: the narration level no longer follows the preset's gain.
+  How it was found: `--benchmark` "Preset changes" reported CLICK on 1->2,
+  4->5, 8->9; a sample dump showed a level jump, not a click. All ten changes
+  of the `fable` profile now report "no gap / no click".
+- `--benchmark` now prints where in the fade the largest jump is.
+- `tools/crossfade_stress.py`: drives a RUNNING app over OSC through walk /
+  heavy / interrupt / burst / random / idle scenarios and checks skipped audio
+  buffers, gaps, final preset and (with `--pid`) CPU. Passed in the cloud
+  (PulseAudio null sink, 0 skipped buffers).
+- `scripts/pi/update_to_fable.sh` (on the Pi: app + ofxPDSP to `fable`,
+  ofxGPIO + ofxAudioFile to `ai-refactor`, unit tests, build with JOBS=1) and
+  `scripts/pi/crossfade_test.sh` (stops the service, `--benchmark`, headless
+  run with simulated sensors + the stress tool, writes `crossfade_test.log`,
+  restarts the service). From the desk: `scripts/remote.sh user@pi fable`, then
+  `scripts/remote.sh user@pi crossfade`.
+- NOT DONE: the run on the real Pi. The cloud session cannot reach it; run the
+  two scripts there and read `crossfade_test.log`.
+
 ## Done since the first handoff
 
 - Motion processing and smoothing bank, tilt/shake modulation sources.

@@ -321,6 +321,7 @@ struct RenderStats {
 	float quietestWindowRms = 1.0e9f; ///< quietest ~100 ms window
 	float averageRms = 0.0f;
 	float largestStep = 0.0f;         ///< biggest sample-to-sample jump (a click is a big one)
+	double largestStepAtSeconds = 0.0; ///< when it happened, from the start of this render
 };
 
 /// Renders with every ball held at a steady squeeze and all gates open, so
@@ -359,7 +360,11 @@ public:
 			worst = std::max(worst, spent);
 			for (int n = 0; n < bufferSize; ++n) {
 				float left = out_[static_cast<size_t>(n) * 2];
-				stats.largestStep = std::max(stats.largestStep, std::fabs(left - lastSample_));
+				float step = std::fabs(left - lastSample_);
+				if (step > stats.largestStep) {
+					stats.largestStep = step;
+					stats.largestStepAtSeconds = (static_cast<double>(b) * bufferSize + n) / profile_.audio.sampleRate;
+				}
 				lastSample_ = left;
 				windowSquares += static_cast<double>(left) * left;
 			}
@@ -417,6 +422,7 @@ void benchmarkPresetChange(AudioEngine & audio, const ProfileSettings & profile,
 		during.quietestWindowRms, after.quietestWindowRms, gap ? "SILENT GAP" : "no gap");
 	std::printf("  largest step:    before %.4f  fade %.4f  after %.4f -> %s\n", before.largestStep, during.largestStep,
 		after.largestStep, click ? "CLICK" : "no click");
+	if (click) std::printf("  the jump is %.3f s into the %.1f s fade\n", during.largestStepAtSeconds, fadeMs / 1000.0);
 	if (stillFading) std::printf("  WARNING: the old preset was still connected 0.2 s after the fade\n");
 }
 

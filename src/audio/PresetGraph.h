@@ -3,7 +3,7 @@
 // -----------------------------------------------------------------------------
 // PresetGraph: everything in the sound graph that belongs to ONE preset.
 //
-//   slot 1..6 -> master EffectChain -> idle gate -> fade gain -> out(ch)
+//   slot 1..6 -> master EffectChain -> idle gate -> fade x preset gain -> out(ch)
 //
 // The AudioEngine holds two of these while it crossfades from one preset to
 // the next: the outgoing one fades to 0, the incoming one fades up.
@@ -64,8 +64,13 @@ public:
 		update(settings_, inputs, overrides, dtSeconds);
 	}
 
-	/// Output level of the whole graph, 0..1 (lightly smoothed against clicks).
-	void setFade(float gain) { fade_.set(gain); }
+	/// Crossfade level of the whole graph, 0..1 (lightly smoothed against clicks).
+	/// The preset's own master gain is applied here too, per graph: during a
+	/// crossfade each preset keeps its own level.
+	void setFade(float gain) {
+		fadeGain_ = gain;
+		applyGain();
+	}
 
 	void mute();
 
@@ -79,13 +84,15 @@ public:
 
 private:
 	void connectSlots(const PresetSettings & preset);
+	void applyGain() { fade_.set(fadeGain_ * settings_.masterGain); }
 
 	std::array<std::unique_ptr<GrainSlot>, kMaxSlots> slots_;
 	std::array<bool, kMaxSlots> slotConnected_ {};
 	EffectChain master_;
 	IdleGate masterIdle_;
 	std::array<pdsp::Amp, 2> fadeAmp_;
-	pdsp::ValueControl fade_;
+	pdsp::ValueControl fade_;  ///< crossfade level x preset master gain
+	float fadeGain_ = 1.0f;
 	std::array<pdsp::PatchNode, 2> out_;
 	PresetSettings settings_; ///< what the graph was last built or synced with
 };

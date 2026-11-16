@@ -48,6 +48,7 @@ std::vector<std::string> PresetGraph::build(const PresetSettings & preset, const
 	master_.build(preset.masterEffects);
 	connectSlots(preset);
 	settings_ = preset;
+	applyGain();
 	return problems;
 }
 
@@ -83,10 +84,14 @@ void PresetGraph::syncStructure(const PresetSettings & preset) {
 	if (!master_.matches(preset.masterEffects)) master_.build(preset.masterEffects);
 	connectSlots(preset);
 	settings_ = preset;
+	applyGain();
 }
 
 void PresetGraph::update(const PresetSettings & preset, const ControlInputs & inputs,
 	const std::array<SlotOverrides, kMaxSlots> & overrides, float dtSeconds) {
+	// The master gain can be edited live; it needs no structural sync.
+	settings_.masterGain = preset.masterGain;
+	applyGain();
 	bool anySlotRunning = false;
 	for (int i = 0; i < kMaxSlots; ++i) {
 		if (slotConnected_[i]) {
