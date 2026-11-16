@@ -71,6 +71,8 @@ ofxOscMessage RemoteControl::stateMessage(const Telemetry & t) const {
 	m.addIntArg(t.preset);
 	m.addStringArg(t.sensorSource);
 	m.addInt64Arg(static_cast<int64_t>(t.skippedBuffers));
+	m.addFloatArg(t.outputLevel);
+	m.addIntArg(t.fading ? 1 : 0);
 	return m;
 }
 

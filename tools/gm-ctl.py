@@ -107,6 +107,8 @@ def print_message(address, values):
         print("%s  total %.2f" % (bars, values[6] if len(values) > 6 else 0.0))
     elif address == "/gm/state":
         print("mode %s | preset %s | sensors %s | skipped audio buffers %s" % tuple(values[:4]))
+        if len(values) >= 6:
+            print("output level %.3f%s" % (values[4], " | crossfading" if values[5] else ""))
     else:
         print(address, values)
 

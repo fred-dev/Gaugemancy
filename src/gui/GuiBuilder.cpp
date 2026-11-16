@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdio>
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -22,15 +23,86 @@ void GuiBuilder::endGroup() {
 	ImGui::TreePop();
 }
 
+bool GuiBuilder::numberSlider(const char * label, float & target, float lo, float hi, const char * format) {
+	const ImGuiID id = ImGui::GetID(label);
+
+	// Typing mode: the slider is replaced by a text field until Enter, Escape
+	// or a click elsewhere. Width and position are those of the slider, so
+	// nothing moves.
+	if (editingId_ == id) {
+		if (editingNeedsFocus_) {
+			ImGui::SetKeyboardFocusHere();
+		}
+		bool entered = ImGui::InputFloat(label, &editingValue_, 0.0f, 0.0f, "%.6g",
+			ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AutoSelectAll);
+		bool done = entered || (!editingNeedsFocus_ && ImGui::IsItemDeactivated());
+		bool cancelled = ImGui::IsKeyPressed(ImGuiKey_Escape);
+		editingNeedsFocus_ = false;
+		if (!done && !cancelled) return false;
+		editingId_ = 0;
+		float typed = std::clamp(editingValue_, std::min(lo, hi), std::max(lo, hi));
+		if (cancelled || typed == target) return false;
+		target = typed;
+		return true;
+	}
+
+	const float before = target;
+	bool changed = ImGui::SliderFloat(label, &target, lo, hi, format);
+	if (ImGui::IsItemActivated() && !ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+		// Remember the value from before this click: the first click of a
+		// double-click also moves the slider, which typing must not keep.
+		preClickId_ = id;
+		preClickValue_ = before;
+	}
+	if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+		if (preClickId_ == id) target = preClickValue_;
+		editingId_ = id;
+		editingNeedsFocus_ = true;
+		editingValue_ = target;
+		changed = true;
+	}
+	return changed;
+}
+
+bool GuiBuilder::sourceChoice(const char * label, ModSource & source) {
+	// A source this instrument lacks is still shown when a parameter already
+	// uses it (marked, and ignored by the audio), but cannot be picked.
+	auto name = [&](ModSource s) {
+		std::string text = modSourceLabel(s);
+		return (!motionAvailable_ && isMotionSource(s)) ? text + " (no gyro)" : text;
+	};
+	bool changed = false;
+	if (ImGui::BeginCombo(label, name(source).c_str())) {
+		for (int i = 0; i < kNumModSources; ++i) {
+			ModSource candidate = static_cast<ModSource>(i);
+			if (!motionAvailable_ && isMotionSource(candidate)) continue;
+			bool selected = candidate == source;
+			if (ImGui::Selectable(name(candidate).c_str(), selected)) {
+				source = candidate;
+				changed = true;
+			}
+			if (selected) ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+	return changed;
+}
+
 bool GuiBuilder::floatSlider(const std::string & label, float & target, float lo, float hi, Callback onChange) {
-	bool changed = ImGui::SliderFloat(label.c_str(), &target, lo, hi);
+	bool changed = numberSlider(label.c_str(), target, lo, hi);
 	if (changed && onChange) onChange();
 	return changed;
 }
 
 bool GuiBuilder::intSlider(const std::string & label, int & target, int lo, int hi, Callback onChange) {
-	bool changed = ImGui::SliderInt(label.c_str(), &target, lo, hi);
-	if (changed && onChange) onChange();
+	float value = static_cast<float>(target);
+	bool changed = numberSlider(label.c_str(), value, static_cast<float>(lo), static_cast<float>(hi), "%.0f");
+	int rounded = static_cast<int>(std::lround(value));
+	changed = changed && rounded != target;
+	if (changed) {
+		target = rounded;
+		if (onChange) onChange();
+	}
 	return changed;
 }
 
@@ -125,16 +197,15 @@ bool GuiBuilder::beginParamTable(const std::string & id) {
 	if (!ImGui::BeginTable(id.c_str(), 5, flags)) return false;
 	ImGui::TableSetupColumn("parameter", ImGuiTableColumnFlags_WidthStretch, 1.5f);
 	ImGui::TableSetupColumn("source", ImGuiTableColumnFlags_WidthStretch, 1.0f);
-	ImGui::TableSetupColumn("value, or at 0", ImGuiTableColumnFlags_WidthStretch, 2.0f);
-	ImGui::TableSetupColumn("at 1", ImGuiTableColumnFlags_WidthStretch, 2.0f);
-	ImGui::TableSetupColumn("now", ImGuiTableColumnFlags_WidthStretch, 0.7f);
+	ImGui::TableSetupColumn("value, or at 0", ImGuiTableColumnFlags_WidthStretch, 1.8f);
+	ImGui::TableSetupColumn("at 1", ImGuiTableColumnFlags_WidthStretch, 1.8f);
+	ImGui::TableSetupColumn("now (moves with its source)", ImGuiTableColumnFlags_WidthStretch, 1.5f);
 	ImGui::TableHeadersRow();
 	tableRows_ = 0;
 	return true;
 }
 
 bool GuiBuilder::paramRow(const ParamSpec & spec, ModulatedParam & target, float now, bool allowSources) {
-	static const std::vector<std::string> sources = sourceNames();
 	bool changed = false;
 	bool discrete = !spec.choices.empty();
 	ImGui::TableNextRow();
@@ -146,19 +217,16 @@ bool GuiBuilder::paramRow(const ParamSpec & spec, ModulatedParam & target, float
 
 	ImGui::TableNextColumn();
 	if (allowSources) {
-		int source = static_cast<int>(target.source);
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		if (choice("##source", source, sources)) {
-			target.source = static_cast<ModSource>(source);
-			changed = true;
-		}
+		changed |= sourceChoice("##source", target.source);
 	}
 
-	bool modulatedNow = allowSources && target.isModulated();
+	// A source the instrument lacks (no gyro) counts as "not connected".
+	bool modulatedNow = allowSources && target.isModulated() && (motionAvailable_ || !isMotionSource(target.source));
 	ImGui::TableNextColumn();
 	ImGui::SetNextItemWidth(-FLT_MIN);
 	if (modulatedNow) {
-		changed |= ImGui::SliderFloat("##min", &target.min, spec.lowest, spec.highest);
+		changed |= numberSlider("##min", target.min, spec.lowest, spec.highest);
 	} else if (discrete) {
 		std::vector<std::string> names(spec.choices.begin(), spec.choices.end());
 		int index = std::clamp(static_cast<int>(std::lround(target.value - spec.lowest)), 0, static_cast<int>(names.size()) - 1);
@@ -167,13 +235,13 @@ bool GuiBuilder::paramRow(const ParamSpec & spec, ModulatedParam & target, float
 			changed = true;
 		}
 	} else {
-		changed |= ImGui::SliderFloat("##value", &target.value, spec.lowest, spec.highest);
+		changed |= numberSlider("##value", target.value, spec.lowest, spec.highest);
 	}
 
 	ImGui::TableNextColumn();
 	if (modulatedNow) {
 		ImGui::SetNextItemWidth(-FLT_MIN);
-		changed |= ImGui::SliderFloat("##max", &target.max, spec.lowest, spec.highest);
+		changed |= numberSlider("##max", target.max, spec.lowest, spec.highest);
 	}
 
 	ImGui::TableNextColumn();
@@ -181,8 +249,15 @@ bool GuiBuilder::paramRow(const ParamSpec & spec, ModulatedParam & target, float
 	if (discrete) {
 		int index = std::clamp(static_cast<int>(now - spec.lowest), 0, static_cast<int>(spec.choices.size()) - 1);
 		ImGui::TextUnformatted(spec.choices[static_cast<size_t>(index)]);
+	} else if (modulatedNow) {
+		// A bar across the parameter's whole range that follows the source.
+		char text[32];
+		std::snprintf(text, sizeof(text), "%.4g", now);
+		float span = spec.highest - spec.lowest;
+		float fraction = span != 0.0f ? std::clamp((now - spec.lowest) / span, 0.0f, 1.0f) : 0.0f;
+		ImGui::ProgressBar(fraction, ImVec2(-FLT_MIN, 0), text);
 	} else {
-		ImGui::Text("%.4g", now);
+		ImGui::TextDisabled("%.4g", now);
 	}
 
 	ImGui::PopID();
@@ -230,9 +305,7 @@ bool GuiBuilder::modulated(const ParamSpec & spec, ModulatedParam & target, Call
 			if (allowSources) {
 				changed |= floatSlider("min (source at 0)", target.min, spec.lowest, spec.highest, onChange);
 				changed |= floatSlider("max (source at 1)", target.max, spec.lowest, spec.highest, onChange);
-				int source = static_cast<int>(target.source);
-				if (choice("source", source, sourceNames())) {
-					target.source = static_cast<ModSource>(source);
+				if (sourceChoice("source", target.source)) {
 					changed = true;
 					if (onChange) onChange();
 				}

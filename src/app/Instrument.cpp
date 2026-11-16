@@ -129,7 +129,7 @@ void Instrument::openSensors(SensorMode mode, const std::string & replayFile) {
 	if (mode == SensorMode::Replay) {
 		sensors_ = makeReplaySensorSource(replayFile, options_.loopReplay);
 	} else if (mode == SensorMode::Hardware || mode == SensorMode::Auto) {
-		sensors_ = makeHardwareSensorSource(loaded_.profile.hardware);
+		sensors_ = makeHardwareSensorSource(loaded_.profile.hardware, loaded_.profile.motion.enabled);
 	} else {
 		sensors_ = makeSimulatedSensorSource(simulator_);
 	}
@@ -296,8 +296,32 @@ bool Instrument::restartAudio() {
 	}
 	std::string report;
 	audioOpen_ = audio_.startDevice(resolveAudioSettings(loaded_.profile.audio), report);
+	audioCheckMs_ = 0; // restart the "is it really running" check
+	audioStalled_ = false;
 	note(report, !audioOpen_);
 	return audioOpen_;
+}
+
+std::vector<int> Instrument::supportedSampleRates() const {
+	return AudioEngine::supportedSampleRates(resolveAudioSettings(loaded_.profile.audio));
+}
+
+void Instrument::checkAudioHealth(uint64_t nowMs) {
+	// Once a second: an open device must have delivered audio callbacks. If it
+	// has not, say so once, clearly - otherwise the app looks fine and is silent.
+	constexpr uint64_t kCheckEveryMs = 1000;
+	if (!audioOpen_ || nowMs - audioCheckMs_ < kCheckEveryMs) return;
+	uint64_t callbacks = audio_.callbackCount();
+	bool stalled = audioCheckMs_ != 0 && callbacks == audioCheckCallbacks_;
+	if (stalled && !audioStalled_) {
+		note("AUDIO NOT RUNNING: the sound device opened but is not playing. Check the device and sample rate in "
+			 "Settings > Audio device.", true);
+	} else if (!stalled && audioStalled_) {
+		note("audio is running again");
+	}
+	audioStalled_ = stalled;
+	audioCheckMs_ = nowMs;
+	audioCheckCallbacks_ = callbacks;
 }
 
 void Instrument::setAudition(int slot, bool active, float position) {
@@ -354,6 +378,7 @@ void Instrument::update(uint64_t nowMs) {
 	playhead_.advance(dt, pressed, preset().playheadSpeed);
 
 	sendToAudio(dt);
+	checkAudioHealth(nowMs);
 	startPendingPreset();
 	panel_.update(nowMs);
 	if (remote_.telemetryDue(nowMs)) {
@@ -509,6 +534,8 @@ Telemetry Instrument::telemetry() const {
 	t.preset = presetIndex_ + 1;
 	t.sensorSource = sensors_ ? sensors_->name() : "none";
 	t.skippedBuffers = audio_.skippedCallbacks();
+	t.outputLevel = std::max(audio_.masterMeter(0), audio_.masterMeter(1));
+	t.fading = audio_.isFading();
 	return t;
 }
 

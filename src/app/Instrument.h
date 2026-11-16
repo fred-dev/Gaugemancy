@@ -82,6 +82,17 @@ public:
 	/// Close and reopen the sound device with the current audio settings.
 	bool restartAudio();
 
+	/// True when a sound device was opened but sends no audio callbacks: it is
+	/// not running (wrong sample rate, device in use, unplugged...), so nothing
+	/// can be heard whatever the sensors do.
+	bool audioStalled() const { return audioStalled_; }
+
+	/// True when a sound device is open (false with --no-audio or no device).
+	bool audioOpen() const { return audioOpen_; }
+
+	/// Sample rates the configured output device supports, lowest first.
+	std::vector<int> supportedSampleRates() const;
+
 	/// GUI audition: hold a slot open at a position (mouse in a waveform).
 	void setAudition(int slot, bool active, float position);
 
@@ -137,6 +148,7 @@ private:
 	void handleGesture(uint64_t nowMs);
 	void handleRemote();
 	void sendToAudio(float dtSeconds);
+	void checkAudioHealth(uint64_t nowMs);
 	void updateLeds();
 	Telemetry telemetry() const;
 	PathResolver audioResolver() const;
@@ -149,6 +161,9 @@ private:
 
 	AudioEngine audio_;
 	bool audioOpen_ = false;
+	bool audioStalled_ = false;
+	uint64_t audioCheckMs_ = 0;        ///< when the callback count was last sampled
+	uint64_t audioCheckCallbacks_ = 0; ///< the count at that time
 
 	std::unique_ptr<SensorSource> sensors_;
 	SensorSimulator simulator_;

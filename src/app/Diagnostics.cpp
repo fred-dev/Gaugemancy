@@ -179,11 +179,11 @@ void checkI2cBus(Report & r, const HardwareSettings & hw) {
 	r.pass("responding: " + list + " (LIS3DH is usually 0x18 or 0x19)");
 }
 
-void checkAccelerometer(Report & r, const HardwareSettings & hw) {
+void checkAccelerometer(Report & r, const HardwareSettings & hw, bool hasGyro) {
 	r.section("Accelerometer (LIS3DH)");
 	if (!ofxgpio::hasHardwareSupport()) return;
-	if (!hw.accelerometer) {
-		r.pass("disabled in settings");
+	if (!hw.accelerometer || !hasGyro) {
+		r.pass("this profile has no gyro (Settings: has gyro is off)");
 		return;
 	}
 	ofxgpio::Lis3dh accel;
@@ -230,7 +230,7 @@ int runSelfTest(const Options & options, const std::string & dataRoot) {
 	checkGpio(r, loaded.profile.hardware);
 	checkAdc(r, loaded.profile);
 	checkI2cBus(r, loaded.profile.hardware);
-	checkAccelerometer(r, loaded.profile.hardware);
+	checkAccelerometer(r, loaded.profile.hardware, loaded.profile.motion.enabled);
 	checkAudioDevices(r, loaded.profile.audio);
 	return r.finish();
 }

@@ -11,7 +11,9 @@ namespace {
 
 class HardwareSensorSource : public SensorSource {
 public:
-	explicit HardwareSensorSource(const HardwareSettings & settings) : settings_(settings) {}
+	HardwareSensorSource(const HardwareSettings & settings, bool withAccelerometer) : settings_(settings) {
+		settings_.accelerometer = settings.accelerometer && withAccelerometer;
+	}
 
 	bool open(std::string & error) override {
 		if (!adc_.open(settings_.spiDevice)) {
@@ -117,8 +119,8 @@ private:
 
 } // namespace
 
-std::unique_ptr<SensorSource> makeHardwareSensorSource(const HardwareSettings & settings) {
-	return std::make_unique<HardwareSensorSource>(settings);
+std::unique_ptr<SensorSource> makeHardwareSensorSource(const HardwareSettings & settings, bool withAccelerometer) {
+	return std::make_unique<HardwareSensorSource>(settings, withAccelerometer);
 }
 
 std::unique_ptr<SensorSource> makeReplaySensorSource(const std::string & path, bool loop) {

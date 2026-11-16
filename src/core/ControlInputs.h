@@ -61,9 +61,28 @@ ModSource modSourceFromLegacyIndex(int index);
 /// ModSource for sensor index 0..5.
 ModSource sensorSource(int sensorIndex);
 
+/// True for the sources that need the gyro/accelerometer (tilt and shake).
+constexpr bool isMotionSource(ModSource source) {
+	return source == ModSource::TiltX || source == ModSource::TiltY || source == ModSource::Tilt
+		|| source == ModSource::Shake;
+}
+
 /// The values for one control frame.
 struct ControlInputs {
 	std::array<float, kNumModSources> values {};
+
+	/// False when the instrument has no gyro/accelerometer (profile setting
+	/// "has gyro" off). The motion sources are then unavailable: a parameter
+	/// mapped to one keeps its fixed value instead of following it.
+	bool motionAvailable = true;
+
+	/// True when `source` can drive something this frame.
+	bool isAvailable(ModSource source) const {
+		return source != ModSource::None && (motionAvailable || !isMotionSource(source));
+	}
+
+	/// True when `source` is available and above zero (used for gates).
+	bool isActive(ModSource source) const { return isAvailable(source) && get(source) > 0.0f; }
 
 	float get(ModSource source) const { return values[static_cast<int>(source)]; }
 	void set(ModSource source, float value) { values[static_cast<int>(source)] = value; }

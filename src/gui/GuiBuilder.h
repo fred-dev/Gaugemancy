@@ -8,6 +8,9 @@
 // group/control/listener lifetime to manage and no "rebuild the panel" dance;
 // call these every frame from inside an ImGui window.
 //
+// Every number slider can also be typed into: double-click it (or Cmd/Ctrl +
+// click), type the value, press Enter. Typed values are clamped to the range.
+//
 //   if (b.group("Sensors")) {
 //       b.floatSlider("Threshold", settings.activeThreshold, 0, 1);
 //       b.endGroup();
@@ -34,6 +37,18 @@ public:
 	/// returns true - mirrors ImGui::TreeNode()/TreePop() pairing.
 	bool group(const std::string & name, bool defaultOpen = true);
 	void endGroup();
+
+	/// When false (the profile has no gyro), tilt and shake are not offered in
+	/// source dropdowns. Set once per frame before drawing.
+	void setMotionAvailable(bool available) { motionAvailable_ = available; }
+	bool motionAvailable() const { return motionAvailable_; }
+
+	/// The slider every number in the GUI uses: drag as usual, or double-click
+	/// to type a value. Returns true when the value changed.
+	bool numberSlider(const char * label, float & target, float lo, float hi, const char * format = "%.3f");
+
+	/// Dropdown of modulation sources that honours setMotionAvailable().
+	bool sourceChoice(const char * label, ModSource & source);
 
 	bool floatSlider(const std::string & label, float & target, float lo, float hi, Callback onChange = {});
 	bool intSlider(const std::string & label, int & target, int lo, int hi, Callback onChange = {});
@@ -67,7 +82,9 @@ public:
 	//   }
 
 	bool beginParamTable(const std::string & id);
-	/// `now` is the value this frame (shown in the last column).
+	/// `now` is the value this frame. For a parameter that follows a source it
+	/// is drawn as a moving bar across the parameter's range, so every linked
+	/// parameter visibly moves when its ball is squeezed.
 	bool paramRow(const ParamSpec & spec, ModulatedParam & target, float now, bool allowSources = true);
 	/// Pads with blank rows up to `totalRows` and closes the table.
 	void endParamTable(int totalRows);
@@ -81,6 +98,14 @@ public:
 
 private:
 	int tableRows_ = 0; ///< rows drawn since beginParamTable()
+	bool motionAvailable_ = true;
+
+	// The one slider being typed into (0 = none). See numberSlider().
+	unsigned int editingId_ = 0;
+	bool editingNeedsFocus_ = false;
+	float editingValue_ = 0.0f;
+	unsigned int preClickId_ = 0;   ///< slider last clicked, and its value before that click
+	float preClickValue_ = 0.0f;
 };
 
 } // namespace gm

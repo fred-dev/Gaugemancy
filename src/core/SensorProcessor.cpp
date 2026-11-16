@@ -6,6 +6,7 @@ namespace gm {
 
 void SensorProcessor::configure(const SensorSettings & sensors, const MotionSettings & motion) {
 	settings_ = sensors;
+	motionEnabled_ = motion.enabled;
 	for (int i = 0; i < kNumSensors; ++i) {
 		smoothing_.setTime(sensorSource(i), sensors.smoothingMs);
 	}
@@ -93,6 +94,7 @@ ControlInputs SensorProcessor::finish(const std::array<float, kNumSensors> & nor
 	}
 	inputs.set(ModSource::Total, totalPressure(inputs, settings_.accumulationDenominator));
 
+	inputs.motionAvailable = motionEnabled_;
 	MotionOutput m = motion_.process(accel.x, accel.y, accel.z, accel.valid, dtSeconds);
 	inputs.set(ModSource::TiltX, smoothing_.process(ModSource::TiltX, m.tiltX, dtSeconds));
 	inputs.set(ModSource::TiltY, smoothing_.process(ModSource::TiltY, m.tiltY, dtSeconds));

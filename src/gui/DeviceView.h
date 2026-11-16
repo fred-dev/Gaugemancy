@@ -15,7 +15,7 @@
 // inside each glows as its pressure sensor is activated, plain balls stay grey.
 //
 // Interaction (when the simulation is the sensor input):
-//   press and hold a sensor ball   squeeze it (pressure rises while held)
+//   click or hold a sensor ball    squeeze it (a click is a short full squeeze)
 //   drag anywhere else             tilt the instrument = simulated accelerometer
 //   double-click                   back to level
 // With hardware or replay input the model follows the measured tilt instead.
@@ -52,6 +52,9 @@ public:
 	/// Back to level.
 	void level();
 
+	/// False when the instrument has no gyro: dragging then does not tilt.
+	void setTiltEnabled(bool enabled);
+
 private:
 	struct Ball {
 		glm::vec3 direction; ///< unit vector from the body centre (device coordinates)
@@ -82,9 +85,11 @@ private:
 	std::array<float, kNumSensors> squeeze_ {}; ///< mouse squeeze per sensor, 0..1
 	std::array<float, kNumSensors> sentSqueeze_ {}; ///< last value written to the simulator
 	bool simulating_ = true;
+	bool tiltEnabled_ = true;
 	bool orientationChanged_ = true; ///< the user tilted the model since the last update
 	AccelSample lastWrittenAccel_;    ///< what this view last told the simulator
 	uint64_t lastClickMs_ = 0;
+	std::array<uint64_t, kNumSensors> holdUntilMs_ {}; ///< a click keeps its ball squeezed until then
 };
 
 } // namespace gm

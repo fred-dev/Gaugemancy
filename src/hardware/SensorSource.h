@@ -48,7 +48,8 @@ public:
 };
 
 /// The Raspberry Pi's ADC and accelerometer (stubs elsewhere: open() fails).
-std::unique_ptr<SensorSource> makeHardwareSensorSource(const HardwareSettings & settings);
+/// `withAccelerometer` false = never open the accelerometer (profile has no gyro).
+std::unique_ptr<SensorSource> makeHardwareSensorSource(const HardwareSettings & settings, bool withAccelerometer = true);
 
 /// Plays back a CSV recording.
 std::unique_ptr<SensorSource> makeReplaySensorSource(const std::string & path, bool loop);

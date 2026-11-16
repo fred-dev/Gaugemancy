@@ -30,7 +30,10 @@
 //   F9 squeeze ramp      F10 message log
 //   F11 fullscreen       F12 save everything
 // Click or drag in a slot tile to audition it; drop an audio file on a slot
-// tile to load it.
+// tile to load it. The Effects panel follows the selected tile; double-click a
+// tile to LOCK the Effects panel to that tile's chain (it then stays put while
+// other tiles are selected), double-click the locked tile again to unlock.
+// Double-click any number slider to type its value.
 // -----------------------------------------------------------------------------
 
 #include "DeviceView.h"
@@ -72,7 +75,14 @@ private:
 	void select(Target target, int slot = 0);
 	/// 0..5 for a slot, 6 for the master, 7 for the narration.
 	int targetIndex() const;
-	EffectChainSettings & selectedChain();
+	/// The tile whose chain the Effects panel shows: the locked one, else the selected one.
+	int effectsIndex() const { return effectsLock_ >= 0 ? effectsLock_ : targetIndex(); }
+	EffectChainSettings & chainOf(int index);
+	static std::string tileName(int index);
+	/// A tile was clicked: select it, and on a double-click toggle the effects lock.
+	void tileClicked(int index);
+	void drawLockMarker(const ofRectangle & tile) const;
+	void refreshAudioLists();
 
 	// Bars and the instrument column.
 	void drawTopBar();
@@ -125,6 +135,19 @@ private:
 	int selectedSlot_ = 0;
 	std::array<int, kTargets> selectedEffect_ {}; ///< per tile, so each remembers its own
 	int auditionSlot_ = -1;
+
+	// Effects lock (-1 = follow the selected tile) and double-click detection.
+	int effectsLock_ = -1;
+	int lastTileClicked_ = -1;
+	uint64_t lastTileClickMs_ = 0;
+
+	// Device names and sample rates are asked from the system only when the
+	// Settings panel opens or the device changes, not every frame.
+	std::vector<std::string> deviceNames_;
+	std::vector<int> sampleRates_;
+	bool audioListsStale_ = true;
+
+	std::array<float, 2> meterPeak_ {}; ///< output meters with a short hold
 	bool glitchByMouse_ = false;
 
 	// "Free run" per synth slot: an ephemeral, not-saved override (same

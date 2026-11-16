@@ -4,7 +4,7 @@ This file is the running status of the refactor so a new session (local on
 Mac/Windows/Linux, or on the Raspberry Pi over SSH) can pick up where the last
 one stopped. **Update it after every major milestone.**
 
-Last updated: 2026-11-11 (local Mac session: review baseline on branch `fable`).
+Last updated: 2026-11-16 (cloud session: GUI fixes on branch `fable`).
 
 ## Ground rules from the owner (Fred)
 
@@ -331,6 +331,61 @@ set() resizes a buffer that was already prepared"), not `ai-refactor`.
 Lesson for new code: any pdsp unit configured with a setter after it was
 constructed must be checked for "already prepared" when it is created at
 run time. Test GUI changes with a real audio device, not only `--no-audio`.
+
+## GUI fixes, gyro switch, audio checks, 2026-11-16 (cloud, branch `fable`)
+
+Asked by Fred after using the fixed-layout GUI:
+
+- **Effects lock.** The Effects panel follows the selected tile. Double-click
+  a tile to lock the panel to that tile's chain (`effectsLock_`, an "FX LOCK"
+  marker on the tile, the panel title says which chain); double-click the
+  locked tile to unlock, or another tile to move the lock.
+- **Typed values.** Every number slider goes through
+  `GuiBuilder::numberSlider()`: double-click it, type, Enter (Escape cancels,
+  values are clamped). ImGui's Cmd/Ctrl + click still works too.
+- **Linked parameters move.** In the parameter tables the "now" column is a
+  bar across the parameter's range for any parameter that follows a source.
+- **Has gyro.** `motion.enabled` is the master switch (top of Settings). Off:
+  tilt and shake are not offered in any source or "heard" dropdown, greyed in
+  the sensor panel, the 3D view does not tilt, the Pi does not open the
+  accelerometer, and at run time `ControlInputs::motionAvailable` is false so
+  `ModulatedParam::resolve()` returns the fixed value for anything still
+  mapped to them. A slot gated on a motion source then follows total pressure.
+- **Sample rate.** `AudioEngine::supportedSampleRates()` asks the device;
+  Settings shows a dropdown of those rates (and of buffer sizes).
+  `startDevice()` never opens an unsupported rate: `core/AudioRates.h`
+  `pickSampleRate()` falls back to the nearest one and the log says so.
+- **Stalled audio is reported.** `pdsp::Engine::getCallbackCount()` (ofxPDSP
+  fork, branch `fable`) is sampled once a second by
+  `Instrument::checkAudioHealth()`. An open device that delivers no callbacks
+  gives "AUDIO NOT RUNNING" in the log and, in red, in the bottom bar.
+- **3D view clicks.** A click on a ball is now a full 450 ms squeeze (it used
+  to ramp over 0.35 s, so a quick click stayed under most thresholds), and a
+  fast second click on a ball no longer counts as "double-click: level".
+- `/gm/state` gained two values: output level and "crossfading" (gm-ctl.py
+  `status` prints them), so sound can be confirmed on the Pi without ears.
+- Output meters hold the peak of |sample| (they showed raw samples before).
+
+Fred reported "clicking a sensor on the 3D model or running the simulator
+gives no audio". Not reproduced on Linux: with a PulseAudio null sink and real
+mouse events (xdotool) every profile sounds from the 3D view, the faders, the
+ramp and OSC. The quick-click fix above and the stalled-audio warning are the
+two likely causes addressed; if it still happens on the Mac, note the profile,
+preset and what the bottom bar shows.
+
+Cloud testing with a running audio thread (do this for GUI changes):
+
+```bash
+apt-get install -y pulseaudio xdotool
+pulseaudio --system --disallow-exit --exit-idle-time=-1 --daemonize=yes -n \
+  --load="module-null-sink sink_name=test" \
+  --load="module-native-protocol-unix auth-anonymous=1 socket=/tmp/pulse-gm.sock"
+export PULSE_SERVER=unix:/tmp/pulse-gm.sock DISPLAY=:99   # Xvfb :99 running
+# copy bin/data, set "api": "pulse" in the profile, then:
+bin/Gaugemancy --gui --data <copy> --profile fable --sensors sim &
+xdotool mousemove 191 128 click 1        # click ball 1 in the 3D view
+tools/gm-ctl.py status                   # prints the output level
+```
 
 ## Done since the first handoff
 

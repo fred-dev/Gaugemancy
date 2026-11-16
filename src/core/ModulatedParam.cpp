@@ -14,8 +14,8 @@ ModulatedParam ModulatedParam::fromSpec(const ParamSpec & spec) {
 }
 
 float ModulatedParam::resolve(const ControlInputs & inputs) const {
-	if (source == ModSource::None) {
-		return value;
+	if (!inputs.isAvailable(source)) {
+		return value; // not connected, or connected to a gyro this instrument does not have
 	}
 	float amount = std::clamp(inputs.get(source), 0.0f, 1.0f);
 	return min + (max - min) * amount;

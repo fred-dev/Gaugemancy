@@ -61,6 +61,10 @@ public:
 	/// - for a GUI picker that sets AudioSettings::deviceName directly.
 	static std::vector<std::string> outputDeviceNames(const std::string & api);
 
+	/// Sample rates the device that `settings` selects can run at, lowest
+	/// first. Empty when the device does not say (then any rate is tried).
+	static std::vector<int> supportedSampleRates(const AudioSettings & settings);
+
 	// ---- content -------------------------------------------------------------
 
 	/// Build a new graph for `preset` (slow, but audio keeps playing) and
@@ -106,6 +110,10 @@ public:
 
 	/// Buffers output as silence because the graph was being changed.
 	uint64_t skippedCallbacks() const { return engine_.getSkippedCallbacks(); }
+
+	/// Audio callbacks received from the device so far. A device that opened
+	/// but refuses to run leaves this standing still (see Instrument).
+	uint64_t callbackCount() const { return engine_.getCallbackCount(); }
 
 	bool isRunning() const { return running_; }
 	int sampleRate() const { return sampleRate_; }

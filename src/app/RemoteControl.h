@@ -22,8 +22,9 @@
 // Telemetry (to osc.remoteHost:remotePort when osc.telemetry is on, and to
 // whoever sent /gm/status):
 //   /gm/sensors f f f f f f f      six sensor levels + total pressure
-//   /gm/state s i s i              mode, preset (1-based), sensor source,
-//                                  skipped audio buffers
+//   /gm/state s i s h f i          mode, preset (1-based), sensor source,
+//                                  skipped audio buffers, output level 0..1,
+//                                  1 while a preset crossfade runs
 // -----------------------------------------------------------------------------
 
 #include "../core/Settings.h"
@@ -50,6 +51,8 @@ struct Telemetry {
 	int preset = 1;
 	std::string sensorSource;
 	uint64_t skippedBuffers = 0;
+	float outputLevel = 0.0f;  ///< louder of the two master output meters, 0..1
+	bool fading = false;       ///< a preset crossfade is running
 };
 
 class RemoteControl {

@@ -1,5 +1,7 @@
 #include "AudioEngine.h"
 
+#include "../core/AudioRates.h"
+
 #include "ofSoundStream.h"
 
 #include <algorithm>
@@ -76,53 +78,86 @@ std::vector<std::string> AudioEngine::outputDeviceNames(const std::string & api)
 	return names;
 }
 
+namespace {
+
+/// The device `settings` selects: by name first (device numbers change when
+/// USB devices are plugged in a different order, names do not), then by id.
+/// Returns nullptr for "use the system default"; `report` gets any mismatch.
+const ofSoundDevice * chooseDevice(const std::vector<ofSoundDevice> & devices, const AudioSettings & settings,
+	std::string & report) {
+	if (!settings.deviceName.empty()) {
+		for (const ofSoundDevice & d : devices) {
+			if (lower(d.name).find(lower(settings.deviceName)) != std::string::npos) return &d;
+		}
+		report += "audio device '" + settings.deviceName + "' not found; ";
+	}
+	if (settings.deviceId >= 0) {
+		for (const ofSoundDevice & d : devices) {
+			if (d.deviceID == settings.deviceId) return &d;
+		}
+		report += "audio device id " + std::to_string(settings.deviceId) + " not found; ";
+	}
+	return nullptr;
+}
+
+/// The device that will really be opened: the chosen one or the default output.
+const ofSoundDevice * effectiveDevice(const std::vector<ofSoundDevice> & devices, const AudioSettings & settings,
+	std::string & report) {
+	if (const ofSoundDevice * chosen = chooseDevice(devices, settings, report)) return chosen;
+	for (const ofSoundDevice & d : devices) {
+		if (d.isDefaultOutput) return &d;
+	}
+	return devices.empty() ? nullptr : &devices.front();
+}
+
+std::vector<int> ratesOf(const ofSoundDevice * device) {
+	std::vector<int> rates;
+	if (device != nullptr) {
+		for (unsigned int r : device->sampleRates) rates.push_back(static_cast<int>(r));
+	}
+	std::sort(rates.begin(), rates.end());
+	return rates;
+}
+
+} // namespace
+
+std::vector<int> AudioEngine::supportedSampleRates(const AudioSettings & settings) {
+	std::string ignored;
+	const std::vector<ofSoundDevice> devices = outputDevices(apiFromName(settings.api));
+	return ratesOf(effectiveDevice(devices, settings, ignored));
+}
+
 bool AudioEngine::startDevice(const AudioSettings & settings, std::string & report) {
 	const ofSoundDevice::Api api = apiFromName(settings.api);
 	const std::vector<ofSoundDevice> devices = outputDevices(api);
-
-	// Prefer a name match: device numbers change when USB devices are plugged
-	// in a different order, names do not.
-	int chosen = -1;
-	std::string chosenName = "system default";
-	if (!settings.deviceName.empty()) {
-		for (const ofSoundDevice & d : devices) {
-			if (lower(d.name).find(lower(settings.deviceName)) != std::string::npos) {
-				chosen = d.deviceID;
-				chosenName = d.name;
-				break;
-			}
-		}
-		if (chosen < 0) {
-			report += "audio device '" + settings.deviceName + "' not found; ";
-		}
-	}
-	if (chosen < 0 && settings.deviceId >= 0) {
-		for (const ofSoundDevice & d : devices) {
-			if (d.deviceID == settings.deviceId) {
-				chosen = d.deviceID;
-				chosenName = d.name;
-			}
-		}
-		if (chosen < 0) {
-			report += "audio device id " + std::to_string(settings.deviceId) + " not found; ";
-		}
-	}
 	if (devices.empty()) {
 		report += "no output devices found for api '" + settings.api + "'";
 		return false;
 	}
+	const ofSoundDevice * chosen = chooseDevice(devices, settings, report);
+	std::string ignored;
+	const ofSoundDevice * device = chosen != nullptr ? chosen : effectiveDevice(devices, settings, ignored);
+
+	// A rate the device cannot run at gives silence, so never ask for one.
+	const int rate = pickSampleRate(ratesOf(device), settings.sampleRate);
+	if (rate != settings.sampleRate) {
+		report += "sample rate " + std::to_string(settings.sampleRate) + " not supported by this device, using "
+			+ std::to_string(rate) + "; ";
+	}
 
 	engine_.setApi(api);
 	engine_.setChannels(0, 2);
-	if (chosen >= 0) {
-		engine_.setOutputDeviceID(chosen);
+	if (chosen != nullptr) {
+		engine_.setOutputDeviceID(chosen->deviceID);
 	}
-	sampleRate_ = settings.sampleRate;
+	sampleRate_ = rate;
 	bufferSize_ = settings.bufferSize;
-	engine_.setup(settings.sampleRate, settings.bufferSize, settings.numBuffers);
+	engine_.setup(rate, settings.bufferSize, settings.numBuffers);
 	running_ = true;
-	report += "audio: " + chosenName + " @ " + std::to_string(settings.sampleRate) + " Hz, buffer "
-		+ std::to_string(settings.bufferSize) + " x " + std::to_string(settings.numBuffers);
+	report += "audio: " + (chosen != nullptr ? chosen->name : "system default"
+			+ (device != nullptr ? " (" + device->name + ")" : std::string()))
+		+ " @ " + std::to_string(rate) + " Hz, buffer " + std::to_string(settings.bufferSize) + " x "
+		+ std::to_string(settings.numBuffers);
 	return true;
 }
 

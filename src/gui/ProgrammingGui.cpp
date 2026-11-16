@@ -3,6 +3,7 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <cmath>
 
 namespace gm {
 
@@ -243,10 +244,47 @@ int ProgrammingGui::targetIndex() const {
 	return selectedSlot_;
 }
 
-EffectChainSettings & ProgrammingGui::selectedChain() {
-	if (target_ == Target::Master) return instrument_.preset().masterEffects;
-	if (target_ == Target::Narration) return instrument_.profile().narration.effects;
-	return instrument_.preset().slots[selectedSlot_].effects;
+EffectChainSettings & ProgrammingGui::chainOf(int index) {
+	if (index == kMaxSlots) return instrument_.preset().masterEffects;
+	if (index == kMaxSlots + 1) return instrument_.profile().narration.effects;
+	return instrument_.preset().slots[std::clamp(index, 0, kMaxSlots - 1)].effects;
+}
+
+std::string ProgrammingGui::tileName(int index) {
+	if (index == kMaxSlots) return "Master";
+	if (index == kMaxSlots + 1) return "Narration";
+	return "Slot " + std::to_string(index + 1);
+}
+
+void ProgrammingGui::tileClicked(int index) {
+	constexpr uint64_t kDoubleClickMs = 350;
+	uint64_t now = ofGetElapsedTimeMillis();
+	bool doubleClick = index == lastTileClicked_ && now - lastTileClickMs_ < kDoubleClickMs;
+	lastTileClicked_ = doubleClick ? -1 : index; // a third click starts a new pair
+	lastTileClickMs_ = now;
+	if (index < kMaxSlots) select(Target::Slot, index);
+	else select(index == kMaxSlots ? Target::Master : Target::Narration);
+	if (doubleClick) {
+		effectsLock_ = effectsLock_ == index ? -1 : index;
+		instrument_.note(effectsLock_ >= 0 ? "effects panel locked to " + tileName(index) : "effects panel follows the selected tile");
+	}
+}
+
+void ProgrammingGui::drawLockMarker(const ofRectangle & tile) const {
+	ofPushStyle();
+	ofFill();
+	ofSetColor(255, 190, 40);
+	ofDrawRectangle(tile.x, tile.getBottom() - 16.0f, 68.0f, 16.0f);
+	ofSetColor(20);
+	ofDrawBitmapString("FX LOCK", tile.x + 6.0f, tile.getBottom() - 4.0f);
+	ofPopStyle();
+}
+
+void ProgrammingGui::refreshAudioLists() {
+	const ProfileSettings & p = instrument_.profile();
+	deviceNames_ = AudioEngine::outputDeviceNames(p.audio.api);
+	sampleRates_ = instrument_.supportedSampleRates();
+	audioListsStale_ = false;
 }
 
 // ===================================================================== top bar
@@ -296,6 +334,7 @@ void ProgrammingGui::drawTopBar() {
 	if (ImGui::Button(labels[2])) instrument_.reloadFromDisk();
 	ImGui::SameLine();
 	if (selectableButton(labels[3], showSettings_, ImVec2(0, 0))) {
+		audioListsStale_ = true; // ask the system again each time Settings opens
 		showSettings_ = !showSettings_;
 		showLog_ = false;
 	}
@@ -315,10 +354,16 @@ void ProgrammingGui::drawBottomBar() {
 	ImGui::AlignTextToFramePadding();
 	ImGui::TextDisabled("out");
 	ImGui::SameLine();
-	ImGui::ProgressBar(std::clamp(instrument_.audio().masterMeter(0), 0.0f, 1.0f), ImVec2(meterW, 0), "L");
+	ImGui::ProgressBar(std::clamp(meterPeak_[0], 0.0f, 1.0f), ImVec2(meterW, 0), "L");
 	ImGui::SameLine();
-	ImGui::ProgressBar(std::clamp(instrument_.audio().masterMeter(1), 0.0f, 1.0f), ImVec2(meterW, 0), "R");
+	ImGui::ProgressBar(std::clamp(meterPeak_[1], 0.0f, 1.0f), ImVec2(meterW, 0), "R");
 	ImGui::SameLine();
+	if (instrument_.audioStalled() || !instrument_.audioOpen()) {
+		// Nothing can be heard: say so where the eye already is.
+		ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.3f, 1.0f), "%s",
+			instrument_.audioStalled() ? "AUDIO NOT RUNNING: check Settings > Audio device  | " : "NO AUDIO DEVICE  | ");
+		ImGui::SameLine();
+	}
 	ImGui::Text("%s  |  sensors: %s  |  dropped buffers: %llu%s", modeName(instrument_.mode()),
 		instrument_.sensorSourceName().c_str(), static_cast<unsigned long long>(instrument_.audio().skippedCallbacks()),
 		instrument_.isRecording() ? "  |  RECORDING" : "");
@@ -358,8 +403,11 @@ void ProgrammingGui::drawSensorsPanel() {
 		for (int i = 0; i < 5; ++i) {
 			ImGui::TableNextColumn();
 			ImGui::Dummy(ImVec2(ImGui::GetContentRegionAvail().x, barH));
-			ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), ImGui::GetColorU32(ImGuiCol_Border));
-			overlayLevel(inputs.get(extras[i]), live);
+			bool available = inputs.motionAvailable || !isMotionSource(extras[i]);
+			ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
+				ImGui::GetColorU32(ImGuiCol_Border, available ? 1.0f : 0.3f));
+			if (available) overlayLevel(inputs.get(extras[i]), live);
+			else if (ImGui::IsItemHovered()) ImGui::SetTooltip("this profile has no gyro (Settings)");
 		}
 		ImGui::TableNextRow();
 		for (int i = 0; i < columns; ++i) {
@@ -452,16 +500,34 @@ void ProgrammingGui::drawSlotSource(SlotSettings & slot, int index) {
 		structureChanged();
 	}
 
-	std::vector<std::string> gates = { "Auto (while its sensors are pressed)", "Always" };
-	for (int i = 1; i < kNumModSources; ++i) gates.push_back("While " + modSourceLabel(static_cast<ModSource>(i)));
-	int gateIndex = slot.gate == GateMode::Auto ? 0 : slot.gate == GateMode::Always ? 1 : 1 + static_cast<int>(slot.gateSource);
-	if (builder_.choice("heard", gateIndex, gates)) {
-		if (gateIndex == 0) slot.gate = GateMode::Auto;
-		else if (gateIndex == 1) slot.gate = GateMode::Always;
-		else {
-			slot.gate = GateMode::Source;
-			slot.gateSource = static_cast<ModSource>(gateIndex - 1);
+	// "Heard": tilt and shake are only offered when the instrument has a gyro
+	// (one already in use stays visible, marked, so nothing changes silently).
+	struct Gate {
+		std::string label;
+		GateMode mode;
+		ModSource source;
+	};
+	std::vector<Gate> gates = { { "Auto (while its sensors are pressed)", GateMode::Auto, ModSource::None },
+		{ "Always", GateMode::Always, ModSource::None } };
+	const bool gyro = builder_.motionAvailable();
+	for (int i = 1; i < kNumModSources; ++i) {
+		ModSource source = static_cast<ModSource>(i);
+		bool inUse = slot.gate == GateMode::Source && slot.gateSource == source;
+		if (!gyro && isMotionSource(source) && !inUse) continue;
+		gates.push_back({ "While " + modSourceLabel(source) + (!gyro && isMotionSource(source) ? " (no gyro: follows the balls)" : ""),
+			GateMode::Source, source });
+	}
+	std::vector<std::string> gateNames;
+	int gateIndex = 0;
+	for (size_t i = 0; i < gates.size(); ++i) {
+		gateNames.push_back(gates[i].label);
+		if (gates[i].mode == slot.gate && (slot.gate != GateMode::Source || gates[i].source == slot.gateSource)) {
+			gateIndex = static_cast<int>(i);
 		}
+	}
+	if (builder_.choice("heard", gateIndex, gateNames)) {
+		slot.gate = gates[gateIndex].mode;
+		slot.gateSource = gates[gateIndex].source;
 	}
 
 	// Sample rows: greyed out, not removed, for a synth source.
@@ -490,8 +556,8 @@ void ProgrammingGui::drawSlotSource(SlotSettings & slot, int index) {
 void ProgrammingGui::drawMasterSource() {
 	builder_.floatSlider("preset gain", instrument_.preset().masterGain, 0.0f, 4.0f);
 	builder_.floatSlider("profile gain", instrument_.profile().audio.masterGain, 0.0f, 4.0f);
-	ImGui::ProgressBar(std::clamp(instrument_.audio().masterMeter(0), 0.0f, 1.0f), ImVec2(-FLT_MIN, 0), "L");
-	ImGui::ProgressBar(std::clamp(instrument_.audio().masterMeter(1), 0.0f, 1.0f), ImVec2(-FLT_MIN, 0), "R");
+	ImGui::ProgressBar(std::clamp(meterPeak_[0], 0.0f, 1.0f), ImVec2(-FLT_MIN, 0), "L");
+	ImGui::ProgressBar(std::clamp(meterPeak_[1], 0.0f, 1.0f), ImVec2(-FLT_MIN, 0), "R");
 	ImGui::Separator();
 	builder_.label("The effects on the right are applied to the mix of all six slots. Preset gain is saved with the "
 				   "preset, profile gain with the profile.");
@@ -555,11 +621,14 @@ void ProgrammingGui::drawParametersPanel() {
 // ===================================================================== effects
 
 void ProgrammingGui::drawEffectsPanel() {
-	panels_.begin("Effects, in order###effects", effectsRect_);
-	EffectChainSettings & chain = selectedChain();
-	int & selected = selectedEffect_[targetIndex()];
+	const int index = effectsIndex();
+	std::string title = "Effects of " + tileName(index) + ", in order"
+		+ (effectsLock_ >= 0 ? "   [LOCKED - double-click a tile to unlock or move the lock]" : "   (double-click a tile to lock)");
+	panels_.begin(title + "###effects", effectsRect_);
+	EffectChainSettings & chain = chainOf(index);
+	int & selected = selectedEffect_[index];
 	selected = std::clamp(selected, 0, std::max(static_cast<int>(chain.size()) - 1, 0));
-	ImGui::PushID(targetIndex());
+	ImGui::PushID(index);
 
 	drawEffectPlaces(chain, selected);
 	drawEffectControls(chain, selected);
@@ -679,6 +748,15 @@ void ProgrammingGui::drawProfileSection() {
 	ProfileSettings & p = instrument_.profile();
 	auto changed = [this]() { structureChanged(); };
 
+	// Master switch, always visible: an instrument without the gyro has no
+	// tilt or shake, so those sources disappear everywhere when this is off.
+	builder_.toggle("Has gyro (tilt and shake sensors)", p.motion.enabled, changed);
+	if (!p.motion.enabled) {
+		ImGui::SameLine();
+		ImGui::TextDisabled("off: tilt and shake cannot be chosen, and anything mapped to them keeps its fixed value");
+	}
+	ImGui::Separator();
+
 	if (builder_.group("Switch / new profile", false)) {
 		std::vector<std::string> names = instrument_.store().listProfiles();
 		int current = static_cast<int>(std::distance(names.begin(), std::find(names.begin(), names.end(), p.name)));
@@ -727,8 +805,8 @@ void ProgrammingGui::drawProfileSection() {
 		builder_.endGroup();
 	}
 
-	if (builder_.group("Motion (accelerometer)", false)) {
-		builder_.toggle("enabled", p.motion.enabled, changed);
+	if (builder_.group("Motion (gyro / accelerometer)", false)) {
+		ImGui::BeginDisabled(!p.motion.enabled);
 		builder_.toggle("level = position at startup", p.motion.zeroAtStartup, changed);
 		int axisIndex = std::max(0, static_cast<int>(std::find(kAxisIds.begin(), kAxisIds.end(), p.motion.upAxis) - kAxisIds.begin()) % 6);
 		if (builder_.choice("else 'up' axis", axisIndex, kAxisIds)) {
@@ -741,6 +819,7 @@ void ProgrammingGui::drawProfileSection() {
 		builder_.floatSlider("shake sensitivity (g)", p.motion.shakeSensitivity, 0.05f, 4.0f, changed);
 		builder_.floatSlider("shake release (ms)", p.motion.shakeReleaseMs, 10.0f, 3000.0f, changed);
 		if (builder_.button("set level now (recalibrate)")) instrument_.recalibrate();
+		ImGui::EndDisabled();
 		builder_.endGroup();
 	}
 
@@ -756,16 +835,45 @@ void ProgrammingGui::drawProfileSection() {
 	}
 
 	if (builder_.group("Audio device", false)) {
-		auto restart = [this]() { instrument_.restartAudio(); };
-		builder_.text("api", p.audio.api, restart);
-		std::vector<std::string> deviceNames = AudioEngine::outputDeviceNames(p.audio.api);
-		int current = static_cast<int>(std::distance(deviceNames.begin(), std::find(deviceNames.begin(), deviceNames.end(), p.audio.deviceName)));
-		if (builder_.choice("device", current, deviceNames) && current >= 0 && current < static_cast<int>(deviceNames.size())) {
-			p.audio.deviceName = deviceNames[current];
+		if (audioListsStale_) refreshAudioLists();
+		auto restart = [this]() {
 			instrument_.restartAudio();
+			audioListsStale_ = true;
+		};
+		builder_.text("api", p.audio.api, restart);
+		int current = static_cast<int>(std::distance(deviceNames_.begin(), std::find(deviceNames_.begin(), deviceNames_.end(), p.audio.deviceName)));
+		if (builder_.choice("device", current, deviceNames_) && current >= 0 && current < static_cast<int>(deviceNames_.size())) {
+			p.audio.deviceName = deviceNames_[current];
+			restart();
 		}
-		builder_.intSlider("sample rate", p.audio.sampleRate, 22050, 96000, restart);
-		builder_.intSlider("buffer size", p.audio.bufferSize, 64, 4096, restart);
+		ImGui::SameLine();
+		if (builder_.button("rescan")) audioListsStale_ = true;
+
+		// Only the rates this device can really run at: any other rate is silence.
+		std::vector<int> rates = sampleRates_.empty() ? std::vector<int> { 22050, 32000, 44100, 48000, 88200, 96000 } : sampleRates_;
+		std::vector<std::string> rateNames;
+		for (int rate : rates) rateNames.push_back(std::to_string(rate) + " Hz");
+		int running = instrument_.audioOpen() ? instrument_.audio().sampleRate() : p.audio.sampleRate;
+		int rateIndex = static_cast<int>(std::distance(rates.begin(), std::find(rates.begin(), rates.end(), running)));
+		if (builder_.choice("sample rate", rateIndex, rateNames)) {
+			p.audio.sampleRate = rates[rateIndex];
+			restart();
+		}
+		if (sampleRates_.empty()) {
+			builder_.label("This device does not list its sample rates; common ones are offered.");
+		} else if (p.audio.sampleRate != running) {
+			builder_.label("The saved rate " + std::to_string(p.audio.sampleRate) + " Hz is not supported by this device, so "
+				+ std::to_string(running) + " Hz is used. Pick a rate to save it.");
+		}
+
+		const std::vector<int> sizes = { 64, 128, 256, 512, 1024, 2048, 4096 };
+		std::vector<std::string> sizeNames;
+		for (int size : sizes) sizeNames.push_back(std::to_string(size) + " samples");
+		int sizeIndex = static_cast<int>(std::distance(sizes.begin(), std::lower_bound(sizes.begin(), sizes.end(), p.audio.bufferSize)));
+		if (builder_.choice("buffer size", sizeIndex, sizeNames)) {
+			p.audio.bufferSize = sizes[sizeIndex];
+			restart();
+		}
 		builder_.intSlider("buffers", p.audio.numBuffers, 1, 8, restart);
 		builder_.floatSlider("master gain", p.audio.masterGain, 0.0f, 4.0f);
 		builder_.endGroup();
@@ -792,7 +900,6 @@ void ProgrammingGui::drawProfileSection() {
 		builder_.intSlider("multi-click gap (ms)", p.hardware.clickTimeoutMs, 50, 1000);
 		builder_.toggle("6 s press quits", p.hardware.longPressQuits);
 		builder_.toggle("power off on quit", p.hardware.shutdownOnQuit);
-		builder_.toggle("accelerometer", p.hardware.accelerometer);
 		builder_.endGroup();
 	}
 
@@ -824,6 +931,11 @@ void ProgrammingGui::update() {
 	float dt = lastUpdateMs_ == 0 ? 0.0f : static_cast<float>(now - lastUpdateMs_) / 1000.0f;
 	lastUpdateMs_ = now;
 	bool simulating = instrument_.sensorSourceName() == "simulation";
+	deviceView_.setTiltEnabled(instrument_.profile().motion.enabled);
+	for (int ch = 0; ch < 2; ++ch) {
+		// The meter reads single samples: hold the peak briefly so it is readable.
+		meterPeak_[ch] = std::max(std::fabs(instrument_.audio().masterMeter(ch)), meterPeak_[ch] * 0.92f);
+	}
 	deviceView_.update(dt, simulating, instrument_.simulator(), instrument_.lastAccel());
 	if (presetRequest_ >= 0) {
 		if (presetRequest_ != instrument_.presetIndex()) {
@@ -850,10 +962,15 @@ void ProgrammingGui::update() {
 void ProgrammingGui::draw() {
 	ofBackground(18);
 	layout(); // cheap; keeps every rect in step with the window size
+	builder_.setMotionAvailable(instrument_.profile().motion.enabled);
 
 	drawSlotTiles();
 	drawMasterTile();
 	drawNarrationTile();
+	if (effectsLock_ >= 0) {
+		drawLockMarker(effectsLock_ < kMaxSlots ? slotViews_[effectsLock_].rect()
+			: effectsLock_ == kMaxSlots ? masterTileRect_ : narrationView_.rect());
+	}
 	deviceView_.draw(instrument_.inputs());
 
 	gui_.begin();
@@ -908,7 +1025,7 @@ void ProgrammingGui::drawMasterTile() {
 	ofFill();
 	ofSetColor(0, 140, 140);
 	for (int ch = 0; ch < 2; ++ch) {
-		float level = std::clamp(instrument_.audio().masterMeter(ch), 0.0f, 1.0f);
+		float level = std::clamp(meterPeak_[ch], 0.0f, 1.0f);
 		float barW = r.width * 0.5f - 12.0f;
 		float x = r.x + 8.0f + ch * (barW + 8.0f);
 		float barH = (r.height - 30.0f) * level;
@@ -944,6 +1061,7 @@ void ProgrammingGui::keyPressed(int key) {
 	if (key >= OF_KEY_F1 && key <= OF_KEY_F6) {
 		select(Target::Slot, key - OF_KEY_F1);
 	} else if (key == OF_KEY_F7) {
+		audioListsStale_ = true;
 		showSettings_ = !showSettings_;
 		showLog_ = false;
 	} else if (key == OF_KEY_F8) {
@@ -969,16 +1087,16 @@ void ProgrammingGui::mousePressed(int x, int y, int) {
 	if (deviceView_.mousePressed(x, y)) return;
 	for (int i = 0; i < kMaxSlots; ++i) {
 		if (slotViews_[i].inside(x, y)) {
-			select(Target::Slot, i);
+			tileClicked(i);
 			auditionSlot_ = i;
 			instrument_.setAudition(i, true, slotViews_[i].positionAt(x));
 			return;
 		}
 	}
 	if (masterTileRect_.inside(x, y)) {
-		select(Target::Master);
+		tileClicked(kMaxSlots);
 	} else if (narrationView_.inside(x, y)) {
-		select(Target::Narration);
+		tileClicked(kMaxSlots + 1);
 		if (instrument_.profile().narration.enabled) {
 			glitchByMouse_ = true;
 			instrument_.setManualGlitch(true, narrationView_.positionAt(x));

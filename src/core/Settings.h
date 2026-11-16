@@ -167,6 +167,9 @@ struct SensorSettings {
 
 /// Accelerometer interpretation (see MotionProcessor).
 struct MotionSettings {
+	/// Master switch "has gyro": false for an instrument without the
+	/// accelerometer. Tilt and shake are then not offered as sources, mappings
+	/// to them are ignored, and the sensor is not opened on the Pi.
 	bool enabled = true;
 	bool zeroAtStartup = true;      ///< "level" = orientation at startup; else `upAxis`
 	std::string upAxis = "+z";      ///< device axis pointing up when level (absolute mode)

@@ -82,6 +82,7 @@ private:
 	int calibrationCount_ = 0;
 	SmoothingBank smoothing_;
 	MotionProcessor motion_;
+	bool motionEnabled_ = true; ///< the profile's "has gyro" switch
 };
 
 } // namespace gm

@@ -12,7 +12,8 @@ constexpr float kBodyHeight = 200.0f;
 constexpr float kBallRadius = 34.0f;
 constexpr float kSideBallHeight = 48.0f; // upper/lower side balls, from the centre
 constexpr float kMaxSquash = 0.45f;      // a full squeeze flattens a ball by 45%
-constexpr float kSqueezeRiseSeconds = 0.35f;
+constexpr float kSqueezeRiseSeconds = 0.12f; // a click is felt at once
+constexpr uint64_t kClickHoldMs = 450;        // a quick click still gives a full, audible squeeze
 
 const ofColor kBodyColour(205, 205, 210);
 const ofColor kPlainBall(92, 92, 102);
@@ -63,6 +64,11 @@ DeviceView::DeviceView() {
 	level();
 }
 
+void DeviceView::setTiltEnabled(bool enabled) {
+	if (tiltEnabled_ && !enabled) level(); // an instrument without a gyro is shown upright
+	tiltEnabled_ = enabled;
+}
+
 void DeviceView::level() {
 	orientation_ = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
 	orientationChanged_ = true;
@@ -89,7 +95,7 @@ glm::vec3 DeviceView::ballCentre(const Ball & ball, float squash) const {
 void DeviceView::update(float dtSeconds, bool simulating, SensorSimulator & simulator, const AccelSample & measuredAccel) {
 	simulating_ = simulating;
 	for (int i = 0; i < kNumSensors; ++i) {
-		bool held = squeezedBall_ >= 0 && balls_[squeezedBall_].sensor == i;
+		bool held = (squeezedBall_ >= 0 && balls_[squeezedBall_].sensor == i) || ofGetElapsedTimeMillis() < holdUntilMs_[i];
 		float step = dtSeconds / kSqueezeRiseSeconds;
 		squeeze_[i] = std::clamp(squeeze_[i] + (held ? step : -2.0f * step), 0.0f, 1.0f);
 	}
@@ -243,7 +249,8 @@ void DeviceView::drawOverlay(const ControlInputs & inputs) {
 	std::snprintf(text, sizeof(text), "shake %.2f", inputs.get(ModSource::Shake));
 	ofDrawBitmapString(text, rect_.x + 8, rect_.getBottom() - 24);
 	ofSetColor(170);
-	ofDrawBitmapString(simulating_ ? "hold ball: squeeze  drag: tilt" : "live sensors and tilt", rect_.x + 8, rect_.getBottom() - 8);
+	ofDrawBitmapString(!simulating_ ? "live sensors" : tiltEnabled_ ? "hold ball: squeeze  drag: tilt" : "hold ball: squeeze  (no gyro)",
+		rect_.x + 8, rect_.getBottom() - 8);
 	if (simulating_) ofDrawBitmapString("double-click: level", rect_.x + 8, rect_.y + 16);
 }
 
@@ -270,14 +277,21 @@ int DeviceView::ballAt(float x, float y) {
 bool DeviceView::mousePressed(float x, float y) {
 	if (!inside(x, y) || !simulating_) return false;
 	uint64_t now = ofGetElapsedTimeMillis();
-	if (now - lastClickMs_ < 300) {
+	squeezedBall_ = ballAt(x, y);
+	if (squeezedBall_ >= 0) {
+		// On a ball every click squeezes, however fast the clicks come.
+		holdUntilMs_[balls_[squeezedBall_].sensor] = now + kClickHoldMs;
+		lastClickMs_ = 0;
+		dragging_ = false;
+		return true;
+	}
+	if (now - lastClickMs_ < 300) { // double-click beside the balls: back to level
 		level();
 		lastClickMs_ = 0;
 		return true;
 	}
 	lastClickMs_ = now;
-	squeezedBall_ = ballAt(x, y);
-	dragging_ = squeezedBall_ < 0;
+	dragging_ = tiltEnabled_;
 	lastMouse_ = { x, y };
 	return true;
 }

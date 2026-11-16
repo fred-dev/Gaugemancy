@@ -201,7 +201,10 @@ bool GrainSlot::gateFor(const SlotSettings & settings, const ControlInputs & inp
 	case GateMode::Always:
 		return true;
 	case GateMode::Source:
-		return inputs.get(settings.gateSource) > 0.0f;
+		// A gate on tilt or shake cannot work without a gyro; such a slot then
+		// follows the balls (total pressure) rather than staying silent forever.
+		if (!inputs.isAvailable(settings.gateSource)) return inputs.isActive(ModSource::Total);
+		return inputs.isActive(settings.gateSource);
 	case GateMode::Auto:
 		break;
 	}
@@ -212,20 +215,18 @@ bool GrainSlot::gateFor(const SlotSettings & settings, const ControlInputs & inp
 	// freshly-picked synth source, for instance) has nothing to "auto" on,
 	// so it just plays - that's much more useful than silence by default.
 	bool anyModulated = false;
+	auto check = [&](const ModulatedParam & p) {
+		if (!inputs.isAvailable(p.source)) return false;
+		anyModulated = true;
+		return inputs.isActive(p.source);
+	};
 	if (settings.sourceType == "granular") {
 		for (int i = 0; i < GrainSettings::count(); ++i) {
-			const ModulatedParam & p = settings.grain.at(i);
-			if (p.isModulated()) {
-				anyModulated = true;
-				if (inputs.get(p.source) > 0.0f) return true;
-			}
+			if (check(settings.grain.at(i))) return true;
 		}
 	} else {
 		for (const ModulatedParam & p : settings.synthParams) {
-			if (p.isModulated()) {
-				anyModulated = true;
-				if (inputs.get(p.source) > 0.0f) return true;
-			}
+			if (check(p)) return true;
 		}
 	}
 	return !anyModulated;

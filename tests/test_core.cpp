@@ -3,6 +3,7 @@
 
 #include "TestFramework.h"
 
+#include "core/AudioRates.h"
 #include "core/ButtonClickDetector.h"
 #include "core/Crossfade.h"
 #include "core/Curve.h"
@@ -707,6 +708,48 @@ TEST(options_report_mistakes) {
 	CHECK(o.errors.size() == 3);
 	Options xcode = parseCommandLine({ "app", "-NSDocumentRevisionsDebugMode", "YES" });
 	CHECK(xcode.errors.empty());
+}
+
+// ====================================================== gyro switch, sample rates
+
+TEST(no_gyro_makes_motion_sources_unavailable) {
+	ControlInputs in;
+	in.set(ModSource::TiltX, 0.75f);
+	in.setSensor(0, 0.5f);
+	ModulatedParam p;
+	p.value = 0.2f;
+	p.min = 0.0f;
+	p.max = 1.0f;
+	p.source = ModSource::TiltX;
+	CHECK_NEAR(p.resolve(in), 0.75f, 1e-6);
+	in.motionAvailable = false;
+	CHECK_NEAR(p.resolve(in), 0.2f, 1e-6);       // falls back to the fixed value
+	CHECK(!in.isAvailable(ModSource::Shake));
+	CHECK(!in.isActive(ModSource::TiltX));
+	CHECK(in.isActive(ModSource::Sensor1));       // balls are unaffected
+	CHECK(isMotionSource(ModSource::Tilt) && !isMotionSource(ModSource::Total));
+}
+
+TEST(sensor_processor_reports_gyro_setting) {
+	MotionSettings motion;
+	motion.enabled = false;
+	SensorProcessor proc;
+	proc.configure(SensorSettings {}, motion);
+	ControlInputs in = proc.processNormalised({}, AccelSample { 0.5f, 0.0f, 0.8f, true }, 0.01f);
+	CHECK(!in.motionAvailable);
+	motion.enabled = true;
+	proc.configure(SensorSettings {}, motion);
+	CHECK(proc.processNormalised({}, AccelSample {}, 0.01f).motionAvailable);
+}
+
+TEST(sample_rate_is_kept_when_supported_else_nearest) {
+	std::vector<int> rates = { 44100, 48000, 96000 };
+	CHECK(pickSampleRate(rates, 48000) == 48000);
+	CHECK(pickSampleRate(rates, 22050) == 44100);
+	CHECK(pickSampleRate(rates, 46050) == 48000); // tie goes to the higher rate
+	CHECK(pickSampleRate(rates, 192000) == 96000);
+	CHECK(pickSampleRate({}, 12345) == 12345);     // unknown device: try what was asked
+	CHECK(isSampleRateSupported(rates, 96000) && !isSampleRateSupported(rates, 88200));
 }
 
 int main() {
