@@ -166,6 +166,7 @@ private:
 	AudioEngine audio_;
 	bool audioOpen_ = false;
 	bool audioStalled_ = false;
+	int reportedDeviceBuffer_ = 0; ///< device block size already reported
 	uint64_t audioCheckMs_ = 0;        ///< when the callback count was last sampled
 	uint64_t audioCheckCallbacks_ = 0; ///< the count at that time
 

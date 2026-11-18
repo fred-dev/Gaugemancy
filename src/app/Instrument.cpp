@@ -326,6 +326,15 @@ void Instrument::checkAudioHealth(uint64_t nowMs) {
 		note("audio is running again");
 	}
 	audioStalled_ = stalled;
+	// Some devices ignore the requested block size (ALSA can round it up).
+	// pdsp copes by processing in pieces; say so once, since the latency and
+	// the CPU figures then differ from the settings.
+	int deviceBuffer = audio_.deviceBufferSize();
+	if (deviceBuffer > 0 && deviceBuffer != audio_.bufferSize() && deviceBuffer != reportedDeviceBuffer_) {
+		reportedDeviceBuffer_ = deviceBuffer;
+		note("the sound device plays blocks of " + std::to_string(deviceBuffer) + " frames, not the "
+			+ std::to_string(audio_.bufferSize()) + " asked for", true);
+	}
 	audioCheckMs_ = nowMs;
 	audioCheckCallbacks_ = callbacks;
 }

@@ -114,6 +114,8 @@ public:
 	/// Audio callbacks received from the device so far. A device that opened
 	/// but refuses to run leaves this standing still (see Instrument).
 	uint64_t callbackCount() const { return engine_.getCallbackCount(); }
+	/// Frames per block the device really delivers (0 before the first block).
+	int deviceBufferSize() const { return engine_.getDeviceBufferSize(); }
 
 	bool isRunning() const { return running_; }
 	int sampleRate() const { return sampleRate_; }
