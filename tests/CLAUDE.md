@@ -4,7 +4,7 @@ This file is the running status of the refactor so a new session (local on
 Mac/Windows/Linux, or on the Raspberry Pi over SSH) can pick up where the last
 one stopped. **Update it after every major milestone.**
 
-Last updated: 2026-11-18 (local Mac + Pi session: Pi on `fable`, crossfade on the Pi, power-off, small-buffer crash).
+Last updated: 2026-11-19 (local Mac + Pi session: Pi on `fable`, crossfade on the Pi, power-off, small-buffer crash, no gyro on this instrument).
 
 ## Ground rules from the owner (Fred)
 
@@ -467,6 +467,17 @@ changed on the stick are in `/media/Data/Backup/before_poweroff_fix_2026-11-18/`
   headphone jack, not the Sound Blaster.
 - The service was restarted on `fable`: Sound Blaster running, sound on a
   simulated squeeze, sensors back on hardware.
+- **Settings check on the Pi, 2026-11-19.** `--selftest` (service
+  stopped): 0 failures. Balls rest at 371 to 383 raw; `fable` uses the code
+  defaults (maxRaw 530, threshold 0.035, pins 19/5/6/13), the same as
+  `generator_demo`. The self-test used to check the desktop audio fields;
+  it now checks `audio.pi` (`Instrument::resolveAudioSettings()`).
+- **This instrument has no gyro** (Fred, 2026-11-19; the I2C scan finds
+  nothing). `fable` now has `motion.enabled: false` and
+  `hardware.accelerometer: false` (repo, stick and `tools/make_fable_profile.py`).
+  All ten `fable` presets still map some parameters to tilt or shake; with
+  the gyro off those mappings are ignored and the parameters stay at their
+  base values. The self-test still prints a WARN for the empty I2C bus.
 
 ## Done since the first handoff
 
@@ -481,7 +492,8 @@ changed on the stick are in `/media/Data/Backup/before_poweroff_fix_2026-11-18/`
 2. Regenerate the Visual Studio project with the project generator (Xcode done).
 3. Confirm the physical sensor numbering and ADC channels against the real
    instrument; adjust `hardware.adcChannels` defaults and the DeviceView table.
-4. Confirm the LIS3DH axis orientation on the board (absolute "up" axis).
+4. Confirm the LIS3DH axis orientation on an instrument that has one (absolute
+   "up" axis). The `fable` instrument has no gyro.
 5. Listening pass on converted performer presets (delay/reverb are now inserts
    with a wet mix rather than parallel sends; levels may need a trim).
 

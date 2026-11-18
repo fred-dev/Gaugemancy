@@ -30,9 +30,13 @@
       "deviceId": -1
     }
   },
+  "motion": {
+    "enabled": false
+  },
   "hardware": {
     "longPressQuits": true,
-    "shutdownOnQuit": true
+    "shutdownOnQuit": true,
+    "accelerometer": false
   },
   "narration": {
     "enabled": false

@@ -255,7 +255,9 @@ def profile(preset_count):
                   # On the Pi: the instrument's USB sound card, not the headphone jack.
                   "pi": {"enabled": True, "api": "default", "deviceName": "Sound Blaster", "deviceId": -1}},
         # 6 s button hold powers the Pi off (never on a desktop build).
-        "hardware": {"longPressQuits": True, "shutdownOnQuit": True},
+        # This instrument has no accelerometer: "Has gyro" off, tilt/shake unused.
+        "motion": {"enabled": False},
+        "hardware": {"longPressQuits": True, "shutdownOnQuit": True, "accelerometer": False},
         "narration": {"enabled": False},
     }
 
