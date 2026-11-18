@@ -489,6 +489,7 @@ void ProgrammingGui::drawSourcePanel() {
 	if (target_ == Target::Master) drawMasterSource();
 	else if (target_ == Target::Narration) drawNarrationSource(instrument_.profile().narration);
 	else drawSlotSource(instrument_.preset().slots[selectedSlot_], selectedSlot_);
+	drawMasterGains();
 	panels_.end();
 }
 
@@ -568,13 +569,23 @@ void ProgrammingGui::drawSlotSource(SlotSettings & slot, int index) {
 }
 
 void ProgrammingGui::drawMasterSource() {
+	builder_.label("The effects on the right are applied to the mix of all six slots. The gains and the output "
+				   "level are at the foot of this panel whatever tile is selected: preset gain is saved with the "
+				   "preset, profile gain with the profile.");
+}
+
+void ProgrammingGui::drawMasterGains() {
+	// Always shown, pinned to the bottom of the Source panel: a separator and
+	// four rows (two sliders, two meters). If the rows above ever reach this
+	// far, the block follows them instead of overlapping (the panel scrolls).
+	const float blockH = 4.0f * ImGui::GetFrameHeightWithSpacing() + 2.0f;
+	const float bottom = ImGui::GetCursorPosY() + ImGui::GetContentRegionAvail().y;
+	ImGui::SetCursorPosY(std::max(ImGui::GetCursorPosY(), bottom - blockH));
+	ImGui::Separator();
 	builder_.floatSlider("preset gain", instrument_.preset().masterGain, 0.0f, 4.0f);
 	builder_.floatSlider("profile gain", instrument_.profile().audio.masterGain, 0.0f, 4.0f);
-	ImGui::ProgressBar(std::clamp(meterPeak_[0], 0.0f, 1.0f), ImVec2(-FLT_MIN, 0), "L");
-	ImGui::ProgressBar(std::clamp(meterPeak_[1], 0.0f, 1.0f), ImVec2(-FLT_MIN, 0), "R");
-	ImGui::Separator();
-	builder_.label("The effects on the right are applied to the mix of all six slots. Preset gain is saved with the "
-				   "preset, profile gain with the profile.");
+	ImGui::ProgressBar(std::clamp(meterPeak_[0], 0.0f, 1.0f), ImVec2(-FLT_MIN, 0), "output L");
+	ImGui::ProgressBar(std::clamp(meterPeak_[1], 0.0f, 1.0f), ImVec2(-FLT_MIN, 0), "output R");
 }
 
 void ProgrammingGui::drawNarrationSource(NarrationSettings & n) {

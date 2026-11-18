@@ -11,7 +11,9 @@
 //   left column  the instrument: 3D view, sensor faders (input AND meter),
 //                squeeze ramp, performance buttons
 //   tile row     Slot 1..6, Master, Narration - what the editor below shows
-//   editor       Source (what plays) | Parameters (always 9 rows)
+//   editor       Source (what plays; | Parameters (always 9 rows)
+//                master gains and    |
+//                output at its foot) |
 //                                    | Effects (always 8 places, 7 rows)
 //   bottom bar   output level, mode, sensor input, last message
 //
@@ -97,6 +99,9 @@ private:
 	void drawSourcePanel();
 	void drawSlotSource(SlotSettings & slot, int index);
 	void drawMasterSource();
+	/// Preset gain, profile gain and the output meters, at the foot of the
+	/// Source panel whatever tile is selected.
+	void drawMasterGains();
 	void drawNarrationSource(NarrationSettings & narration);
 	void drawParametersPanel();
 	void drawEffectsPanel();

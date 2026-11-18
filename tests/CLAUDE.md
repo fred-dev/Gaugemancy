@@ -4,7 +4,7 @@ This file is the running status of the refactor so a new session (local on
 Mac/Windows/Linux, or on the Raspberry Pi over SSH) can pick up where the last
 one stopped. **Update it after every major milestone.**
 
-Last updated: 2026-11-19 (local Mac + Pi session: Pi on `fable`, crossfade on the Pi, power-off, small-buffer crash, no gyro on this instrument, memory leak per preset change).
+Last updated: 2026-11-19 (local Mac + Pi session: Pi on `fable`, crossfade on the Pi, power-off, small-buffer crash, no gyro on this instrument, memory leak per preset change, master gains always shown in the GUI).
 
 ## Ground rules from the owner (Fred)
 
@@ -314,6 +314,13 @@ narration is switched on from its own editor.
 Limits: a chain shows its first 8 effects and a profile its first 12 presets;
 the Settings panel still uses collapsible groups; only checked by screenshot
 at 1920x1080 on the Mac, mouse interaction not tested.
+
+Master gains always visible (2026-11-19): preset gain, profile gain and the
+L/R output meters used to appear only with the Master tile selected. They now
+sit at the foot of the Source panel for every tile (`drawMasterGains()`,
+bottom-aligned; if the rows above ever reach them they follow instead of
+overlapping). The Master tile's Source panel keeps only its explanation.
+Checked by screenshot on the Mac (slot and narration tiles, `--no-audio`).
 
 ## Crash on launch with the GUI and real audio, fixed 2026-11-12
 
