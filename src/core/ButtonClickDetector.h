@@ -7,7 +7,8 @@
 //   Single / Double / Triple click  - presses separated by < clickTimeoutMs,
 //                                     reported once the sequence has ended
 //   LongPress                       - held >= 3 s, reported on release
-//   VeryLongPress                   - held >= 6 s, reported on release
+//   VeryLongPress                   - held >= 6 s, reported at 6 s while
+//                                     still held (the release is then ignored)
 // -----------------------------------------------------------------------------
 
 #include <cstdint>
@@ -43,6 +44,7 @@ private:
 	int clicks_ = 0;
 	uint64_t pressStartMs_ = 0;
 	uint64_t lastReleaseMs_ = 0;
+	bool veryLongFired_ = false; ///< this press already gave VeryLongPress
 };
 
 } // namespace gm

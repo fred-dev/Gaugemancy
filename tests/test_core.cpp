@@ -311,8 +311,11 @@ TEST(button_long_and_very_long_press) {
 	b.update(true, 0);
 	CHECK(b.update(false, 3500) == ButtonEvent::LongPress);
 	b.update(true, 10000);
-	CHECK(b.update(false, 16500) == ButtonEvent::VeryLongPress);
-	CHECK(b.update(false, 20000) == ButtonEvent::None); // nothing left pending
+	CHECK(b.update(true, 15900) == ButtonEvent::None);
+	CHECK(b.update(true, 16000) == ButtonEvent::VeryLongPress); // fires while still held
+	CHECK(b.update(true, 18000) == ButtonEvent::None);          // only once per press
+	CHECK(b.update(false, 18500) == ButtonEvent::None);         // the release adds nothing
+	CHECK(b.update(false, 20000) == ButtonEvent::None);         // nothing left pending
 }
 
 // ============================================================== hit gesture

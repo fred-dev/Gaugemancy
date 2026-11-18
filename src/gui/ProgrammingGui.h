@@ -82,6 +82,8 @@ private:
 	/// A tile was clicked: select it, and on a double-click toggle the effects lock.
 	void tileClicked(int index);
 	void drawLockMarker(const ofRectangle & tile) const;
+	/// Red strip over the 3D view while the narration keeps the slots silent.
+	void drawNarrationWarning();
 	void refreshAudioLists();
 
 	// Bars and the instrument column.

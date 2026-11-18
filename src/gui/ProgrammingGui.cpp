@@ -452,7 +452,21 @@ void ProgrammingGui::drawPerformancePanel() {
 	const float half = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 	if (ImGui::Button("recalibrate", ImVec2(half, 0))) instrument_.recalibrate();
 	ImGui::SameLine();
-	if (ImGui::Button("skip narration", ImVec2(half, 0))) instrument_.skipNarration();
+	ImGui::BeginDisabled(!instrument_.profile().narration.enabled || instrument_.profile().narration.skip);
+	if (ImGui::Button("always skip narration", ImVec2(half, 0))) instrument_.skipNarration();
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) {
+		ImGui::SetTooltip("Saved: this profile starts straight with the slots from now on");
+	}
+	ImGui::EndDisabled();
+	// While the narration runs the six slots are silent, so squeezes in the
+	// 3D view or the faders drive the narration, not the slots.
+	bool narrationFirst = instrument_.mode() != Mode::Granular;
+	ImGui::BeginDisabled(!narrationFirst);
+	if (selectableButton(narrationFirst ? "narration first: play the slots now (not saved)" : "slots playing",
+			narrationFirst, ImVec2(-FLT_MIN, 0))) {
+		instrument_.playSlotsNow();
+	}
+	ImGui::EndDisabled();
 	sourceChoice_ = instrument_.sensorSourceName() == "hardware" ? 1 : 0;
 	if (builder_.choice("sensors", sourceChoice_, { "Simulation", "Hardware" })) {
 		instrument_.useSensorMode(sourceChoice_ == 1 ? SensorMode::Hardware : SensorMode::Simulation);
@@ -972,6 +986,7 @@ void ProgrammingGui::draw() {
 			: effectsLock_ == kMaxSlots ? masterTileRect_ : narrationView_.rect());
 	}
 	deviceView_.draw(instrument_.inputs());
+	drawNarrationWarning();
 
 	gui_.begin();
 	drawTopBar();
@@ -1015,6 +1030,21 @@ void ProgrammingGui::drawSlotTiles() {
 			slotViews_[i].drawLive(slot.scopeBuffer(), title, slot.currentVolume(), selected, slot.gateOpen());
 		}
 	}
+}
+
+void ProgrammingGui::drawNarrationWarning() {
+	if (instrument_.mode() == Mode::Granular) return;
+	// Squeezes start or glitch the narration in these modes; the slots only
+	// play after it, which looks like "no sound" while programming.
+	const ofRectangle & r = deviceView_.rect();
+	ofPushStyle();
+	ofFill();
+	ofSetColor(150, 30, 30, 220);
+	ofDrawRectangle(r.x, r.getBottom() - 44.0f, r.width, 44.0f);
+	ofSetColor(255);
+	ofDrawBitmapString("NARRATION: slots are silent", r.x + 8.0f, r.getBottom() - 26.0f);
+	ofDrawBitmapString("see Performance, play slots", r.x + 8.0f, r.getBottom() - 10.0f);
+	ofPopStyle();
 }
 
 void ProgrammingGui::drawMasterTile() {

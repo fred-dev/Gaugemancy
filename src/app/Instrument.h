@@ -58,7 +58,11 @@ public:
 	// ---- actions (button, gesture, GUI, OSC) ----------------------------------
 	void nextPreset(bool respectMinInterval);
 	void selectPreset(int index);
+	/// Skip the narration now AND for every later start (saved to the profile).
 	void skipNarration();
+	/// GUI: skip the narration for this session only, so the slots can be
+	/// heard while programming. Nothing is saved.
+	void playSlotsNow();
 	void recalibrate();
 	bool reloadFromDisk();
 	/// Load a different profile by name (its folder under the data root) and

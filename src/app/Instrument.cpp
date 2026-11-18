@@ -227,6 +227,12 @@ void Instrument::skipNarration() {
 	modes_.skipNarration();
 }
 
+void Instrument::playSlotsNow() {
+	if (modes_.mode() == Mode::Granular) return;
+	note("narration skipped for this session (not saved): the slots play now");
+	modes_.skipNarration();
+}
+
 void Instrument::recalibrate() {
 	processor_.beginCalibration();
 	note("recalibrating - keep the instrument still and do not touch the balls");
@@ -429,6 +435,12 @@ void Instrument::handleButton(uint64_t nowMs) {
 		if (loaded_.profile.hardware.longPressQuits) {
 			quitRequested_ = true;
 			shutdownSystem_ = loaded_.profile.hardware.shutdownOnQuit;
+			// Fast red blink at once, so the performer knows to let go.
+			panel_.setLeds(LedPattern::error());
+			panel_.update(nowMs);
+			ofLogWarning(kLog) << (shutdownSystem_ ? "button held 6 s: powering off" : "button held 6 s: quitting");
+		} else {
+			note("button held 6 s, but hardware.longPressQuits is off", true);
 		}
 		break;
 	default:

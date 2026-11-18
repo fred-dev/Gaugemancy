@@ -18,6 +18,7 @@ void ButtonClickDetector::reset() {
 	clicks_ = 0;
 	pressStartMs_ = 0;
 	lastReleaseMs_ = 0;
+	veryLongFired_ = false;
 }
 
 ButtonEvent ButtonClickDetector::update(bool pressed, uint64_t nowMs) {
@@ -27,14 +28,24 @@ ButtonEvent ButtonClickDetector::update(bool pressed, uint64_t nowMs) {
 
 	if (justPressed) {
 		pressStartMs_ = nowMs;
+		veryLongFired_ = false;
 		return ButtonEvent::None;
+	}
+
+	// The very long press fires WHILE the button is still held: a performer
+	// holding it for 6 s expects the instrument to act then, not to guess
+	// that it waits for the release.
+	if (pressed && !veryLongFired_ && nowMs - pressStartMs_ >= kVeryLongPressMs) {
+		veryLongFired_ = true;
+		clicks_ = 0;
+		return ButtonEvent::VeryLongPress;
 	}
 
 	if (justReleased) {
 		const uint64_t held = nowMs - pressStartMs_;
-		if (held >= kVeryLongPressMs) {
-			clicks_ = 0;
-			return ButtonEvent::VeryLongPress;
+		if (veryLongFired_) {
+			veryLongFired_ = false; // already reported while held
+			return ButtonEvent::None;
 		}
 		if (held >= kLongPressMs) {
 			clicks_ = 0;
