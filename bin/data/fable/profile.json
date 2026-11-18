@@ -22,7 +22,17 @@
     "sampleRate": 44100,
     "bufferSize": 512,
     "numBuffers": 3,
-    "masterGain": 0.8
+    "masterGain": 0.8,
+    "pi": {
+      "enabled": true,
+      "api": "default",
+      "deviceName": "Sound Blaster",
+      "deviceId": -1
+    }
+  },
+  "hardware": {
+    "longPressQuits": true,
+    "shutdownOnQuit": true
   },
   "narration": {
     "enabled": false

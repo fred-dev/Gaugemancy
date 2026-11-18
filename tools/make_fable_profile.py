@@ -251,7 +251,11 @@ def profile(preset_count):
         "version": 1, "name": "fable", "logLevel": "notice", "playMode": "multi", "controlRateHz": 100,
         "presetSwitchMinIntervalMs": 1000, "presetFadeMs": FADE_MS,
         "presets": ["presets/preset_%d.json" % (i + 1) for i in range(preset_count)],
-        "audio": {"sampleRate": 44100, "bufferSize": 512, "numBuffers": 3, "masterGain": 0.8},
+        "audio": {"sampleRate": 44100, "bufferSize": 512, "numBuffers": 3, "masterGain": 0.8,
+                  # On the Pi: the instrument's USB sound card, not the headphone jack.
+                  "pi": {"enabled": True, "api": "default", "deviceName": "Sound Blaster", "deviceId": -1}},
+        # 6 s button hold powers the Pi off (never on a desktop build).
+        "hardware": {"longPressQuits": True, "shutdownOnQuit": True},
         "narration": {"enabled": False},
     }
 

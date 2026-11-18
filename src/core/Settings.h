@@ -225,7 +225,8 @@ struct HardwareSettings {
 	int relayPulseMs = 400;
 	int clickTimeoutMs = 240;       ///< max gap between clicks of a double/triple click
 	// On by default: holding the button is the only way to switch the
-	// headless instrument off safely. Only the Pi's button can trigger it.
+	// headless instrument off safely. Only the Pi's button can trigger it,
+	// and only a Raspberry Pi build ever powers its machine off.
 	bool longPressQuits = true;     ///< 6 s press quits the app
 	bool shutdownOnQuit = true;     ///< power off the Pi when the 6 s press quits
 	bool accelerometer = true;

@@ -175,7 +175,7 @@ def profile(name, mode, presets, narration_enabled):
                      "maxTroughMs": 300, "requiredHits": 4, "minSensorsPerHit": 2},
         "hardware": {"spiDevice": "/dev/spidev0.0", "adcChannels": [0, 1, 2, 3, 4, 5], "buttonPin": 19,
                      "buttonActiveLow": True, "blueLedPin": 5, "redLedPin": 6, "relayPin": 13, "relayPulseMs": 400,
-                     "clickTimeoutMs": 240, "longPressQuits": False, "shutdownOnQuit": False,
+                     "clickTimeoutMs": 240, "longPressQuits": True, "shutdownOnQuit": True,
                      "accelerometer": True, "i2cBus": "/dev/i2c-1", "accelAddress": 24},
         "osc": {"telemetry": False, "remoteHost": "127.0.0.1", "remotePort": 1235, "control": True,
                 "controlPort": 1234, "telemetryRateHz": 20},

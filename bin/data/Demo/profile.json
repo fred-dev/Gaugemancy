@@ -71,8 +71,8 @@
     "relayPin": 13,
     "relayPulseMs": 400,
     "clickTimeoutMs": 240,
-    "longPressQuits": false,
-    "shutdownOnQuit": false,
+    "longPressQuits": true,
+    "shutdownOnQuit": true,
     "accelerometer": true,
     "i2cBus": "/dev/i2c-1",
     "accelAddress": 24

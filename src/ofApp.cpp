@@ -62,13 +62,19 @@ void ofApp::draw() {
 void ofApp::exit() {
 	bool powerOff = instrument_.shutdownSystemRequested();
 	instrument_.shutdown();
-	if (powerOff) {
-		ofLogNotice("gaugemancy") << "powering off";
-		// Needs passwordless sudo for systemctl (the default on Raspberry Pi OS).
-		if (std::system("sudo -n systemctl poweroff") != 0) {
-			ofLogError("gaugemancy") << "poweroff failed (needs passwordless sudo)";
-		}
+	if (!powerOff) return;
+#if defined(__linux__) && (defined(__arm__) || defined(__aarch64__))
+	// Only a Raspberry Pi build can power its machine off. Quitting on a Mac,
+	// Windows or desktop Linux never does, whatever the profile says.
+	ofLogWarning("gaugemancy") << "powering off";
+	// Needs the passwordless sudo rule that scripts/pi/install.sh installs
+	// (/etc/sudoers.d/gaugemancy-poweroff).
+	if (std::system("sudo -n systemctl poweroff") != 0) {
+		ofLogError("gaugemancy") << "poweroff failed (needs the sudoers rule from scripts/pi/install.sh)";
 	}
+#else
+	ofLogNotice("gaugemancy") << "not powering off: only a Raspberry Pi build does that";
+#endif
 }
 
 void ofApp::keyPressed(int key) {

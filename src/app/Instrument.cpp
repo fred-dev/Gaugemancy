@@ -434,7 +434,8 @@ void Instrument::handleButton(uint64_t nowMs) {
 	case ButtonEvent::VeryLongPress:
 		if (loaded_.profile.hardware.longPressQuits) {
 			quitRequested_ = true;
-			shutdownSystem_ = loaded_.profile.hardware.shutdownOnQuit;
+			// Power off only on the Pi itself, never a desktop machine.
+			shutdownSystem_ = loaded_.profile.hardware.shutdownOnQuit && hardwareExpected();
 			// Fast red blink at once, so the performer knows to let go.
 			panel_.setLeds(LedPattern::error());
 			panel_.update(nowMs);
