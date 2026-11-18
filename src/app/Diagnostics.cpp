@@ -1,5 +1,7 @@
 #include "Diagnostics.h"
 
+#include "Instrument.h"
+
 #include "../audio/AudioEngine.h"
 #include "../core/SensorProcessor.h"
 #include "../core/SensorSimulator.h"
@@ -231,7 +233,8 @@ int runSelfTest(const Options & options, const std::string & dataRoot) {
 	checkAdc(r, loaded.profile);
 	checkI2cBus(r, loaded.profile.hardware);
 	checkAccelerometer(r, loaded.profile.hardware, loaded.profile.motion.enabled);
-	checkAudioDevices(r, loaded.profile.audio);
+	// The device this machine will really open (on the Pi: the audio.pi block).
+	checkAudioDevices(r, Instrument::resolveAudioSettings(loaded.profile.audio));
 	return r.finish();
 }
 
