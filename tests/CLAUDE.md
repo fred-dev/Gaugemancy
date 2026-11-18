@@ -4,7 +4,7 @@ This file is the running status of the refactor so a new session (local on
 Mac/Windows/Linux, or on the Raspberry Pi over SSH) can pick up where the last
 one stopped. **Update it after every major milestone.**
 
-Last updated: 2026-11-16 (cloud session: GUI fixes on branch `fable`).
+Last updated: 2026-11-18 (local Mac + Pi session: Pi on `fable`, crossfade on the Pi, power-off, small-buffer crash).
 
 ## Ground rules from the owner (Fred)
 
@@ -28,8 +28,8 @@ Last updated: 2026-11-16 (cloud session: GUI fixes on branch `fable`).
 
 | Repo | Branch | Role | State |
 |---|---|---|---|
-| fred-dev/Gaugemancy | `main` | the app | GUI rewrite (ofxImGui) merged in; builds and runs on OF main |
-| fred-dev/ofxPDSP | `ai-refactor` | DSP | builds on OF main; `lockPatching()`, `renderOffline()`, denormal flush |
+| fred-dev/Gaugemancy | `fable` (current work; `main` is behind) | the app | GUI rewrite, preset crossfade, Pi tested |
+| fred-dev/ofxPDSP | `fable` (the app needs it) | DSP | `lockPatching()`, `renderOffline()`, denormal flush, Scope resize, callback count, oversized device blocks |
 | fred-dev/ofxGPIO | `ai-refactor` | Pi GPIO/SPI/I2C | rewritten on GPIO chardev v2 + spidev + i2c-dev; legacy API kept |
 | fred-dev/ofxAudioFile | `ai-refactor` | sample decoding | memory bugs fixed, decoders updated; recommended for `master` too |
 | danomatika/ofxMidi | `master` | dependency of ofxPDSP | upstream works on OF main, no fork needed |
@@ -410,8 +410,63 @@ tools/gm-ctl.py status                   # prints the output level
   run with simulated sensors + the stress tool, writes `crossfade_test.log`,
   restarts the service). From the desk: `scripts/remote.sh user@pi fable`, then
   `scripts/remote.sh user@pi crossfade`.
-- NOT DONE: the run on the real Pi. The cloud session cannot reach it; run the
-  two scripts there and read `crossfade_test.log`.
+- The run on the real Pi: done 2026-11-18, see the next section.
+
+## Pi on `fable`, crossfade on the Pi, power-off, 2026-11-18 (local Mac + Pi)
+
+The Pi (`ssh gauge@192.168.1.172`, Pi 3B+) now runs `fable` everywhere:
+Gaugemancy `fable`, ofxPDSP `fable`, ofxGPIO and ofxAudioFile `ai-refactor`
+(they have no `fable` branch), ofxMidi `master`, ofxImGui `develop`.
+`scripts/pi/update_to_fable.sh` did the switch. The data root is the USB
+stick `/media/Data`; its active profile is now **`fable`** (the `fable`
+folder with its samples was copied onto the stick). Backups of the files
+changed on the stick are in `/media/Data/Backup/before_poweroff_fix_2026-11-18/`.
+
+- **6 s hold did not power off.** Not a code fault in the end: the stick's
+  active profile was `generator_demo`, with `hardware.longPressQuits` and
+  `shutdownOnQuit` false. The sudoers rule was fine (`sudo -n -l` from the
+  service context allows `systemctl poweroff`), and quitting exits cleanly
+  in 1.4 s. Changes: both settings default to true and are true in every
+  profile (repo and stick) and in both profile generators; the very long
+  press now fires at 6 s while the button is still held, with a fast red
+  blink; the power-off command is compiled only into Linux ARM builds and
+  only requested there (`Instrument::hardwareExpected()`), so quitting on a
+  Mac or PC never shuts anything down. NOT verified: an actual hold of the
+  physical button (needs a person at the instrument; it powers the Pi off).
+- **"No sound from the 3D view or the simulator" on the Mac.** Cause found:
+  the Mac's active profile is Chandra, which has narration. Until the
+  narration ends or is skipped the six slots are silent, so squeezes only
+  drive the narration (and Chandra's slots 2 to 6 have no sample files on
+  the Mac). The GUI now shows a red strip over the 3D view in that state and
+  a "play the slots now (not saved)" button (`Instrument::playSlotsNow()`);
+  "skip narration" is now "always skip narration" since it is saved.
+- **Crash at small buffer sizes on the Pi (fixed in ofxPDSP `fable`).**
+  Fred's profile (buffer 128) crashed at start with "double free or
+  corruption" on the Pi; 256 too, 512 not. ALSA plays larger blocks than
+  asked for, openFrameworks does not pass the real size back, and pdsp
+  processed the whole block into buffers prepared for 128 frames. pdsp's
+  `Engine::processBlock()` now works in pieces of the prepared size, and
+  the app logs once when the device block size differs. Verified on the
+  Pi: the headphone output plays blocks of 444 frames whatever is asked
+  for; Fred at 128 and 256 now runs, and its quick crossfade stress test
+  passes (but see the CPU note below: ALSA underruns).
+- **`fable` profile on the Pi, Sound Blaster, buffer 512 x 3**: offline, CPU
+  during a 3 s fade averages 27 to 41% of a core (worst block 58 to 75%),
+  build 18 to 96 ms, freeing the old preset 94 to 162 ms on the control
+  thread; no gap, no click on all ten changes. Live
+  (`tools/crossfade_stress.py`: walk, heavy, interrupt, burst, random,
+  idle; 39 changes): RESULT PASS, 0 skipped buffers, process CPU 33 to 50%.
+  The `fable` profile now has an `audio.pi` block (Sound Blaster); without it
+  the Pi used the headphone jack.
+- **Fred's profile is too heavy for a Pi 3B+**: 42 slot effects at buffer
+  128 need 105 to 112% of one core with all balls pressed (worst block
+  150%), and about 215% during a crossfade; live, the process uses about
+  123% and ALSA reports underruns (audible dropouts). It needs fewer effects
+  (master reverb instead of per-slot), a larger buffer, or both. Fred's
+  profile on the stick has no `audio.pi` block, so it plays on the
+  headphone jack, not the Sound Blaster.
+- The service was restarted on `fable`: Sound Blaster running, sound on a
+  simulated squeeze, sensors back on hardware.
 
 ## Done since the first handoff
 
