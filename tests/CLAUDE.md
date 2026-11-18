@@ -493,7 +493,11 @@ changed on the stick are in `/media/Data/Backup/before_poweroff_fix_2026-11-18/`
   has a ValueNode), and `Delay`, `AllPassDelay`, `SRDelay`, `LHDelay`,
   `RMSDetector`, `SamplesDelay` had no destructor. After the fix: 0 leaks,
   benchmark peak footprint 71 MB (was 275 MB), all ten fades still no gap
-  and no click. Find new leaks the same way:
+  and no click. On the Pi (rebuilt with ccache in 12 min), muted
+  `crossfade_test.sh`: RESULT PASS, 0 skipped buffers, memory 57 MB after
+  the first walk and 53 MB after 29 more changes; fade CPU a little lower
+  than before (average 24 to 38% of a core, worst block 68%).
+  Find new leaks the same way:
   `MallocStackLogging=1 leaks --atExit -- bin/Gaugemancy.app/Contents/MacOS/Gaugemancy --data bin/data --profile fable --benchmark 0.5`
 - Suspected, not fixed: `prepareAllToPlay()` (engine restart, e.g. a new
   sample rate from the GUI) calls `OutputNode::prepareToPlay()` on a
