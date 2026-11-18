@@ -4,7 +4,7 @@ This file is the running status of the refactor so a new session (local on
 Mac/Windows/Linux, or on the Raspberry Pi over SSH) can pick up where the last
 one stopped. **Update it after every major milestone.**
 
-Last updated: 2026-11-19 (local Mac + Pi session: Pi on `fable`, crossfade on the Pi, power-off, small-buffer crash, no gyro on this instrument).
+Last updated: 2026-11-19 (local Mac + Pi session: Pi on `fable`, crossfade on the Pi, power-off, small-buffer crash, no gyro on this instrument, memory leak per preset change).
 
 ## Ground rules from the owner (Fred)
 
@@ -29,7 +29,7 @@ Last updated: 2026-11-19 (local Mac + Pi session: Pi on `fable`, crossfade on th
 | Repo | Branch | Role | State |
 |---|---|---|---|
 | fred-dev/Gaugemancy | `fable` (current work; `main` is behind) | the app | GUI rewrite, preset crossfade, Pi tested |
-| fred-dev/ofxPDSP | `fable` (the app needs it) | DSP | `lockPatching()`, `renderOffline()`, denormal flush, Scope resize, callback count, oversized device blocks |
+| fred-dev/ofxPDSP | `fable` (the app needs it) | DSP | `lockPatching()`, `renderOffline()`, denormal flush, Scope resize, callback count, oversized device blocks, node/delay buffer leaks |
 | fred-dev/ofxGPIO | `ai-refactor` | Pi GPIO/SPI/I2C | rewritten on GPIO chardev v2 + spidev + i2c-dev; legacy API kept |
 | fred-dev/ofxAudioFile | `ai-refactor` | sample decoding | memory bugs fixed, decoders updated; recommended for `master` too |
 | danomatika/ofxMidi | `master` | dependency of ofxPDSP | upstream works on OF main, no fork needed |
@@ -478,6 +478,29 @@ changed on the stick are in `/media/Data/Backup/before_poweroff_fix_2026-11-18/`
   All ten `fable` presets still map some parameters to tilt or shake; with
   the gyro off those mappings are ignored and the parameters stay at their
   base values. The self-test still prints a WARN for the empty I2C bus.
+- **Load on the Pi (2026-11-19)**, all balls held (simulator), presets 4 and
+  7 swapped: the app uses 18 to 26% of one core, 32 to 34% while fading;
+  the whole Pi 5 to 7%; 42 to 44 C; no throttling now, but
+  `get_throttled` = 0x50000 (under-voltage and throttling happened at some
+  point since boot): check the power supply. The board reports itself as a
+  **Raspberry Pi 3 Model B** (1.2 GHz), not a 3B+.
+- **Memory leak per preset change, fixed in ofxPDSP `fable` (d622e92).**
+  The app grew 5 to 20 MB with every preset change and never gave it back
+  (44 MB at start, 378 MB after about 56 changes; ~400 MB free on the Pi).
+  macOS `leaks --atExit` on `--benchmark` found 219 MB leaked: `ValueNode`
+  and `PatchNode` threw away the buffer their `OutputNode` base allocates
+  when a node is built while the engine runs (every input of every unit
+  has a ValueNode), and `Delay`, `AllPassDelay`, `SRDelay`, `LHDelay`,
+  `RMSDetector`, `SamplesDelay` had no destructor. After the fix: 0 leaks,
+  benchmark peak footprint 71 MB (was 275 MB), all ten fades still no gap
+  and no click. Find new leaks the same way:
+  `MallocStackLogging=1 leaks --atExit -- bin/Gaugemancy.app/Contents/MacOS/Gaugemancy --data bin/data --profile fable --benchmark 0.5`
+- Suspected, not fixed: `prepareAllToPlay()` (engine restart, e.g. a new
+  sample rate from the GUI) calls `OutputNode::prepareToPlay()` on a
+  PatchNode's output, which frees the buffer it borrowed from its input.
+  Worth a look if restarting audio ever crashes.
+- **Tests on the Pi run with the speaker muted** (Fred): start with
+  `trap "amixer -q -c S3 sset Speaker unmute" EXIT; amixer -q -c S3 sset Speaker mute`.
 
 ## Done since the first handoff
 

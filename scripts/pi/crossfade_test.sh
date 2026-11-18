@@ -5,11 +5,12 @@
 #   scripts/pi/crossfade_test.sh                 # profile "fable" (10 presets)
 #   PROFILE=Fred scripts/pi/crossfade_test.sh    # a performer's presets
 #   QUICK=1 scripts/pi/crossfade_test.sh         # shorter
+#   MUTE=0 scripts/pi/crossfade_test.sh          # hear it (muted by default)
 #
 # 1. offline: bin/Gaugemancy --benchmark, whose "Preset changes" section gives
 #    the time to build and free a preset and the audio CPU during a fade
 # 2. live: starts the instrument headless with simulated sensors and runs
-#    tools/crossfade_stress.py against it (listen to it: no gaps, no clicks)
+#    tools/crossfade_stress.py against it (speaker muted unless MUTE=0)
 # The systemd service is stopped for the test and started again afterwards.
 # Everything is also written to crossfade_test.log in the app folder.
 # -----------------------------------------------------------------------------
@@ -24,6 +25,16 @@ cd "$APP_DIR"
 exec > >(tee "$LOG") 2>&1
 echo "Crossfade test: profile $PROFILE, data $DATA, $(date)"
 echo "$(tr -d '\0' < /proc/device-tree/model 2>/dev/null || uname -m), $(git log --oneline -1)"
+
+# The speaker stays muted during the test (the checks read the app's own
+# output level, not the speaker) and is unmuted however the script ends.
+# MUTE=0 to listen. SPEAKER_CARD is the Sound Blaster's ALSA card id.
+SPEAKER_CARD="${SPEAKER_CARD:-S3}"
+if [[ "${MUTE:-1}" == 1 ]] && amixer -c "$SPEAKER_CARD" sget Speaker > /dev/null 2>&1; then
+	amixer -q -c "$SPEAKER_CARD" sset Speaker mute
+	trap 'amixer -q -c "$SPEAKER_CARD" sset Speaker unmute' EXIT
+	echo "speaker muted for the test (MUTE=0 to listen)"
+fi
 
 WAS_ACTIVE=0
 if systemctl --user is-active --quiet gaugemancy 2>/dev/null; then

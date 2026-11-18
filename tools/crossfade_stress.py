@@ -8,7 +8,7 @@ device playing. Python standard library only.
     tools/crossfade_stress.py                       # on the Pi, app running
     tools/crossfade_stress.py --host gaugemancy.local
     tools/crossfade_stress.py --quick               # shorter run
-    tools/crossfade_stress.py --pid $(pgrep -x Gaugemancy)   # also report CPU
+    tools/crossfade_stress.py --pid $(pgrep -x Gaugemancy)   # also report CPU and memory
 
 What it does (the sensor input is switched to the simulator for the test and
 back to hardware afterwards, so the balls do not need to be touched):
@@ -26,6 +26,9 @@ What it checks, from the app's own status over OSC (/gm/status):
   * output never drops to silence while balls are held (gap check)
   * every fade ends, and the final preset is the one asked for
   * with --pid: process CPU while fading (percent of one core)
+  * with --pid: memory does not keep growing from one change to the next
+    (measured from the end of the first walk, when every preset has been
+    built once, to the end of the test; a leak shows as MB per change)
 
 Exit code 0 = all checks passed.
 """
@@ -138,6 +141,19 @@ class Instrument:
             return (int(fields[11]) + int(fields[12])) / os.sysconf("SC_CLK_TCK")
         except (OSError, IndexError, ValueError):
             return None
+
+    def rss_mb(self):
+        """Resident memory of the app in MB (only when --pid is given, on Linux)."""
+        if not self.pid:
+            return None
+        try:
+            with open("/proc/%d/status" % self.pid) as f:
+                for line in f:
+                    if line.startswith("VmRSS:"):
+                        return int(line.split()[1]) / 1024.0
+        except (OSError, IndexError, ValueError):
+            pass
+        return None
 
     def squeeze_all(self, level):
         for ball in range(1, 7):
@@ -264,6 +280,8 @@ def run(inst, args):
     for n in list(range(2, presets + 1)) + [1]:
         change("walk", n)
 
+    mem_start, changes_start = inst.rss_mb(), len(rows)
+
     a, b = heaviest_two(args.data, args.profile, presets)
     print("2. heavy: presets %d <-> %d" % (a, b))
     for i in range(args.rounds):
@@ -315,6 +333,15 @@ def run(inst, args):
             change("idle", n, hold=False)
 
     inst.squeeze_all(0.0)
+
+    mem_end = inst.rss_mb()
+    changes = len(rows) - changes_start
+    if mem_start is not None and mem_end is not None and changes > 0:
+        per_change = (mem_end - mem_start) / changes
+        leak = per_change > args.max_growth_mb
+        print("memory: %.0f MB after the first walk, %.0f MB at the end, %d changes later: %+.2f MB per change -> %s"
+              % (mem_start, mem_end, changes, per_change, "LEAK" if leak else "ok"))
+        ok &= not leak
     return ok
 
 
@@ -327,11 +354,12 @@ def main():
     p.add_argument("--fade-ms", type=float, default=0, help="the profile's presetFadeMs (default: read from the profile, else 1500)")
     p.add_argument("--data", default="", help="data folder, to read the profile (e.g. bin/data or /media/Data)")
     p.add_argument("--profile", default="", help="profile name, to read the preset list and fade time")
-    p.add_argument("--pid", type=int, default=0, help="process id of Gaugemancy on this machine, to report its CPU")
+    p.add_argument("--pid", type=int, default=0, help="process id of Gaugemancy on this machine, to report its CPU and memory")
     p.add_argument("--rounds", type=int, default=6)
     p.add_argument("--quick", action="store_true", help="two rounds per scenario")
     p.add_argument("--max-skipped", type=int, default=4, help="audio buffers a single change may skip")
     p.add_argument("--min-level", type=float, default=0.002, help="output below this while balls are held counts as a gap")
+    p.add_argument("--max-growth-mb", type=float, default=0.5, help="memory growth per preset change that counts as a leak (needs --pid)")
     p.add_argument("--keep-source", action="store_true", help="do not switch back to hardware sensors at the end")
     args = p.parse_args()
     if args.quick:
