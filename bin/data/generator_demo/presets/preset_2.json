@@ -1,7 +1,7 @@
 {
   "version": 1,
   "name": "FM Bells",
-  "playheadSpeed": 0.012,
+  "playheadSpeed": 0.012000000104308128,
   "slots": [
     {
       "enabled": true,
@@ -17,9 +17,9 @@
           "source": "none"
         },
         "density": {
-          "value": 0.9,
-          "min": 0.9,
-          "max": 0.9,
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
           "source": "none"
         },
         "distanceJitter": {
@@ -71,9 +71,9 @@
           "enabled": true,
           "params": {
             "mix": {
-              "value": 0.3,
-              "min": 0.3,
-              "max": 0.3,
+              "value": 0.30000001192092896,
+              "min": 0.30000001192092896,
+              "max": 0.30000001192092896,
               "source": "none"
             },
             "time": {
@@ -83,15 +83,15 @@
               "source": "none"
             },
             "feedback": {
-              "value": 0.4,
-              "min": 0.4,
-              "max": 0.4,
+              "value": 0.4000000059604645,
+              "min": 0.4000000059604645,
+              "max": 0.4000000059604645,
               "source": "none"
             },
             "damping": {
-              "value": 0.6,
-              "min": 0.6,
-              "max": 0.6,
+              "value": 0.6000000238418579,
+              "min": 0.6000000238418579,
+              "max": 0.6000000238418579,
               "source": "none"
             }
           }
@@ -101,9 +101,9 @@
           "enabled": true,
           "params": {
             "mix": {
-              "value": 0.3,
-              "min": 0.3,
-              "max": 0.3,
+              "value": 0.30000001192092896,
+              "min": 0.30000001192092896,
+              "max": 0.30000001192092896,
               "source": "none"
             },
             "time": {
@@ -113,9 +113,9 @@
               "source": "none"
             },
             "density": {
-              "value": 0.4,
-              "min": 0.4,
-              "max": 0.4,
+              "value": 0.4000000059604645,
+              "min": 0.4000000059604645,
+              "max": 0.4000000059604645,
               "source": "none"
             },
             "damping": {
@@ -131,9 +131,9 @@
               "source": "none"
             },
             "modFreq": {
-              "value": 0.2,
-              "min": 0.2,
-              "max": 0.2,
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
               "source": "none"
             },
             "modAmount": {
@@ -148,9 +148,9 @@
       "sourceType": "fm_operator",
       "synth": {
         "volume": {
-          "value": 0.6,
+          "value": 0.6000000238418579,
           "min": 0.0,
-          "max": 0.6,
+          "max": 0.6000000238418579,
           "source": "sensor1"
         },
         "pitch": {
@@ -172,8 +172,8 @@
           "source": "none"
         },
         "feedback": {
-          "value": 0.05,
-          "min": 0.05,
+          "value": 0.05000000074505806,
+          "min": 0.05000000074505806,
           "max": 0.5,
           "source": "sensor1"
         }
@@ -193,9 +193,9 @@
           "source": "none"
         },
         "density": {
-          "value": 0.9,
-          "min": 0.9,
-          "max": 0.9,
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
           "source": "none"
         },
         "distanceJitter": {
@@ -283,15 +283,15 @@
               "source": "none"
             },
             "density": {
-              "value": 0.3,
-              "min": 0.3,
-              "max": 0.3,
+              "value": 0.30000001192092896,
+              "min": 0.30000001192092896,
+              "max": 0.30000001192092896,
               "source": "none"
             },
             "damping": {
-              "value": 0.6,
-              "min": 0.6,
-              "max": 0.6,
+              "value": 0.6000000238418579,
+              "min": 0.6000000238418579,
+              "max": 0.6000000238418579,
               "source": "none"
             },
             "hiCut": {
@@ -301,9 +301,9 @@
               "source": "none"
             },
             "modFreq": {
-              "value": 0.2,
-              "min": 0.2,
-              "max": 0.2,
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
               "source": "none"
             },
             "modAmount": {
@@ -336,15 +336,15 @@
           "source": "none"
         },
         "fmAmount": {
-          "value": 0.3,
-          "min": 0.3,
+          "value": 0.30000001192092896,
+          "min": 0.30000001192092896,
           "max": 2.0,
           "source": "sensor2"
         },
         "feedback": {
-          "value": 0.08,
-          "min": 0.08,
-          "max": 0.08,
+          "value": 0.07999999821186066,
+          "min": 0.07999999821186066,
+          "max": 0.07999999821186066,
           "source": "none"
         }
       }
@@ -363,9 +363,9 @@
           "source": "none"
         },
         "density": {
-          "value": 0.9,
-          "min": 0.9,
-          "max": 0.9,
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
           "source": "none"
         },
         "distanceJitter": {
@@ -423,9 +423,9 @@
               "source": "none"
             },
             "resonance": {
-              "value": 0.05,
-              "min": 0.05,
-              "max": 0.6,
+              "value": 0.05000000074505806,
+              "min": 0.05000000074505806,
+              "max": 0.6000000238418579,
               "source": "sensor3"
             }
           }
@@ -435,9 +435,9 @@
           "enabled": true,
           "params": {
             "mix": {
-              "value": 0.3,
-              "min": 0.3,
-              "max": 0.3,
+              "value": 0.30000001192092896,
+              "min": 0.30000001192092896,
+              "max": 0.30000001192092896,
               "source": "none"
             },
             "time": {
@@ -447,15 +447,15 @@
               "source": "none"
             },
             "density": {
-              "value": 0.45,
-              "min": 0.45,
-              "max": 0.45,
+              "value": 0.44999998807907104,
+              "min": 0.44999998807907104,
+              "max": 0.44999998807907104,
               "source": "none"
             },
             "damping": {
-              "value": 0.45,
-              "min": 0.45,
-              "max": 0.45,
+              "value": 0.44999998807907104,
+              "min": 0.44999998807907104,
+              "max": 0.44999998807907104,
               "source": "none"
             },
             "hiCut": {
@@ -465,9 +465,9 @@
               "source": "none"
             },
             "modFreq": {
-              "value": 0.2,
-              "min": 0.2,
-              "max": 0.2,
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
               "source": "none"
             },
             "modAmount": {
@@ -482,9 +482,9 @@
       "sourceType": "fm_operator",
       "synth": {
         "volume": {
-          "value": 0.55,
+          "value": 0.550000011920929,
           "min": 0.0,
-          "max": 0.55,
+          "max": 0.550000011920929,
           "source": "sensor3"
         },
         "pitch": {
@@ -500,15 +500,15 @@
           "source": "none"
         },
         "fmAmount": {
-          "value": 0.8,
-          "min": 0.8,
-          "max": 0.8,
+          "value": 0.800000011920929,
+          "min": 0.800000011920929,
+          "max": 0.800000011920929,
           "source": "none"
         },
         "feedback": {
-          "value": 0.1,
-          "min": 0.1,
-          "max": 0.1,
+          "value": 0.10000000149011612,
+          "min": 0.10000000149011612,
+          "max": 0.10000000149011612,
           "source": "none"
         }
       }
@@ -527,9 +527,9 @@
           "source": "none"
         },
         "density": {
-          "value": 0.9,
-          "min": 0.9,
-          "max": 0.9,
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
           "source": "none"
         },
         "distanceJitter": {
@@ -581,9 +581,9 @@
           "enabled": true,
           "params": {
             "mix": {
-              "value": 0.1,
-              "min": 0.1,
-              "max": 0.45,
+              "value": 0.10000000149011612,
+              "min": 0.10000000149011612,
+              "max": 0.44999998807907104,
               "source": "sensor4"
             },
             "time": {
@@ -593,15 +593,15 @@
               "source": "none"
             },
             "feedback": {
-              "value": 0.3,
-              "min": 0.3,
-              "max": 0.3,
+              "value": 0.30000001192092896,
+              "min": 0.30000001192092896,
+              "max": 0.30000001192092896,
               "source": "none"
             },
             "damping": {
-              "value": 0.6,
-              "min": 0.6,
-              "max": 0.6,
+              "value": 0.6000000238418579,
+              "min": 0.6000000238418579,
+              "max": 0.6000000238418579,
               "source": "none"
             }
           }
@@ -623,9 +623,9 @@
               "source": "none"
             },
             "density": {
-              "value": 0.3,
-              "min": 0.3,
-              "max": 0.3,
+              "value": 0.30000001192092896,
+              "min": 0.30000001192092896,
+              "max": 0.30000001192092896,
               "source": "none"
             },
             "damping": {
@@ -641,9 +641,9 @@
               "source": "none"
             },
             "modFreq": {
-              "value": 0.2,
-              "min": 0.2,
-              "max": 0.2,
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
               "source": "none"
             },
             "modAmount": {
@@ -664,9 +664,9 @@
           "source": "none"
         },
         "volume": {
-          "value": 0.45,
+          "value": 0.44999998807907104,
           "min": 0.0,
-          "max": 0.45,
+          "max": 0.44999998807907104,
           "source": "sensor4"
         },
         "pitch": {
@@ -697,9 +697,9 @@
           "source": "none"
         },
         "density": {
-          "value": 0.9,
-          "min": 0.9,
-          "max": 0.9,
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
           "source": "none"
         },
         "distanceJitter": {
@@ -763,9 +763,9 @@
           "enabled": true,
           "params": {
             "mix": {
-              "value": 0.2,
-              "min": 0.2,
-              "max": 0.2,
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
               "source": "none"
             },
             "time": {
@@ -781,9 +781,9 @@
               "source": "none"
             },
             "damping": {
-              "value": 0.6,
-              "min": 0.6,
-              "max": 0.6,
+              "value": 0.6000000238418579,
+              "min": 0.6000000238418579,
+              "max": 0.6000000238418579,
               "source": "none"
             },
             "hiCut": {
@@ -793,9 +793,9 @@
               "source": "none"
             },
             "modFreq": {
-              "value": 0.2,
-              "min": 0.2,
-              "max": 0.2,
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
               "source": "none"
             },
             "modAmount": {
@@ -816,9 +816,9 @@
           "source": "none"
         },
         "volume": {
-          "value": 0.35,
+          "value": 0.3499999940395355,
           "min": 0.0,
-          "max": 0.35,
+          "max": 0.3499999940395355,
           "source": "sensor5"
         },
         "pitch": {
@@ -849,9 +849,9 @@
           "source": "none"
         },
         "density": {
-          "value": 0.9,
-          "min": 0.9,
-          "max": 0.9,
+          "value": 0.8999999761581421,
+          "min": 0.8999999761581421,
+          "max": 0.8999999761581421,
           "source": "none"
         },
         "distanceJitter": {
@@ -915,9 +915,9 @@
           "enabled": true,
           "params": {
             "mix": {
-              "value": 0.35,
-              "min": 0.35,
-              "max": 0.35,
+              "value": 0.3499999940395355,
+              "min": 0.3499999940395355,
+              "max": 0.3499999940395355,
               "source": "none"
             },
             "time": {
@@ -933,9 +933,9 @@
               "source": "none"
             },
             "damping": {
-              "value": 0.4,
-              "min": 0.4,
-              "max": 0.4,
+              "value": 0.4000000059604645,
+              "min": 0.4000000059604645,
+              "max": 0.4000000059604645,
               "source": "none"
             },
             "hiCut": {
@@ -945,9 +945,9 @@
               "source": "none"
             },
             "modFreq": {
-              "value": 0.2,
-              "min": 0.2,
-              "max": 0.2,
+              "value": 0.20000000298023224,
+              "min": 0.20000000298023224,
+              "max": 0.20000000298023224,
               "source": "none"
             },
             "modAmount": {
@@ -962,9 +962,9 @@
       "sourceType": "noise",
       "synth": {
         "volume": {
-          "value": 0.4,
+          "value": 0.4000000059604645,
           "min": 0.0,
-          "max": 0.4,
+          "max": 0.4000000059604645,
           "source": "sensor6"
         },
         "pitch": {
@@ -987,5 +987,9 @@
         }
       }
     }
-  ]
+  ],
+  "master": {
+    "gain": 1.0,
+    "effects": []
+  }
 }

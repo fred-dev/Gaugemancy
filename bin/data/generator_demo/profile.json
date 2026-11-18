@@ -5,6 +5,7 @@
   "playMode": "multi",
   "controlRateHz": 100,
   "presetSwitchMinIntervalMs": 4000,
+  "presetFadeMs": 1500,
   "presets": [
     "presets/preset_1.json",
     "presets/preset_2.json",
@@ -13,18 +14,29 @@
   ],
   "sensors": {
     "maxRaw": 530,
-    "activeThreshold": 0.035,
+    "activeThreshold": 0.03500000014901161,
     "curve": "linear",
     "calibrationFrames": 16,
     "accumulationDenominator": 3.0,
     "smoothingMs": 0.0
   },
+  "motion": {
+    "enabled": true,
+    "zeroAtStartup": true,
+    "upAxis": "+z",
+    "rangeDegrees": 45.0,
+    "deadzoneDegrees": 3.0,
+    "smoothingMs": 80.0,
+    "shakeSensitivity": 0.5,
+    "shakeReleaseMs": 300.0,
+    "calibrationFrames": 20
+  },
   "audio": {
-    "sampleRate": 44100,
-    "bufferSize": 1024,
+    "sampleRate": 48000,
+    "bufferSize": 128,
     "numBuffers": 2,
     "api": "default",
-    "deviceName": "",
+    "deviceName": "Apple Inc.: Mac Studio Speakers",
     "deviceId": 5,
     "masterGain": 1.0,
     "pi": {
@@ -37,7 +49,7 @@
   "gestures": {
     "hitToChangePreset": false,
     "hitThreshold": 0.25,
-    "troughThreshold": 0.08,
+    "troughThreshold": 0.07999999821186066,
     "maxPeakMs": 200,
     "maxTroughMs": 200,
     "requiredHits": 6,
@@ -76,23 +88,24 @@
   },
   "narration": {
     "enabled": false,
+    "skip": false,
     "file": "narrationcha1_Loud.wav",
     "volume": 1.0,
     "startWithSensor": true,
     "autoStartDelayMs": 5000,
-    "glitchThreshold": 0.04,
-    "glitchStrand": 0.016,
+    "glitchThreshold": 0.03999999910593033,
+    "glitchStrand": 0.01600000075995922,
     "window": "hann",
     "grain": {
       "length": {
-        "value": 1628.6,
+        "value": 1628.5999755859375,
         "min": 10.0,
         "max": 3000.0,
         "source": "none"
       },
       "density": {
         "value": 1.0,
-        "min": 0.1,
+        "min": 0.10000000149011612,
         "max": 1.0,
         "source": "none"
       },
